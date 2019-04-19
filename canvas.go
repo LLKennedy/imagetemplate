@@ -9,7 +9,6 @@ import (
 	"image/color"
 	"image/draw"
 	"io/ioutil"
-	"math"
 	"os"
 )
 
@@ -20,7 +19,7 @@ type Canvas interface {
 	GetWidth() int
 	GetHeight() int
 	Rectangle(topLeft image.Point, width, height int, colour color.Color) error
-	Circle(centre image.Point, radius int, alignment CircleAlignment, colour color.Color) error
+	Circle(centre image.Point, radius int, colour color.Color) error
 	Text(start image.Point, typeFace font.Face, colour color.Color, fontSize, maxWidth, maxLines int) error
 	SubImage(start image.Point, subImage image.Image) error
 }
@@ -94,130 +93,14 @@ func (canvas *ImageCanvas) Rectangle(topLeft image.Point, width, height int, col
 // CircleAlignment dicates where precisely a circle is centred
 type CircleAlignment int
 
-const (
-	// CAlignPixelTopLeft puts the circle centre in the top left of the pizel, so the diameter is exactly 2r and the circle can be placed anywhere except the bottom and right edges
-	CAlignPixelTopLeft = iota
-	// CAlignPIxelTopRight puts the circle centre in the top right of the pixel, so the diameter is exactly 2r and the circle can be placed anywhere except the bottom and left edges
-	CAlignPixelTopRight
-	// CAlignPIxelBottomLeft puts the circle centre in the bottom left of the pixel, so the diameter is exactly 2r and the circle can be placed anywhere except the top and right edges
-	CAlignPixelBottomLeft
-	// CAlignPIxelBottomRight puts the circle centre in the bottom right of the pixel, so the diameter is exactly 2r and the circle can be placed anywhere except the top and left edges
-	CAlignPixelBottomRight
-	// CAlignPixelCentre puts the circle centre in the middle of the pixel, so the diameter is exactly 2r-1
-	CAlignPixelCentre
-	// CAlignPixelAuto attempts to determine the most mathematically accurate option between Centre and Top Left
-	CAlignPixelAuto
-)
-
 // Circle draws a circle of a specific colour on the canvas
-func (canvas *ImageCanvas) Circle(centre image.Point, radius int, alignment CircleAlignment, colour color.Color) error {
+func (canvas *ImageCanvas) Circle(centre image.Point, radius int, colour color.Color) error {
 	colourPlane := image.Uniform{C: colour}
-	var startX, startY, enclosingWidth int
-	//TODO: Handle the rest of these
-	switch alignment {
-	case CAlignPixelTopLeft:
-		startX = centre.X - radius
-		startY = centre.Y - radius
-		enclosingWidth = 2 * radius
-		break
-	case CAlignPixelTopRight:
-		startX = centre.X - (radius - 1)
-		startY = centre.Y - radius
-		enclosingWidth = 2 * radius
-		break
-	case CAlignPixelBottomLeft:
-		startX = centre.X - radius
-		startY = centre.Y - (radius - 1)
-		enclosingWidth = 2 * radius
-		break
-	case CAlignPixelBottomRight:
-		startX = centre.X - (radius - 1)
-		startY = centre.Y - (radius - 1)
-		enclosingWidth = 2 * radius
-		break
-	case CAlignPixelCentre:
-		startX = centre.X - (radius - 1)
-		startY = centre.Y - (radius - 1)
-		enclosingWidth = (2 * radius) - 1
-		break
-	case CAlignPixelAuto:
-		return errors.New("Not implemented yet")
-		break
-	default:
-		return errors.New("Invalid circle alignment setting: " + string(alignment))
-	}
-	enclosingRectangle := image.Rectangle{
-		Min: image.Point{X: startX, Y: startY},
-		Max: image.Point{X: startX + enclosingWidth + 1, Y: startY + enclosingWidth + 1},
-	}
-	mask := image.NewNRGBA(enclosingRectangle)
-	for x := startX; x < startX+enclosingWidth; x++ {
-		for y := startY; y < startY+enclosingWidth; y++ {
-			// Set base distance
-			deltaX, deltaY := float64(x-centre.X), float64(y-centre.Y)
-			absDeltaX, absDeltaY := math.Abs(deltaX), math.Abs(deltaY)
-			// Correct based on circle centre position
-			switch alignment {
-			case CAlignPixelTopLeft:
-				if deltaX >= 0 {
-					deltaX += 0.5
-				}
-				if deltaY >= 0 {
-					deltaY += 0.5
-				}
-				break
-			case CAlignPixelTopRight:
-				if deltaX <= 0 {
-					deltaX -= 0.5
-				}
-				if deltaY >= 0 {
-					deltaY += 0.5
-				}
-				break
-			case CAlignPixelBottomLeft:
-				if deltaX >= 0 {
-					deltaX += 0.5
-				}
-				if deltaY <= 0 {
-					deltaY -= 0.5
-				}
-				break
-			case CAlignPixelBottomRight:
-				if deltaX <= 0 {
-					deltaX -= 0.5
-				}
-				if deltaY <= 0 {
-					deltaY -= 0.5
-				}
-				break
-			case CAlignPixelCentre:
-				// Reduce magnitude of each axis by 1
-				if deltaX != 0 {
-					deltaX += (deltaX / absDeltaX) / 2
-				}
-				if deltaY != 0 {
-					deltaY += (deltaY / absDeltaY) / 2
-				}
-				break
-			case CAlignPixelAuto:
-				return errors.New("Not implemented yet")
-				break
-			default:
-				return errors.New("Invalid circle alignment setting: " + string(alignment))
-			}
-			// Calculate current polar distance from the centre of the circle
-			xx, yy, rr := deltaX, deltaY, float64(radius)
-			if xx*xx+yy*yy <= rr*rr {
-				mask.Set(x, y, color.Alpha{255})
-			} else {
-				mask.Set(x, y, color.Alpha{0})
-			}
-		}
-	}
+	mask := &circle{p: centre, r: radius}
 	var buf bytes.Buffer
 	bmp.Encode(&buf, mask)
 	ioutil.WriteFile("mask.bmp", buf.Bytes(), os.ModeExclusive)
-	draw.DrawMask(canvas.Image, enclosingRectangle, &colourPlane, image.Point{X: startX, Y: startY}, mask, image.Point{}, draw.Over)
+	draw.DrawMask(canvas.Image, mask.Bounds(), &colourPlane, mask.Bounds().Min, mask, image.Point{}, draw.Over)
 	return nil
 }
 
@@ -229,4 +112,26 @@ func (canvas *ImageCanvas) Text(start image.Point, typeFace font.Face, colour co
 // SubImage draws another image on the canvas
 func (canvas *ImageCanvas) SubImage(start image.Point, subImage image.Image) error {
 	return errors.New("Not implemented yet")
+}
+
+// Steal the circle example code from https://blog.golang.org/go-imagedraw-package
+type circle struct {
+	p image.Point
+	r int
+}
+
+func (c *circle) ColorModel() color.Model {
+	return color.AlphaModel
+}
+
+func (c *circle) Bounds() image.Rectangle {
+	return image.Rect(c.p.X-c.r, c.p.Y-c.r, c.p.X+c.r, c.p.Y+c.r)
+}
+
+func (c *circle) At(x, y int) color.Color {
+	xx, yy, rr := float64(x-c.p.X)+0.5, float64(y-c.p.Y)+0.5, float64(c.r)
+	if xx*xx+yy*yy < rr*rr {
+		return color.Alpha{255}
+	}
+	return color.Alpha{0}
 }

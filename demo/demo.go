@@ -25,7 +25,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create rectangle: %v", err)
 	}
-	err = canvas.Circle(image.Point{X: 60, Y: 35}, 4, img.CAlignPixelBottomRight, color.White)
+	err = canvas.Circle(image.Point{X: 60, Y: 35}, 15, color.NRGBA{R: 0, G: 100, B: 255, A: 255})
 	if err != nil {
 		log.Fatalf("Failed to create circle: %v", err)
 	}
