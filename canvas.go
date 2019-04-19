@@ -100,7 +100,7 @@ func (canvas *ImageCanvas) Circle(centre image.Point, radius int, colour color.C
 	var buf bytes.Buffer
 	bmp.Encode(&buf, mask)
 	ioutil.WriteFile("mask.bmp", buf.Bytes(), os.ModeExclusive)
-	draw.DrawMask(canvas.Image, mask.Bounds(), &colourPlane, mask.Bounds().Min, mask, image.Point{}, draw.Over)
+	draw.DrawMask(canvas.Image, mask.Bounds(), &colourPlane, image.ZP, mask, mask.Bounds().Min, draw.Over)
 	return nil
 }
 
