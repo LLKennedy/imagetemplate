@@ -21,6 +21,7 @@ type Canvas interface {
 	Rectangle(topLeft image.Point, width, height int, colour color.Color) error
 	Circle(centre image.Point, radius int, colour color.Color) error
 	Text(start image.Point, typeFace font.Face, colour color.Color, fontSize, maxWidth, maxLines int) error
+	SubImage(start image.Point, subImage image.Image) error
 }
 
 // ImageCanvas uses golang's native Image package to implement the Canvas interface
@@ -96,5 +97,10 @@ func (canvas *ImageCanvas) Circle(centre image.Point, radius int, colour color.C
 
 // Text draws text on the canvas
 func (canvas *ImageCanvas) Text(start image.Point, typeFace font.Face, colour color.Color, fontSize, maxWidth, maxLines int) error {
+	return errors.New("Not implemented yet")
+}
+
+// SubImage draws another image on the canvas
+func (canvas *ImageCanvas) SubImage(start image.Point, subImage image.Image) error {
 	return errors.New("Not implemented yet")
 }
