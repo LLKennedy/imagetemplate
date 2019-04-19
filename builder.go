@@ -18,8 +18,12 @@ type ImageBuilder struct {
 	Canvas Canvas
 }
 
-func NewBuilder(width, height int) *ImageBuilder {
-	return &ImageBuilder{Canvas: NewCanvas(width, height)}
+func NewBuilder(width, height int) (*ImageBuilder, error) {
+	newCanvas, err := NewCanvas(width, height)
+	if err != nil {
+		return nil, err
+	}
+	return &ImageBuilder{Canvas: newCanvas}, nil
 }
 
 func (builder *ImageBuilder) WriteToBMP() ([]byte, error) {

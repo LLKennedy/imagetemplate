@@ -10,7 +10,10 @@ import (
 func main() {
 	log.Println("Starting imagetemplate demo")
 	var builder img.Builder
-	builder = img.NewBuilder(100, 100)
+	builder, err := img.NewBuilder(100, 100)
+	if err != nil {
+		log.Fatalf("Failed to create builder: %v", err)
+	}
 	bytes, err := builder.WriteToBMP()
 	if err != nil {
 		log.Fatalf("Failed to write canvas to bitmap: %v", err)

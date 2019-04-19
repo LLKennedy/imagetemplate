@@ -22,13 +22,20 @@ type ImageCanvas struct {
 }
 
 // NewCanvas generates a new canvas of the given width and height
-func NewCanvas(width, height int) *ImageCanvas {
+func NewCanvas(width, height int) (*ImageCanvas, error) {
+	if width <= 0 && height <= 0 {
+		return nil, errors.New("Invalid width and height")
+	} else if width <= 0 {
+		return nil, errors.New("Invalid width")
+	} else if height <= 0 {
+		return nil, errors.New("Invalid height")
+	}
 	return &ImageCanvas{
 		Image: image.NewNRGBA(image.Rectangle{
 			Min: image.Point{X: 0, Y: 0},
 			Max: image.Point{X: width, Y: height},
 		}),
-	}
+	}, nil
 }
 
 // SetUnderlyingImage sets the internal Image property to the given object
