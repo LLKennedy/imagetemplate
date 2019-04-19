@@ -2,6 +2,8 @@ package main
 
 import (
 	img "github.com/LLKennedy/imagetemplate"
+	"image"
+	"image/color"
 	"io/ioutil"
 	"log"
 	"os"
@@ -15,9 +17,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create canvas: %v", err)
 	}
-	builder, err = img.NewBuilder(canvas, nil)
+	builder, err = img.NewBuilder(canvas, color.Gray{Y: 128})
 	if err != nil {
 		log.Fatalf("Failed to create builder: %v", err)
+	}
+	err = canvas.Circle(image.Point{X: 30, Y: 50}, 15, color.White)
+	if err != nil {
+		log.Fatalf("Failed to create circle: %v", err)
 	}
 	bytes, err := builder.WriteToBMP()
 	if err != nil {
