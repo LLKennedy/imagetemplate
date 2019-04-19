@@ -21,7 +21,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create builder: %v", err)
 	}
-	err = canvas.Circle(image.Point{X: 30, Y: 50}, 15, color.White)
+	err = canvas.Circle(image.Point{X: 30, Y: 50}, 15, img.CAlignPixelCentre, color.White)
 	if err != nil {
 		log.Fatalf("Failed to create circle: %v", err)
 	}
