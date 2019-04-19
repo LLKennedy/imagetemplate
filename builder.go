@@ -2,23 +2,24 @@ package imagetemplate
 
 import (
 	"bytes"
-	// "errors"
 	"golang.org/x/image/bmp"
-	"golang.org/x/image/font"
 	"image"
 	"image/color"
-	"image/draw"
 )
 
 // Builder manipulates Canvas objects and outputs to a bitmap
 type Builder interface {
-	Canvas
+	GetCanvas() Canvas
+	SetCanvas(newCanvas Canvas)
+	GetComponents() []Component
+	SetComponents([]Component)
 	WriteToBMP() ([]byte, error)
 }
 
 // ImageBuilder uses golang's native Image package to implement the Builder interface
 type ImageBuilder struct {
-	Canvas Canvas
+	Canvas     Canvas
+	Components []Component
 }
 
 // NewBuilder generates a new ImageBuilder with an internal canvas of the specified width and height, and optionally the specified starting colour. No provided colour will result in defaults for Image.
@@ -41,39 +42,18 @@ func (builder *ImageBuilder) WriteToBMP() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-//Canvas methods passed through to the internal canvas
-
-// SetUnderlyingImage sets the underlying image in the canvas
-func (builder *ImageBuilder) SetUnderlyingImage(newImage draw.Image) {
-	builder.Canvas.SetUnderlyingImage(newImage)
+func (builder *ImageBuilder) GetCanvas() Canvas {
+	return builder.Canvas
 }
 
-// GetUnderlyingImage gets the underlying image from the canvas
-func (builder *ImageBuilder) GetUnderlyingImage() image.Image {
-	return builder.Canvas.GetUnderlyingImage()
+func (builder *ImageBuilder) SetCanvas(newCanvas Canvas) {
+	builder.Canvas = newCanvas
 }
 
-// GetWidth returns the width of the underlying image
-func (builder *ImageBuilder) GetWidth() int {
-	return builder.Canvas.GetWidth()
+func (builder *ImageBuilder) GetComponents() []Component {
+	return builder.Components
 }
 
-// GetHeight returns the hight of the underlying image
-func (builder *ImageBuilder) GetHeight() int {
-	return builder.Canvas.GetHeight()
-}
-
-// Rectangle draws a rectangle on the canvas
-func (builder *ImageBuilder) Rectangle(topLeft image.Point, width, height int, colour color.Color) error {
-	return builder.Canvas.Rectangle(topLeft, width, height, colour)
-}
-
-// Circle draws a circle on the canvas
-func (builder *ImageBuilder) Circle(centre image.Point, radius int, colour color.Color) error {
-	return builder.Canvas.Circle(centre, radius, colour)
-}
-
-// Text draws text on the canvas
-func (builder *ImageBuilder) Text(start image.Point, typeFace font.Face, colour color.Color, fontSize, maxWidth, maxLines int) error {
-	return builder.Canvas.Text(start, typeFace, colour, fontSize, maxWidth, maxLines)
+func (builder *ImageBuilder) SetComponents(components []Component) {
+	builder.Components = components
 }

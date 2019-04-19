@@ -33,7 +33,7 @@ func TestNewBuilder(t *testing.T) {
 				realBuilder, ok := newBuilder.(*ImageBuilder)
 				assert.True(t, ok)
 				assert.NotNil(t, realBuilder)
-				imageBounds := realBuilder.GetUnderlyingImage().Bounds()
+				imageBounds := realBuilder.Canvas.GetUnderlyingImage().Bounds()
 				assert.Equal(t, imageBounds.Size().X, x)
 				assert.Equal(t, imageBounds.Size().Y, y)
 			})
