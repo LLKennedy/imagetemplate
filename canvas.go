@@ -6,6 +6,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"math"
 )
 
 // Canvas holds the image struct and associated properties
@@ -111,17 +112,29 @@ func (canvas *ImageCanvas) Circle(centre image.Point, radius int, alignment Circ
 	//TODO: Handle the rest of these
 	switch alignment {
 	case CAlignPixelTopLeft:
-		startX = centre.X - 4
-		startY = centre.Y - 4
-		enclosingWidth = (2 * radius) - 1
+		startX = centre.X - radius
+		startY = centre.Y - radius
+		enclosingWidth = 2 * radius
 		break
 	case CAlignPixelTopRight:
+		startX = centre.X - (radius - 1)
+		startY = centre.Y - radius
+		enclosingWidth = 2 * radius
 		break
 	case CAlignPixelBottomLeft:
+		startX = centre.X - radius
+		startY = centre.Y - (radius - 1)
+		enclosingWidth = 2 * radius
 		break
 	case CAlignPixelBottomRight:
+		startX = centre.X - (radius - 1)
+		startY = centre.Y - (radius - 1)
+		enclosingWidth = 2 * radius
 		break
 	case CAlignPixelCentre:
+		startX = centre.X - (radius - 1)
+		startY = centre.Y - (radius - 1)
+		enclosingWidth = (2 * radius) - 1
 		break
 	case CAlignPixelAuto:
 		return errors.New("Not implemented yet")
@@ -129,11 +142,83 @@ func (canvas *ImageCanvas) Circle(centre image.Point, radius int, alignment Circ
 	default:
 		return errors.New("Invalid circle alignment setting: " + string(alignment))
 	}
-	mask := image.NewNRGBA(image.Rectangle{
+	enclosingRectangle := image.Rectangle{
 		Min: image.Point{X: startX, Y: startY},
-		Max: image.Point{X: enclosingWidth, Y: enclosingWidth},
-	})
-	//FIXME: fill mask circle
+		Max: image.Point{X: startX + enclosingWidth - 1, Y: startY + enclosingWidth - 1},
+	}
+	mask := image.NewNRGBA(enclosingRectangle)
+	for x := startX; x < startX+enclosingWidth; x++ {
+		for y := startY; y < startY+enclosingWidth; y++ {
+			// Set base distance
+			centreDelta := image.Point{
+				X: x - startX,
+				Y: y - startY,
+			}
+			cDeltaAbs := image.Point{
+				// Thanks for the implicit conversions Go
+				X: int(math.Abs(float64(centreDelta.X))),
+				Y: int(math.Abs(float64(centreDelta.Y))),
+			}
+			// Correct based on circle centre position
+			switch alignment {
+			case CAlignPixelTopLeft:
+				if centreDelta.X >= 0 {
+					centreDelta.X += 1
+				}
+				if centreDelta.Y >= 0 {
+					centreDelta.Y += 1
+				}
+				break
+			case CAlignPixelTopRight:
+				if centreDelta.X <= 0 {
+					centreDelta.X -= 1
+				}
+				if centreDelta.Y >= 0 {
+					centreDelta.Y += 1
+				}
+				break
+			case CAlignPixelBottomLeft:
+				if centreDelta.X >= 0 {
+					centreDelta.X += 1
+				}
+				if centreDelta.Y <= 0 {
+					centreDelta.Y -= 1
+				}
+				break
+			case CAlignPixelBottomRight:
+				if centreDelta.X <= 0 {
+					centreDelta.X -= 1
+				}
+				if centreDelta.Y <= 0 {
+					centreDelta.Y -= 1
+				}
+				break
+			case CAlignPixelCentre:
+				// Reduce magnitude of each axis by 1
+				if centreDelta.X != 0 {
+					centreDelta.X += centreDelta.X / cDeltaAbs.X
+				}
+				if centreDelta.Y != 0 {
+					centreDelta.Y += centreDelta.Y / cDeltaAbs.Y
+				}
+				break
+			case CAlignPixelAuto:
+				return errors.New("Not implemented yet")
+				break
+			default:
+				return errors.New("Invalid circle alignment setting: " + string(alignment))
+			}
+			// Calculate current polar distance from the centre of the circle
+			currentRadius := int(math.Sqrt(math.Pow(float64(centreDelta.X), 2) + math.Pow(float64(centreDelta.Y), 2)))
+			if currentRadius <= radius {
+				mask.Set(x, y, color.Opaque)
+			} else {
+				mask.Set(x, y, color.Transparent)
+			}
+		}
+	}
+	draw.DrawMask(canvas.Image, enclosingRectangle, &colourPlane, image.Point{X: startX, Y: startY}, mask, image.Point{}, draw.Over)
+	return nil
 }
 
 // Text draws text on the canvas
