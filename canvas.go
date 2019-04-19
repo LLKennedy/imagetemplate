@@ -2,16 +2,22 @@ package imagetemplate
 
 import (
 	"errors"
+	// _ "golang.org/x/image/bmp"
 	"golang.org/x/image/font"
 	"image"
 	"image/color"
 	"image/draw"
+	// _ "image/gif"
+	// _ "image/jpeg"
+	// _ "image/png"
 )
 
 // Canvas holds the image struct and associated properties
 type Canvas interface {
 	SetUnderlyingImage(newImage draw.Image)
 	GetUnderlyingImage() image.Image
+	GetWidth() int
+	GetHeight() int
 	Rectangle(topLeft image.Point, width, height int, colour color.Color) error
 	Circle(centre image.Point, radius int, colour color.Color) error
 	Text(start image.Point, typeFace font.Face, colour color.Color, fontSize, maxWidth, maxLines int) error
@@ -47,6 +53,16 @@ func (canvas *ImageCanvas) SetUnderlyingImage(newImage draw.Image) {
 // GetUnderlyingImage gets the internal Image property
 func (canvas *ImageCanvas) GetUnderlyingImage() image.Image {
 	return canvas.Image
+}
+
+// GetWidth returns the width of the underlying Image
+func (canvas *ImageCanvas) GetWidth() int {
+	return canvas.Image.Bounds().Size().X
+}
+
+// GetWidth returns the width of the underlying Image
+func (canvas *ImageCanvas) GetHeight() int {
+	return canvas.Image.Bounds().Size().Y
 }
 
 // Rectangle draws a rectangle of a specific colour on the canvas

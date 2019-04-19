@@ -22,18 +22,14 @@ type ImageBuilder struct {
 }
 
 // NewBuilder generates a new ImageBuilder with an internal canvas of the specified width and height, and optionally the specified starting colour. No provided colour will result in defaults for Image.
-func NewBuilder(width, height int, startingColour color.Color) (*ImageBuilder, error) {
-	newCanvas, err := NewCanvas(width, height)
-	if err != nil {
-		return nil, err
-	}
+func NewBuilder(canvas Canvas, startingColour color.Color) (*ImageBuilder, error) {
 	if startingColour != nil {
-		err = newCanvas.Rectangle(image.Point{X: 0, Y: 0}, width, height, startingColour)
+		err := canvas.Rectangle(image.Point{}, canvas.GetWidth(), canvas.GetHeight(), startingColour)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return &ImageBuilder{Canvas: newCanvas}, nil
+	return &ImageBuilder{Canvas: canvas}, nil
 }
 
 func (builder *ImageBuilder) WriteToBMP() ([]byte, error) {
@@ -55,6 +51,16 @@ func (builder *ImageBuilder) SetUnderlyingImage(newImage draw.Image) {
 // GetUnderlyingImage gets the underlying image from the canvas
 func (builder *ImageBuilder) GetUnderlyingImage() image.Image {
 	return builder.Canvas.GetUnderlyingImage()
+}
+
+// GetWidth returns the width of the underlying image
+func (builder *ImageBuilder) GetWidth() int {
+	return builder.Canvas.GetWidth()
+}
+
+// GetHeight returns the hight of the underlying image
+func (builder *ImageBuilder) GetHeight() int {
+	return builder.Canvas.GetHeight()
 }
 
 // Rectangle draws a rectangle on the canvas
