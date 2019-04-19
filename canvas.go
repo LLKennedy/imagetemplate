@@ -1,15 +1,11 @@
 package imagetemplate
 
 import (
-	"bytes"
 	"errors"
-	"golang.org/x/image/bmp"
 	"golang.org/x/image/font"
 	"image"
 	"image/color"
 	"image/draw"
-	"io/ioutil"
-	"os"
 )
 
 // Canvas holds the image struct and associated properties
@@ -97,9 +93,6 @@ type CircleAlignment int
 func (canvas *ImageCanvas) Circle(centre image.Point, radius int, colour color.Color) error {
 	colourPlane := image.Uniform{C: colour}
 	mask := &circle{p: centre, r: radius}
-	var buf bytes.Buffer
-	bmp.Encode(&buf, mask)
-	ioutil.WriteFile("mask.bmp", buf.Bytes(), os.ModeExclusive)
 	draw.DrawMask(canvas.Image, mask.Bounds(), &colourPlane, image.ZP, mask, mask.Bounds().Min, draw.Over)
 	return nil
 }
