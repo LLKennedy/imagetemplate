@@ -1,0 +1,73 @@
+{
+	"samples": [
+		{
+			"baseImage": {
+				"fileName": "path/to/file.ext"
+			},
+			"components": []
+		},
+		{
+			"baseImage": {
+				"fileName": "path/to/file.ext",
+				"filetype": "png"
+			},
+			"components": []
+		},
+		{
+			"baseImage": {
+				"data": "Qk2GAAAAAAAAADYAAAAoAAAABQAAAAUAAAABABgAAAAAAFAAAAAAAAAAAAAAAAAAAAAAAAAA////////////zEg/////AP///////////////////wD///////////////////8A////JBzt////////////AP///////////////wDy/wA=",
+				"filetype": "bmp"
+			},
+			"components": []
+		},
+		{
+			"baseImage": {
+				"width": 800,
+				"height": 600,
+				"baseColour": {
+					"R": 255, 
+					"G": 255, 
+					"B": 255,
+					"A": 255
+				}
+			},
+			"components": []
+		},
+		{
+			"baseImage": {
+				"fileName": "path/to/file.ext",
+				"filetype": "png"
+			},
+			"components": [
+				{
+					"type": "text",
+					"properties": {
+						"content": "Label Text Here",
+						"fontSize": 12,
+						"typeFace": "Times New Roman",
+						"colour": {
+							"R": 0,
+							"G": 0,
+							"B": 0,
+							"A": 255
+						}
+					}
+				},
+				{
+					"type": "circle",
+					"properties": {
+						"centreX": 56,
+						"centreY": 42,
+						"radius": 12,
+						"colour": {
+							"R": 255,
+							"G": 0,
+							"B": 0,
+							"A": 255
+						}
+					}
+				}
+			]
+		}
+	]
+}
