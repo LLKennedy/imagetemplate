@@ -1,7 +1,9 @@
 package imagetemplate
 
 import (
-	"errors"
+	"bytes"
+	// "errors"
+	"golang.org/x/image/bmp"
 	"golang.org/x/image/font"
 	"image"
 	"image/color"
@@ -18,16 +20,28 @@ type ImageBuilder struct {
 	Canvas Canvas
 }
 
-func NewBuilder(width, height int) (*ImageBuilder, error) {
+// NewBuilder generates a new ImageBuilder with an internal canvas of the specified width and height, and optionally the specified starting colour. No provided colour will result in defaults for Image.
+func NewBuilder(width, height int, startingColour color.Color) (*ImageBuilder, error) {
 	newCanvas, err := NewCanvas(width, height)
 	if err != nil {
 		return nil, err
+	}
+	if startingColour != nil {
+		err = newCanvas.Rectangle(image.Point{X: 0, Y: 0}, width, height, startingColour)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return &ImageBuilder{Canvas: newCanvas}, nil
 }
 
 func (builder *ImageBuilder) WriteToBMP() ([]byte, error) {
-	return nil, errors.New("Not implemented yet")
+	var buf bytes.Buffer
+	err := bmp.Encode(&buf, builder.Canvas.GetUnderlyingImage())
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
 
 //Canvas methods passed through to the internal canvas
