@@ -1,12 +1,16 @@
 package imagetemplate
 
 import (
+	"bytes"
 	"errors"
+	"golang.org/x/image/bmp"
 	"golang.org/x/image/font"
 	"image"
 	"image/color"
 	"image/draw"
+	"io/ioutil"
 	"math"
+	"os"
 )
 
 // Canvas holds the image struct and associated properties
@@ -144,62 +148,55 @@ func (canvas *ImageCanvas) Circle(centre image.Point, radius int, alignment Circ
 	}
 	enclosingRectangle := image.Rectangle{
 		Min: image.Point{X: startX, Y: startY},
-		Max: image.Point{X: startX + enclosingWidth - 1, Y: startY + enclosingWidth - 1},
+		Max: image.Point{X: startX + enclosingWidth + 1, Y: startY + enclosingWidth + 1},
 	}
 	mask := image.NewNRGBA(enclosingRectangle)
 	for x := startX; x < startX+enclosingWidth; x++ {
 		for y := startY; y < startY+enclosingWidth; y++ {
 			// Set base distance
-			centreDelta := image.Point{
-				X: x - startX,
-				Y: y - startY,
-			}
-			cDeltaAbs := image.Point{
-				// Thanks for the implicit conversions Go
-				X: int(math.Abs(float64(centreDelta.X))),
-				Y: int(math.Abs(float64(centreDelta.Y))),
-			}
+			deltaX, deltaY := float64(x-centre.X), float64(y-centre.Y)
+			absDeltaX, absDeltaY := math.Abs(deltaX), math.Abs(deltaY)
 			// Correct based on circle centre position
 			switch alignment {
 			case CAlignPixelTopLeft:
-				if centreDelta.X >= 0 {
-					centreDelta.X += 1
+				if deltaX >= 0 {
+					deltaX += 0.5
 				}
-				if centreDelta.Y >= 0 {
-					centreDelta.Y += 1
+				if deltaY >= 0 {
+					deltaY += 0.5
 				}
 				break
 			case CAlignPixelTopRight:
-				if centreDelta.X <= 0 {
-					centreDelta.X -= 1
+				if deltaX <= 0 {
+					deltaX -= 0.5
 				}
-				if centreDelta.Y >= 0 {
-					centreDelta.Y += 1
+				if deltaY >= 0 {
+					deltaY += 0.5
 				}
 				break
 			case CAlignPixelBottomLeft:
-				if centreDelta.X >= 0 {
-					centreDelta.X += 1
+				if deltaX >= 0 {
+					deltaX += 0.5
 				}
-				if centreDelta.Y <= 0 {
-					centreDelta.Y -= 1
+				if deltaY <= 0 {
+					deltaY -= 0.5
 				}
 				break
 			case CAlignPixelBottomRight:
-				if centreDelta.X <= 0 {
-					centreDelta.X -= 1
+				if deltaX <= 0 {
+					deltaX -= 0.5
 				}
-				if centreDelta.Y <= 0 {
-					centreDelta.Y -= 1
+				if deltaY <= 0 {
+					deltaY -= 0.5
 				}
 				break
 			case CAlignPixelCentre:
 				// Reduce magnitude of each axis by 1
-				if centreDelta.X != 0 {
-					centreDelta.X += centreDelta.X / cDeltaAbs.X
+				if deltaX != 0 {
+					deltaX += (deltaX / absDeltaX) / 2
 				}
-				if centreDelta.Y != 0 {
-					centreDelta.Y += centreDelta.Y / cDeltaAbs.Y
+				if deltaY != 0 {
+					deltaY += (deltaY / absDeltaY) / 2
 				}
 				break
 			case CAlignPixelAuto:
@@ -209,14 +206,17 @@ func (canvas *ImageCanvas) Circle(centre image.Point, radius int, alignment Circ
 				return errors.New("Invalid circle alignment setting: " + string(alignment))
 			}
 			// Calculate current polar distance from the centre of the circle
-			currentRadius := int(math.Sqrt(math.Pow(float64(centreDelta.X), 2) + math.Pow(float64(centreDelta.Y), 2)))
-			if currentRadius <= radius {
-				mask.Set(x, y, color.Opaque)
+			xx, yy, rr := deltaX, deltaY, float64(radius)
+			if xx*xx+yy*yy <= rr*rr {
+				mask.Set(x, y, color.Alpha{255})
 			} else {
-				mask.Set(x, y, color.Transparent)
+				mask.Set(x, y, color.Alpha{0})
 			}
 		}
 	}
+	var buf bytes.Buffer
+	bmp.Encode(&buf, mask)
+	ioutil.WriteFile("mask.bmp", buf.Bytes(), os.ModeExclusive)
 	draw.DrawMask(canvas.Image, enclosingRectangle, &colourPlane, image.Point{X: startX, Y: startY}, mask, image.Point{}, draw.Over)
 	return nil
 }
