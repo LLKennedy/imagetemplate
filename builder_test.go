@@ -39,7 +39,7 @@ func TestNewBuilder(t *testing.T) {
 			})
 		}
 	}
-	specifiedColour := color.RGBA{R: 123, G: 231, B: 132, A: 213}
+	specifiedColour := color.NRGBA{R: 123, G: 231, B: 132, A: 213}
 	width := 50
 	height := 50
 	newBuilder, err := NewBuilder(width, height, &specifiedColour)
@@ -47,12 +47,10 @@ func TestNewBuilder(t *testing.T) {
 	img := newBuilder.GetUnderlyingImage()
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
-			setColour := img.At(x, y)
-			r, g, b, a := setColour.RGBA()
-			assert.Equal(t, r, specifiedColour.R)
-			assert.Equal(t, g, specifiedColour.G)
-			assert.Equal(t, b, specifiedColour.B)
-			assert.Equal(t, a, specifiedColour.A)
+			t.Run(fmt.Sprintf("Testing set pixel at %d, %d", x, y), func(t *testing.T) {
+				setColour := img.At(x, y)
+				assert.Equal(t, specifiedColour, setColour)
+			})
 		}
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"golang.org/x/image/font"
 	"image"
 	"image/color"
+	"image/draw"
 )
 
 // Builder manipulates Canvas objects and outputs to a bitmap
@@ -47,7 +48,7 @@ func (builder *ImageBuilder) WriteToBMP() ([]byte, error) {
 //Canvas methods passed through to the internal canvas
 
 // SetUnderlyingImage sets the underlying image in the canvas
-func (builder *ImageBuilder) SetUnderlyingImage(newImage image.Image) {
+func (builder *ImageBuilder) SetUnderlyingImage(newImage draw.Image) {
 	builder.Canvas.SetUnderlyingImage(newImage)
 }
 

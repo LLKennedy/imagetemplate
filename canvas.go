@@ -5,11 +5,12 @@ import (
 	"golang.org/x/image/font"
 	"image"
 	"image/color"
+	"image/draw"
 )
 
 // Canvas holds the image struct and associated properties
 type Canvas interface {
-	SetUnderlyingImage(newImage image.Image)
+	SetUnderlyingImage(newImage draw.Image)
 	GetUnderlyingImage() image.Image
 	Rectangle(topLeft image.Point, width, height int, colour color.Color) error
 	Circle(centre image.Point, radius int, colour color.Color) error
@@ -18,7 +19,7 @@ type Canvas interface {
 
 // ImageCanvas uses golang's native Image package to implement the Canvas interface
 type ImageCanvas struct {
-	Image image.Image
+	Image draw.Image
 }
 
 // NewCanvas generates a new canvas of the given width and height
@@ -39,7 +40,7 @@ func NewCanvas(width, height int) (*ImageCanvas, error) {
 }
 
 // SetUnderlyingImage sets the internal Image property to the given object
-func (canvas *ImageCanvas) SetUnderlyingImage(newImage image.Image) {
+func (canvas *ImageCanvas) SetUnderlyingImage(newImage draw.Image) {
 	canvas.Image = newImage
 }
 
@@ -50,7 +51,26 @@ func (canvas *ImageCanvas) GetUnderlyingImage() image.Image {
 
 // Rectangle draws a rectangle of a specific colour on the canvas
 func (canvas *ImageCanvas) Rectangle(topLeft image.Point, width, height int, colour color.Color) error {
-	return errors.New("Not implemented yet")
+	colourPlane := image.Uniform{C: colour}
+	if width <= 0 && height <= 0 {
+		return errors.New("Invalid width and height")
+	} else if width <= 0 {
+		return errors.New("Invalid width")
+	} else if height <= 0 {
+		return errors.New("Invalid height")
+	}
+	rect := image.Rectangle{
+		Min: image.Point{
+			X: topLeft.X,
+			Y: topLeft.Y,
+		},
+		Max: image.Point{
+			X: topLeft.X + width,
+			Y: topLeft.Y + height,
+		},
+	}
+	draw.Draw(canvas.Image, rect, &colourPlane, topLeft, draw.Over)
+	return nil
 }
 
 // Circle draws a circle of a specific colour on the canvas
