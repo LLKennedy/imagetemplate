@@ -70,6 +70,16 @@ func (builder *ImageBuilder) SetComponents(components []Component) {
 	builder.Components = components
 }
 
+// GetNamedProperties returns the list of named properties in the builder object
+func (builder *ImageBuilder) GetNamedProperties() []NamedProperty {
+	return builder.NamedProperties
+}
+
+// SetNamedProperties sets the list of named properties in the builder object
+func (builder *ImageBuilder) SetNamedProperties(properties []NamedProperty) {
+	builder.NamedProperties = properties
+}
+
 // ApplyComponents iterates over the internal Component array, applying each in turn to the Canvas
 func (builder *ImageBuilder) ApplyComponents() error {
 	return errors.New("Not implemented yet")

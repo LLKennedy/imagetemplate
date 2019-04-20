@@ -13,7 +13,9 @@ func TestNewBuilder(t *testing.T) {
 		for _, y := range dimensions {
 			t.Run(fmt.Sprintf("Creating builder with dimensions %d by %d", x, y), func(t *testing.T) {
 				var newBuilder Builder
-				newBuilder, err := NewBuilder(x, y, nil)
+				newCanvas, err := NewCanvas(x, y)
+				assert.Nil(t, err)
+				newBuilder, err = NewBuilder(newCanvas, nil)
 				if x <= 0 && y <= 0 {
 					assert.Nil(t, newBuilder)
 					assert.Equal(t, "Invalid width and height", err.Error())
@@ -42,9 +44,11 @@ func TestNewBuilder(t *testing.T) {
 	specifiedColour := color.NRGBA{R: 123, G: 231, B: 132, A: 213}
 	width := 50
 	height := 50
-	newBuilder, err := NewBuilder(width, height, &specifiedColour)
+	newCanvas, err := NewCanvas(width, height)
 	assert.Nil(t, err)
-	img := newBuilder.GetUnderlyingImage()
+	newBuilder, err := NewBuilder(newCanvas, &specifiedColour)
+	assert.Nil(t, err)
+	img := newBuilder.Canvas.GetUnderlyingImage()
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 			t.Run(fmt.Sprintf("Testing set pixel at %d, %d", x, y), func(t *testing.T) {
