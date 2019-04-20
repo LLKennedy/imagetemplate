@@ -71,6 +71,23 @@
 				},
 				{
 					"type": "rectangle",
+					"conditional": {
+						"name": "username",
+						"boolNot": false,
+						"operator": "contains",
+						"value": "Smith",
+						"group": {
+							"groupOperator": "and",
+							"conditionals": [
+								{
+									"name": "username",
+									"boolNot": true,
+									"operator": "ci_contains",
+									"value": "joHn"
+								}
+							]
+						}
+					},
 					"properties": {
 						"topLeftX": "350",
 						"topLeftY": "400",

@@ -23,6 +23,46 @@ func TestParseDataValue(t *testing.T) {
 			propNames:          []string{},
 			err:                nil,
 		},
+		parseTest{
+			name:               "simple value 2",
+			value:              "123",
+			hasNamedProperties: false,
+			cleanValues:        []string{"123"},
+			propNames:          []string{},
+			err:                nil,
+		},
+		parseTest{
+			name:               "simple value 3",
+			value:              "#4: This. Is. Just. Data!~",
+			hasNamedProperties: false,
+			cleanValues:        []string{"#4: This. Is. Just. Data!~"},
+			propNames:          []string{},
+			err:                nil,
+		},
+		parseTest{
+			name:               "escaped dollars",
+			value:              "some $$ data 2 be pr$$ocessed!",
+			hasNamedProperties: false,
+			cleanValues:        []string{"some $ data 2 be pr$ocessed!"},
+			propNames:          []string{},
+			err:                nil,
+		},
+		parseTest{
+			name:               "simple property",
+			value:              "$username$",
+			hasNamedProperties: true,
+			cleanValues:        []string{"", ""},
+			propNames:          []string{"username"},
+			err:                nil,
+		},
+		parseTest{
+			name:               "multiple properties with surrounding text",
+			value:              "Hello there, $title$. $username$!",
+			hasNamedProperties: true,
+			cleanValues:        []string{"Hello there, ", ". ", "!"},
+			propNames:          []string{"title", "username"},
+			err:                nil,
+		},
 	}
 	for _, test := range testArray {
 		t.Run(test.name, func(t *testing.T) {
