@@ -2,6 +2,8 @@ package imagetemplate
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 // Component provides a generic interface for operations to perform on a canvas
@@ -123,5 +125,87 @@ type ComponentConditional struct {
 		Operator     groupOperator          `json:"groupOperator"`
 		Conditionals []ComponentConditional `json:"conditionals"`
 	} `json:"group"`
-	validated bool
+	valueSet  bool // Represents whether this individual component has had its value set and its condition evaluated at least once
+	validated bool // Represents whether this individual component at this level is validated. Use ComponentConditional.Validate() to evaluate the logic of entire groups.
+}
+
+// SetValue sets the value of a specific named property through this conditional chain, evaluating any conditions along the way
+func (conditional *ComponentConditional) SetValue(name string, value interface{}) error {
+	for _, con := range conditional.Group.Conditionals {
+		con.SetValue(name, value)
+	}
+	if conditional.Name == name {
+		switch conditional.Operator {
+		case equals, contains, startswith, endswith, ci_equals, ci_contains, ci_startswith, ci_endswith:
+			// Handle string operators
+			stringVal, ok := value.(string)
+			if !ok {
+				return fmt.Errorf("Invalid value for string operator: %v", value)
+			}
+			conVal := conditional.Value
+			switch conditional.Operator {
+			case ci_equals:
+				conVal = strings.ToLower(conVal)
+				stringVal = strings.ToLower(stringVal)
+				fallthrough
+			case equals:
+				conditional.validated = conVal == stringVal
+			case ci_contains:
+				conVal = strings.ToLower(conVal)
+				stringVal = strings.ToLower(stringVal)
+				fallthrough
+			case contains:
+				conditional.validated = strings.Contains(stringVal, conVal)
+			case ci_startswith:
+				conVal = strings.ToLower(conVal)
+				stringVal = strings.ToLower(stringVal)
+				fallthrough
+			case startswith:
+				if len(conVal) > len(stringVal) {
+					conditional.validated = false
+					break
+				}
+				conditional.validated = stringVal[:len(conVal)] == conVal
+			case ci_endswith:
+				conVal = strings.ToLower(conVal)
+				stringVal = strings.ToLower(stringVal)
+				fallthrough
+			case endswith:
+				if len(conVal) > len(stringVal) {
+					conditional.validated = false
+					break
+				}
+				conditional.validated = stringVal[len(stringVal)-len(conVal):] == conVal
+			}
+		case lessthan, greaterthan, lessorequal, greaterorequal:
+			// Handle integer operators
+			intVal, ok := value.(int)
+			if !ok {
+				return fmt.Errorf("Invalid value for integer operator: %v", value)
+			}
+			conVal, err := strconv.Atoi(conditional.Value)
+			if err != nil {
+				return fmt.Errorf("Failed to convert conditional value to integer: %v", conditional.Value)
+			}
+			switch conditional.Operator {
+			case lessthan:
+				conditional.validated = intVal < conVal
+			case greaterthan:
+				conditional.validated = intVal > conVal
+			case lessorequal:
+				conditional.validated = intVal <= conVal
+			case greaterorequal:
+				conditional.validated = intVal >= conVal
+			}
+		default:
+			return fmt.Errorf("Invalid conditional operator %v", conditional.Operator)
+		}
+		conditional.valueSet = true
+	}
+	return nil
+}
+
+// Validate validates this conditional chain, erroring if a value down the line has not been set and evaluated
+func (condition *ComponentConditional) Validate() (bool, error) {
+	return false, fmt.Errorf("Not implemented yet")
 }
