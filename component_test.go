@@ -74,3 +74,11 @@ func TestParseDataValue(t *testing.T) {
 		})
 	}
 }
+
+func TestSetValue(t *testing.T) {
+
+}
+
+func TestValidate(t *testing.T) {
+
+}

@@ -3,6 +3,7 @@ package imagetemplate
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"golang.org/x/image/bmp"
 	"image"
@@ -20,6 +21,23 @@ type Builder interface {
 	ApplyComponents() error
 	LoadComponentsFile(fileName string) error
 	WriteToBMP() ([]byte, error)
+}
+
+// Template is the format of the JSON file used as a template for building images. See samples.json for examples, each element in the samples array is a complete and valid template object.
+type Template struct {
+	BaseImage struct {
+		FileName string `json:"fileName"`
+		Data     string `json:"data"`
+		FileType string `json:"fileType"`
+	} `json:"baseImage"`
+	Components []ComponentsElement `json:"components"`
+}
+
+// ComponentsElement represents a partial unmarshalled Component, with its properties left in raw form to be handled by each known type of Component.
+type ComponentsElement struct {
+	Type        string               `json:"type"`
+	Conditional ComponentConditional `json:"conditional"`
+	Properties  json.RawMessage      `json:"properties"`
 }
 
 // ImageBuilder uses golang's native Image package to implement the Builder interface
