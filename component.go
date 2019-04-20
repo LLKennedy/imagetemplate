@@ -130,9 +130,14 @@ type ComponentConditional struct {
 }
 
 // SetValue sets the value of a specific named property through this conditional chain, evaluating any conditions along the way
-func (conditional *ComponentConditional) SetValue(name string, value interface{}) error {
-	for _, con := range conditional.Group.Conditionals {
-		con.SetValue(name, value)
+func (c ComponentConditional) SetValue(name string, value interface{}) (ComponentConditional, error) {
+	conditional := c
+	for conIndex, con := range conditional.Group.Conditionals {
+		var err error
+		conditional.Group.Conditionals[conIndex], err = con.SetValue(name, value)
+		if err != nil {
+			return c, err
+		}
 	}
 	if conditional.Name == name {
 		switch conditional.Operator {
@@ -140,7 +145,7 @@ func (conditional *ComponentConditional) SetValue(name string, value interface{}
 			// Handle string operators
 			stringVal, ok := value.(string)
 			if !ok {
-				return fmt.Errorf("Invalid value for string operator: %v", value)
+				return c, fmt.Errorf("Invalid value for string operator: %v", value)
 			}
 			conVal := conditional.Value
 			switch conditional.Operator {
@@ -181,11 +186,11 @@ func (conditional *ComponentConditional) SetValue(name string, value interface{}
 			// Handle integer operators
 			intVal, ok := value.(int)
 			if !ok {
-				return fmt.Errorf("Invalid value for integer operator: %v", value)
+				return c, fmt.Errorf("Invalid value for integer operator: %v", value)
 			}
 			conVal, err := strconv.Atoi(conditional.Value)
 			if err != nil {
-				return fmt.Errorf("Failed to convert conditional value to integer: %v", conditional.Value)
+				return c, fmt.Errorf("Failed to convert conditional value to integer: %v", conditional.Value)
 			}
 			switch conditional.Operator {
 			case lessthan:
@@ -198,15 +203,15 @@ func (conditional *ComponentConditional) SetValue(name string, value interface{}
 				conditional.validated = intVal >= conVal
 			}
 		default:
-			return fmt.Errorf("Invalid conditional operator %v", conditional.Operator)
+			return c, fmt.Errorf("Invalid conditional operator %v", conditional.Operator)
 		}
 		conditional.valueSet = true
 	}
-	return nil
+	return conditional, nil
 }
 
 // Validate validates this conditional chain, erroring if a value down the line has not been set and evaluated
-func (conditional *ComponentConditional) Validate() (bool, error) {
+func (conditional ComponentConditional) Validate() (bool, error) {
 	if !conditional.valueSet {
 		return false, fmt.Errorf("Attempted to validate conditional %v %v %v without setting %v", conditional.Name, conditional.Operator, conditional.Value, conditional.Name)
 	}

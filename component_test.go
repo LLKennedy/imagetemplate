@@ -110,150 +110,150 @@ func TestConditionals(t *testing.T) {
 		validateError   error
 	}
 	testArray := []testSet{
-		// testSet{
-		// 	name: "single string condition",
-		// 	conditional: ComponentConditional{
-		// 		Name:     "username",
-		// 		Not:      false,
-		// 		Operator: "equals",
-		// 		Value:    "john smith",
-		// 	},
-		// 	namedProperties: []testProperty{
-		// 		testProperty{
-		// 			name:   "username",
-		// 			value:  "john smith",
-		// 			setErr: nil,
-		// 		},
-		// 	},
-		// 	validateResult: true,
-		// 	validateError:  nil,
-		// },
-		// testSet{
-		// 	name: "string condition, int set value",
-		// 	conditional: ComponentConditional{
-		// 		Name:     "username",
-		// 		Not:      false,
-		// 		Operator: "equals",
-		// 		Value:    "john smith",
-		// 	},
-		// 	namedProperties: []testProperty{
-		// 		testProperty{
-		// 			name:   "username",
-		// 			value:  18,
-		// 			setErr: errors.New("Invalid value for string operator: 18"),
-		// 		},
-		// 	},
-		// 	validateResult: false,
-		// 	validateError:  errors.New("Attempted to validate conditional username equals john smith without setting username"),
-		// },
-		// testSet{
-		// 	name: "string condition, mismatched value name",
-		// 	conditional: ComponentConditional{
-		// 		Name:     "username",
-		// 		Not:      false,
-		// 		Operator: "equals",
-		// 		Value:    "john smith",
-		// 	},
-		// 	namedProperties: []testProperty{
-		// 		testProperty{
-		// 			name:   "UserName",
-		// 			value:  "john smith",
-		// 			setErr: nil,
-		// 		},
-		// 	},
-		// 	validateResult: false,
-		// 	validateError:  errors.New("Attempted to validate conditional username equals john smith without setting username"),
-		// },
-		// testSet{
-		// 	name: "string equals, fails on case sensitivity",
-		// 	conditional: ComponentConditional{
-		// 		Name:     "username",
-		// 		Not:      false,
-		// 		Operator: "equals",
-		// 		Value:    "john smith",
-		// 	},
-		// 	namedProperties: []testProperty{
-		// 		testProperty{
-		// 			name:   "username",
-		// 			value:  "John Smith",
-		// 			setErr: nil,
-		// 		},
-		// 	},
-		// 	validateResult: false,
-		// 	validateError:  nil,
-		// },
-		// testSet{
-		// 	name: "string ci_equals fixed cs problems",
-		// 	conditional: ComponentConditional{
-		// 		Name:     "username",
-		// 		Not:      false,
-		// 		Operator: "ci_equals",
-		// 		Value:    "john smith",
-		// 	},
-		// 	namedProperties: []testProperty{
-		// 		testProperty{
-		// 			name:   "username",
-		// 			value:  "John Smith",
-		// 			setErr: nil,
-		// 		},
-		// 	},
-		// 	validateResult: true,
-		// 	validateError:  nil,
-		// },
-		// testSet{
-		// 	name: "single int condition",
-		// 	conditional: ComponentConditional{
-		// 		Name:     "age",
-		// 		Not:      false,
-		// 		Operator: ">=",
-		// 		Value:    "18",
-		// 	},
-		// 	namedProperties: []testProperty{
-		// 		testProperty{
-		// 			name:   "age",
-		// 			value:  18,
-		// 			setErr: nil,
-		// 		},
-		// 	},
-		// 	validateResult: true,
-		// 	validateError:  nil,
-		// },
-		// testSet{
-		// 	name: "int condition, string value",
-		// 	conditional: ComponentConditional{
-		// 		Name:     "age",
-		// 		Not:      false,
-		// 		Operator: ">=",
-		// 		Value:    "18",
-		// 	},
-		// 	namedProperties: []testProperty{
-		// 		testProperty{
-		// 			name:   "age",
-		// 			value:  "john smith",
-		// 			setErr: errors.New("Invalid value for integer operator: john smith"),
-		// 		},
-		// 	},
-		// 	validateResult: false,
-		// 	validateError:  errors.New("Attempted to validate conditional age >= 18 without setting age"),
-		// },
-		// testSet{
-		// 	name: "int condition, mismatched value name",
-		// 	conditional: ComponentConditional{
-		// 		Name:     "age",
-		// 		Not:      false,
-		// 		Operator: ">=",
-		// 		Value:    "18",
-		// 	},
-		// 	namedProperties: []testProperty{
-		// 		testProperty{
-		// 			name:   "Age",
-		// 			value:  18,
-		// 			setErr: nil,
-		// 		},
-		// 	},
-		// 	validateResult: false,
-		// 	validateError:  errors.New("Attempted to validate conditional age >= 18 without setting age"),
-		// },
+		testSet{
+			name: "single string condition",
+			conditional: ComponentConditional{
+				Name:     "username",
+				Not:      false,
+				Operator: "equals",
+				Value:    "john smith",
+			},
+			namedProperties: []testProperty{
+				testProperty{
+					name:   "username",
+					value:  "john smith",
+					setErr: nil,
+				},
+			},
+			validateResult: true,
+			validateError:  nil,
+		},
+		testSet{
+			name: "string condition, int set value",
+			conditional: ComponentConditional{
+				Name:     "username",
+				Not:      false,
+				Operator: "equals",
+				Value:    "john smith",
+			},
+			namedProperties: []testProperty{
+				testProperty{
+					name:   "username",
+					value:  18,
+					setErr: errors.New("Invalid value for string operator: 18"),
+				},
+			},
+			validateResult: false,
+			validateError:  errors.New("Attempted to validate conditional username equals john smith without setting username"),
+		},
+		testSet{
+			name: "string condition, mismatched value name",
+			conditional: ComponentConditional{
+				Name:     "username",
+				Not:      false,
+				Operator: "equals",
+				Value:    "john smith",
+			},
+			namedProperties: []testProperty{
+				testProperty{
+					name:   "UserName",
+					value:  "john smith",
+					setErr: nil,
+				},
+			},
+			validateResult: false,
+			validateError:  errors.New("Attempted to validate conditional username equals john smith without setting username"),
+		},
+		testSet{
+			name: "string equals, fails on case sensitivity",
+			conditional: ComponentConditional{
+				Name:     "username",
+				Not:      false,
+				Operator: "equals",
+				Value:    "john smith",
+			},
+			namedProperties: []testProperty{
+				testProperty{
+					name:   "username",
+					value:  "John Smith",
+					setErr: nil,
+				},
+			},
+			validateResult: false,
+			validateError:  nil,
+		},
+		testSet{
+			name: "string ci_equals fixed cs problems",
+			conditional: ComponentConditional{
+				Name:     "username",
+				Not:      false,
+				Operator: "ci_equals",
+				Value:    "john smith",
+			},
+			namedProperties: []testProperty{
+				testProperty{
+					name:   "username",
+					value:  "John Smith",
+					setErr: nil,
+				},
+			},
+			validateResult: true,
+			validateError:  nil,
+		},
+		testSet{
+			name: "single int condition",
+			conditional: ComponentConditional{
+				Name:     "age",
+				Not:      false,
+				Operator: ">=",
+				Value:    "18",
+			},
+			namedProperties: []testProperty{
+				testProperty{
+					name:   "age",
+					value:  18,
+					setErr: nil,
+				},
+			},
+			validateResult: true,
+			validateError:  nil,
+		},
+		testSet{
+			name: "int condition, string value",
+			conditional: ComponentConditional{
+				Name:     "age",
+				Not:      false,
+				Operator: ">=",
+				Value:    "18",
+			},
+			namedProperties: []testProperty{
+				testProperty{
+					name:   "age",
+					value:  "john smith",
+					setErr: errors.New("Invalid value for integer operator: john smith"),
+				},
+			},
+			validateResult: false,
+			validateError:  errors.New("Attempted to validate conditional age >= 18 without setting age"),
+		},
+		testSet{
+			name: "int condition, mismatched value name",
+			conditional: ComponentConditional{
+				Name:     "age",
+				Not:      false,
+				Operator: ">=",
+				Value:    "18",
+			},
+			namedProperties: []testProperty{
+				testProperty{
+					name:   "Age",
+					value:  18,
+					setErr: nil,
+				},
+			},
+			validateResult: false,
+			validateError:  errors.New("Attempted to validate conditional age >= 18 without setting age"),
+		},
 		testSet{
 			name: "one of everything, all passing",
 			conditional: ComponentConditional{
@@ -295,7 +295,7 @@ func TestConditionals(t *testing.T) {
 					setErr: nil,
 				},
 			},
-			validateResult: false,
+			validateResult: true,
 			validateError:  nil,
 		},
 	}
@@ -303,7 +303,8 @@ func TestConditionals(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			for _, prop := range test.namedProperties {
 				t.Run(prop.name, func(t *testing.T) {
-					err := test.conditional.SetValue(prop.name, prop.value)
+					var err error
+					test.conditional, err = test.conditional.SetValue(prop.name, prop.value)
 					assert.Equal(t, prop.setErr, err)
 				})
 			}
