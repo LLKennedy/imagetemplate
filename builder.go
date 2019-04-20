@@ -15,6 +15,8 @@ type Builder interface {
 	SetCanvas(newCanvas Canvas)
 	GetComponents() []Component
 	SetComponents(components []Component)
+	GetNamedProperties() []NamedProperty
+	SetNamedProperties(properties []NamedProperty)
 	ApplyComponents() error
 	LoadComponentsFile(fileName string) error
 	WriteToBMP() ([]byte, error)
@@ -22,8 +24,9 @@ type Builder interface {
 
 // ImageBuilder uses golang's native Image package to implement the Builder interface
 type ImageBuilder struct {
-	Canvas     Canvas
-	Components []Component
+	Canvas          Canvas
+	Components      []Component
+	NamedProperties []NamedProperty
 }
 
 // NewBuilder generates a new ImageBuilder with an internal canvas of the specified width and height, and optionally the specified starting colour. No provided colour will result in defaults for Image.
