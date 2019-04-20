@@ -12,6 +12,45 @@ type Component interface {
 	Write(canvas Canvas) error
 	SetNamedProperties(properties []NamedProperty) error
 	GetJSONFormat() interface{}
+	VerifyAndSetJSONData(interface{}) ([]NamedProperty, error)
+}
+
+// PropertySetFunc maps property names and values to component inner properties
+type PropertySetFunc func(string, interface{}) error
+
+// ProcessNamedProperties iterates over all named properties, retrieves their value, and calls the provided function to map properties to inner component properties. Each implementation of Component should call this within its SetNamedProperties function.
+func ProcessNamedProperties(properties []NamedProperty, propMap map[string][]string, setFunc PropertySetFunc) (leftovers map[string][]string, err error) {
+	for _, prop := range properties {
+		name := prop.GetName()
+		innerPropNames := propMap[name]
+		if len(innerPropNames) <= 0 {
+			// Not matching props, keep going
+			continue
+		}
+		value, err := prop.GetValue()
+		if err != nil {
+			return propMap, err
+		}
+		for _, innerName := range innerPropNames {
+			err = setFunc(innerName, value)
+			if err != nil {
+				return propMap, err
+			}
+		}
+		delete(propMap, name)
+	}
+	return propMap, nil
+}
+
+// ParseDataValue determines whether a string represents raw data or a named variable and returns this information as well as the data cleaned of any variable definitions
+func ParseDataValue(value string) (hasNamedProperties bool, cleanValue string, err error) {
+	if len(value) == 0 {
+		err = fmt.Errorf("Could not parse empty property")
+		return
+	}
+	if value[0] == '$' {
+
+	}
 }
 
 // CircleComponent implements the Component interface for circles
@@ -83,6 +122,7 @@ func (component *CircleComponent) SetNamedProperties(properties []NamedProperty)
 	return nil
 }
 
+// GetJSONFormat returns the JSON structure of a circle component
 func (component *CircleComponent) GetJSONFormat() interface{} {
 	type format struct {
 		CentreX string `json:"centreX"`
@@ -98,29 +138,30 @@ func (component *CircleComponent) GetJSONFormat() interface{} {
 	return &format{}
 }
 
-// PropertySetFunc maps property names and values to component inner properties
-type PropertySetFunc func(string, interface{}) error
+// VerifyAndSetJSONData processes the data parsed from JSON and uses it to set circle properties and fill the named properties map
+func (component *CircleComponent) VerifyAndSetJSONData(interface{}) ([]NamedProperty, error) {
 
-// ProcessNamedProperties iterates over all named properties, retrieves their value, and calls the provided function to map properties to inner component properties. Each implementation of Component should call this within its SetNamedProperties function.
-func ProcessNamedProperties(properties []NamedProperty, propMap map[string][]string, setFunc PropertySetFunc) (leftovers map[string][]string, err error) {
-	for _, prop := range properties {
-		name := prop.GetName()
-		innerPropNames := propMap[name]
-		if len(innerPropNames) <= 0 {
-			// Not matching props, keep going
-			continue
-		}
-		value, err := prop.GetValue()
-		if err != nil {
-			return propMap, err
-		}
-		for _, innerName := range innerPropNames {
-			err = setFunc(innerName, value)
-			if err != nil {
-				return propMap, err
-			}
-		}
-		delete(propMap, name)
-	}
-	return propMap, nil
+}
+
+// RectangleComponent implements the Component interface for rectangles
+type RectangleComponent struct {
+	NamedPropertiesMap map[string][]string
+	TopLeft            image.Point
+	Width              int
+	Height             int
+	Colour             color.Color
+}
+
+// Write draws a rectangle on the canvas
+func (component *RectangleComponent) Write(canvas Canvas) error {}
+
+// SetNamedProperties proceses the named properties and sets them into the rectangle properties
+func (component *RectangleComponent) SetNamedProperties(properties []NamedProperty) error {}
+
+// GetJSONFormat returns the JSON structure of a circle component
+func (component *RectangleComponent) GetJSONFormat() interface{} {}
+
+// VerifyAndSetJSONData processes the data parsed from JSON and uses it to set circle properties and fill the named properties map
+func (component *RectangleComponent) VerifyAndSetJSONData(interface{}) ([]NamedProperty, error) {
+
 }
