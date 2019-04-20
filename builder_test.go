@@ -14,22 +14,27 @@ func TestNewBuilder(t *testing.T) {
 			t.Run(fmt.Sprintf("Creating builder with dimensions %d by %d", x, y), func(t *testing.T) {
 				var newBuilder Builder
 				newCanvas, err := NewCanvas(x, y)
-				assert.Nil(t, err)
-				newBuilder, err = NewBuilder(newCanvas, nil)
-				if x <= 0 && y <= 0 {
+				if x <= 0 && y <= 0 && err != nil {
 					assert.Nil(t, newBuilder)
 					assert.Equal(t, "Invalid width and height", err.Error())
 					return
 				}
-				if x <= 0 {
+				if x <= 0 && err != nil {
 					assert.Nil(t, newBuilder)
 					assert.Equal(t, "Invalid width", err.Error())
 					return
 				}
-				if y <= 0 {
+				if y <= 0 && err != nil {
 					assert.Nil(t, newBuilder)
 					assert.Equal(t, "Invalid height", err.Error())
 					return
+				}
+				if err != nil {
+					t.Fatalf("%v", err)
+				}
+				newBuilder, err = NewBuilder(newCanvas, nil)
+				if err != nil {
+					t.Fatalf("%v", err)
 				}
 				assert.NotNil(t, newBuilder)
 				realBuilder, ok := newBuilder.(*ImageBuilder)
@@ -38,6 +43,7 @@ func TestNewBuilder(t *testing.T) {
 				imageBounds := realBuilder.Canvas.GetUnderlyingImage().Bounds()
 				assert.Equal(t, imageBounds.Size().X, x)
 				assert.Equal(t, imageBounds.Size().Y, y)
+
 			})
 		}
 	}
