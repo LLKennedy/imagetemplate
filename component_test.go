@@ -272,12 +272,43 @@ func TestConditionals(t *testing.T) {
 							Not:      false,
 							Operator: "equals",
 							Value:    "vAlUe2!",
+						},
+						ComponentConditional{
+							Name:     "prop3",
+							Not:      false,
+							Operator: "ci_contains",
+							Value:    "al",
 							Group: struct {
 								Operator     groupOperator          `json:"groupOperator"`
 								Conditionals []ComponentConditional `json:"conditionals"`
 							}(testGroup{
-								Operator:     and,
-								Conditionals: []ComponentConditional{},
+								Operator: or,
+								Conditionals: []ComponentConditional{
+									ComponentConditional{
+										Name:     "prop4",
+										Not:      false,
+										Operator: "contains",
+										Value:    "al",
+									},
+									ComponentConditional{
+										Name:     "prop5",
+										Not:      false,
+										Operator: "ci_startswith",
+										Value:    "va",
+									},
+									ComponentConditional{
+										Name:     "prop6",
+										Not:      false,
+										Operator: "startswith",
+										Value:    "va",
+									},
+									ComponentConditional{
+										Name:     "prop7",
+										Not:      false,
+										Operator: "startswith",
+										Value:    "vaasoidfgha;sodigkfhasldkfhjas",
+									},
+								},
 							}),
 						},
 					},
@@ -292,6 +323,31 @@ func TestConditionals(t *testing.T) {
 				testProperty{
 					name:   "prop2",
 					value:  "vAlUe2!",
+					setErr: nil,
+				},
+				testProperty{
+					name:   "prop3",
+					value:  "vAlUe3!",
+					setErr: nil,
+				},
+				testProperty{
+					name:   "prop4",
+					value:  "vAlUe4!",
+					setErr: nil,
+				},
+				testProperty{
+					name:   "prop5",
+					value:  "vAlUe5!",
+					setErr: nil,
+				},
+				testProperty{
+					name:   "prop6",
+					value:  "vAlUe6!",
+					setErr: nil,
+				},
+				testProperty{
+					name:   "prop7",
+					value:  "vAlUe7!",
 					setErr: nil,
 				},
 			},
