@@ -206,6 +206,52 @@ func (conditional *ComponentConditional) SetValue(name string, value interface{}
 }
 
 // Validate validates this conditional chain, erroring if a value down the line has not been set and evaluated
-func (condition *ComponentConditional) Validate() (bool, error) {
-	return false, fmt.Errorf("Not implemented yet")
+func (conditional *ComponentConditional) Validate() (bool, error) {
+	if !conditional.valueSet {
+		return false, fmt.Errorf("Attempted to validate conditional %v %v %v without setting %v", conditional.Name, conditional.Operator, conditional.Value, conditional.Name)
+	}
+	group := conditional.Group.Conditionals
+	op := conditional.Group.Operator
+	if op == xor {
+		//Evaluate XOR on a group as meaning only one of all results in the list can be true, and one must be true.
+		trueCount := 0
+		if conditional.validated {
+			trueCount++
+		}
+		for _, subConditional := range group {
+			result, err := subConditional.Validate()
+			if err != nil {
+				return false, err
+			}
+			if result {
+				trueCount++
+			}
+		}
+		return trueCount == 1, nil
+	}
+	var result, negate bool
+	result = conditional.validated
+	if op == nand || op == nor {
+		negate = true
+	}
+	if op == and || op == nand || op == or || op == nor {
+		for _, subConditional := range group {
+			subResult, err := subConditional.Validate()
+			if err != nil {
+				return false, err
+			}
+			if op == and {
+				result = result && subResult
+			} else {
+				result = result || subResult
+			}
+		}
+		if negate {
+			result = !result
+		}
+		return result, nil
+	} else {
+		return false, fmt.Errorf("Invalid group operator %v", op)
+	}
+
 }
