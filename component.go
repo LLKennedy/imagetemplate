@@ -211,6 +211,9 @@ func (conditional *ComponentConditional) Validate() (bool, error) {
 		return false, fmt.Errorf("Attempted to validate conditional %v %v %v without setting %v", conditional.Name, conditional.Operator, conditional.Value, conditional.Name)
 	}
 	group := conditional.Group.Conditionals
+	if len(group) == 0 {
+		return conditional.validated, nil
+	}
 	op := conditional.Group.Operator
 	if op == xor {
 		//Evaluate XOR on a group as meaning only one of all results in the list can be true, and one must be true.

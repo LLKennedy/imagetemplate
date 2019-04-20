@@ -92,10 +92,50 @@ func TestParseDataValue(t *testing.T) {
 	}
 }
 
-func TestSetValue(t *testing.T) {
-
-}
-
-func TestValidate(t *testing.T) {
-
+func TestConditionals(t *testing.T) {
+	type testProperty struct {
+		name   string
+		value  interface{}
+		setErr error
+	}
+	type testSet struct {
+		name            string
+		conditional     ComponentConditional
+		namedProperties []testProperty
+		validateResult  bool
+		validateError   error
+	}
+	testArray := []testSet{
+		testSet{
+			name: "basic single condition",
+			conditional: ComponentConditional{
+				Name:     "username",
+				Not:      false,
+				Operator: "equals",
+				Value:    "john smith",
+			},
+			namedProperties: []testProperty{
+				testProperty{
+					name:   "username",
+					value:  "john smith",
+					setErr: nil,
+				},
+			},
+			validateResult: true,
+			validateError:  nil,
+		},
+	}
+	for _, test := range testArray {
+		t.Run(test.name, func(t *testing.T) {
+			for _, prop := range test.namedProperties {
+				t.Run(prop.name, func(t *testing.T) {
+					err := test.conditional.SetValue(prop.name, prop.value)
+					assert.Equal(t, prop.setErr, err)
+				})
+			}
+			success, err := test.conditional.Validate()
+			assert.Equal(t, test.validateResult, success)
+			assert.Equal(t, test.validateError, err)
+		})
+	}
 }
