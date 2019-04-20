@@ -61,7 +61,7 @@ func ParseDataValue(value string) (hasNamedProperties bool, cleanValues []string
 				break
 			}
 		}
-		if value[j] != '$' {
+		if j >= len(value) || value[j] != '$' {
 			err = fmt.Errorf("Unclosed named property in %v", value)
 			return
 		}

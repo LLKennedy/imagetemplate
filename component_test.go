@@ -1,6 +1,7 @@
 package imagetemplate
 
 import (
+	"errors"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -62,6 +63,22 @@ func TestParseDataValue(t *testing.T) {
 			cleanValues:        []string{"Hello there, ", ". ", "!"},
 			propNames:          []string{"title", "username"},
 			err:                nil,
+		},
+		parseTest{
+			name:               "unclosed property",
+			value:              "Hello there, $title$. $username!",
+			hasNamedProperties: true,
+			cleanValues:        []string{"Hello there, "},
+			propNames:          []string{"title"},
+			err:                errors.New("Unclosed named property in Hello there, $title$. $username!"),
+		},
+		parseTest{
+			name:               "empty value",
+			value:              "",
+			hasNamedProperties: false,
+			cleanValues:        []string{},
+			propNames:          []string{},
+			err:                errors.New("Could not parse empty property"),
 		},
 	}
 	for _, test := range testArray {
