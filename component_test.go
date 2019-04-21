@@ -345,6 +345,50 @@ func TestConditionals(t *testing.T) {
 								},
 							}),
 						},
+						ComponentConditional{
+							Name:     "prop11",
+							Not:      false,
+							Operator: ">",
+							Value:    "50",
+							Group: struct {
+								Operator     groupOperator          `json:"groupOperator"`
+								Conditionals []ComponentConditional `json:"conditionals"`
+							}(testGroup{
+								Operator: xor,
+								Conditionals: []ComponentConditional{
+									ComponentConditional{
+										Name:     "prop12",
+										Not:      false,
+										Operator: "<=",
+										Value:    "6",
+									},
+									ComponentConditional{
+										Name:     "prop13",
+										Not:      false,
+										Operator: ">=",
+										Value:    "9",
+									},
+								},
+							}),
+						},
+						ComponentConditional{
+							Name:     "prop14",
+							Not:      false,
+							Operator: "<=",
+							Value:    "6",
+						},
+						ComponentConditional{
+							Name:     "prop15",
+							Not:      false,
+							Operator: ">=",
+							Value:    "9",
+						},
+						ComponentConditional{
+							Name:     "prop15",
+							Not:      false,
+							Operator: ">=",
+							Value:    "9",
+						},
 					},
 				}),
 			},
@@ -397,6 +441,36 @@ func TestConditionals(t *testing.T) {
 				testProperty{
 					name:   "prop10",
 					value:  10,
+					setErr: nil,
+				},
+				testProperty{
+					name:   "prop11",
+					value:  10,
+					setErr: nil,
+				},
+				testProperty{
+					name:   "prop12",
+					value:  4,
+					setErr: nil,
+				},
+				testProperty{
+					name:   "prop13",
+					value:  2,
+					setErr: nil,
+				},
+				testProperty{
+					name:   "prop14",
+					value:  6,
+					setErr: nil,
+				},
+				testProperty{
+					name:   "prop15",
+					value:  9,
+					setErr: nil,
+				},
+				testProperty{
+					name:   "prop16",
+					value:  100,
 					setErr: nil,
 				},
 			},
