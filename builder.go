@@ -9,8 +9,8 @@ import (
 	"golang.org/x/image/bmp"
 	"image"
 	"image/color"
-	_ "image/jpeg"
-	_ "image/png"
+	_ "image/jpeg" // jpeg imported for image decoding
+	_ "image/png"  // png imported for image decoding
 	"io/ioutil"
 	"strings"
 )
