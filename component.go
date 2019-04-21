@@ -27,9 +27,6 @@ func StandardSetNamedProperties(properties NamedProperties, propMap map[string][
 			// Not matching props, keep going
 			continue
 		}
-		if err != nil {
-			return propMap, err
-		}
 		for _, innerName := range innerPropNames {
 			err = setFunc(innerName, value)
 			if err != nil {

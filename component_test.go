@@ -48,6 +48,22 @@ func TestStandardSetNamedProperties(t *testing.T) {
 			},
 			resultErr: errors.New("Failed to set property"),
 		},
+		setPropTest{
+			name: "many properties success",
+			properties: NamedProperties{
+				"username": "john smith",
+				"age":      57,
+				"title":    "Mr.",
+			},
+			propMap: map[string][]string{
+				"username": []string{"innerPropUsername", "innerPropEmail"},
+				"age":      []string{"innerPropAge"},
+				"title":    []string{"innerPropTitle", "TITLE", "innerPropRank", "some random field"},
+			},
+			setFunc:         successSetFunc,
+			resultLeftovers: map[string][]string{},
+			resultErr:       nil,
+		},
 	}
 	for _, test := range testArray {
 		t.Run(test.name, func(t *testing.T) {
@@ -56,6 +72,57 @@ func TestStandardSetNamedProperties(t *testing.T) {
 			assert.Equal(t, test.resultErr, err)
 		})
 	}
+	t.Run("check all internal properties are passed through", func(t *testing.T) {
+		valuesSet := map[string]bool{
+			"innerPropUsername": false,
+			"innerPropEmail":    false,
+			"innerPropAge":      false,
+			"innerPropTitle":    false,
+			"TITLE":             false,
+			"innerPropRank":     false,
+			"some random field": false,
+		}
+		expectedValues := NamedProperties{
+			"innerPropUsername": "john smith",
+			"innerPropEmail":    "john smith",
+			"innerPropAge":      57,
+			"innerPropTitle":    "Mr.",
+			"TITLE":             "Mr.",
+			"innerPropRank":     "Mr.",
+			"some random field": "Mr.",
+		}
+		testSetFunc := func(name string, value interface{}) error {
+			assert.Equal(t, expectedValues[name], value)
+			valuesSet[name] = true
+			return nil
+		}
+		test := setPropTest{
+			name: "all properties get passed through",
+			properties: NamedProperties{
+				"username": "john smith",
+				"age":      57,
+				"title":    "Mr.",
+				"unused":   "whatever",
+			},
+			propMap: map[string][]string{
+				"username": []string{"innerPropUsername", "innerPropEmail"},
+				"age":      []string{"innerPropAge"},
+				"title":    []string{"innerPropTitle", "TITLE", "innerPropRank", "some random field"},
+			},
+			setFunc:         testSetFunc,
+			resultLeftovers: map[string][]string{},
+			resultErr:       nil,
+		}
+		leftovers, err := StandardSetNamedProperties(test.properties, test.propMap, test.setFunc)
+		assert.Equal(t, test.resultLeftovers, leftovers)
+		assert.Equal(t, test.resultErr, err)
+		assert.Equal(t, len(expectedValues), len(valuesSet), "valuesSet length changes, something was added or deleted improperly")
+		finalResult := true
+		for _, result := range valuesSet {
+			finalResult = finalResult && result
+		}
+		assert.True(t, finalResult)
+	})
 }
 
 func TestParseDataValue(t *testing.T) {
