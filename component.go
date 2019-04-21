@@ -91,6 +91,7 @@ const (
 	ci_contains    conditionalOperator = "ci_contains"
 	ci_startswith  conditionalOperator = "ci_startswith"
 	ci_endswith    conditionalOperator = "ci_endswith"
+	numequals      conditionalOperator = "=="
 	lessthan       conditionalOperator = "<"
 	greaterthan    conditionalOperator = ">"
 	lessorequal    conditionalOperator = "<="
@@ -109,11 +110,11 @@ const (
 
 /* ComponentConditional enables or disables a component based on named properties.
 
-All properties will be assumed to be either strings or integers based on the operator.
+All properties will be assumed to be either strings or floats based on the operator.
 
 String operators: "equals", "contains", "startswith", "endswith", "ci_equals", "ci_contains", "ci_startswith", "ci_endswith". Operators including "ci_" are case-insensitive variants.
 
-Integer operators: ">", "<", "<=", ">=".
+Float operators: "=", ">", "<", "<=", ">=".
 
 Group operators can be "and", "or", "nand", "nor", "xor".*/
 type ComponentConditional struct {
@@ -182,25 +183,31 @@ func (c ComponentConditional) SetValue(name string, value interface{}) (Componen
 				}
 				conditional.validated = stringVal[len(stringVal)-len(conVal):] == conVal
 			}
-		case lessthan, greaterthan, lessorequal, greaterorequal:
-			// Handle integer operators
-			intVal, ok := value.(int)
+		case numequals, lessthan, greaterthan, lessorequal, greaterorequal:
+			// Handle float operators
+			floatVal, ok := value.(float64)
 			if !ok {
-				return c, fmt.Errorf("Invalid value for integer operator: %v", value)
+				intVal, ok := value.(int)
+				if !ok {
+					return c, fmt.Errorf("Invalid value for float operator: %v", value)
+				}
+				floatVal = float64(intVal)
 			}
-			conVal, err := strconv.Atoi(conditional.Value)
+			conVal, err := strconv.ParseFloat(conditional.Value, 64)
 			if err != nil {
-				return c, fmt.Errorf("Failed to convert conditional value to integer: %v", conditional.Value)
+				return c, fmt.Errorf("Failed to convert conditional value to float: %v", conditional.Value)
 			}
 			switch conditional.Operator {
+			case numequals:
+				conditional.validated = floatVal == conVal
 			case lessthan:
-				conditional.validated = intVal < conVal
+				conditional.validated = floatVal < conVal
 			case greaterthan:
-				conditional.validated = intVal > conVal
+				conditional.validated = floatVal > conVal
 			case lessorequal:
-				conditional.validated = intVal <= conVal
+				conditional.validated = floatVal <= conVal
 			case greaterorequal:
-				conditional.validated = intVal >= conVal
+				conditional.validated = floatVal >= conVal
 			}
 		default:
 			return c, fmt.Errorf("Invalid conditional operator %v", conditional.Operator)

@@ -244,7 +244,25 @@ func TestConditionals(t *testing.T) {
 				testProperty{
 					name:   "age",
 					value:  "john smith",
-					setErr: errors.New("Invalid value for integer operator: john smith"),
+					setErr: errors.New("Invalid value for float operator: john smith"),
+				},
+			},
+			validateResult: false,
+			validateError:  errors.New("Attempted to validate conditional age >= 18 without setting age"),
+		},
+		testSet{
+			name: "failing xor",
+			conditional: ComponentConditional{
+				Name:     "age",
+				Not:      false,
+				Operator: ">=",
+				Value:    "18",
+			},
+			namedProperties: []testProperty{
+				testProperty{
+					name:   "age",
+					value:  "john smith",
+					setErr: errors.New("Invalid value for float operator: john smith"),
 				},
 			},
 			validateResult: false,
@@ -257,6 +275,20 @@ func TestConditionals(t *testing.T) {
 				Not:      false,
 				Operator: ">=",
 				Value:    "18",
+				Group: struct {
+					Operator     groupOperator          `json:"groupOperator"`
+					Conditionals []ComponentConditional `json:"conditionals"`
+				}(testGroup{
+					Operator: xor,
+					Conditionals: []ComponentConditional{
+						ComponentConditional{
+							Name:     "height",
+							Not:      false,
+							Operator: "equals",
+							Value:    "vAlUe2!",
+						},
+					},
+				}),
 			},
 			namedProperties: []testProperty{
 				testProperty{
@@ -398,10 +430,16 @@ func TestConditionals(t *testing.T) {
 							Value:    "9",
 						},
 						ComponentConditional{
-							Name:     "prop15",
+							Name:     "prop16",
 							Not:      false,
 							Operator: ">=",
 							Value:    "9",
+						},
+						ComponentConditional{
+							Name:     "prop17",
+							Not:      false,
+							Operator: "==",
+							Value:    "52",
 						},
 					},
 				}),
@@ -485,6 +523,11 @@ func TestConditionals(t *testing.T) {
 				testProperty{
 					name:   "prop16",
 					value:  100,
+					setErr: nil,
+				},
+				testProperty{
+					name:   "prop17",
+					value:  52,
 					setErr: nil,
 				},
 			},
