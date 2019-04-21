@@ -6,9 +6,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/disintegration/imaging"
 	"golang.org/x/image/bmp"
 	"image"
 	"image/color"
+	"image/draw"
 	_ "image/jpeg" // jpeg imported for image decoding
 	_ "image/png"  // png imported for image decoding
 	"io/ioutil"
@@ -82,7 +84,7 @@ func (builder ImageBuilder) WriteToBMP() ([]byte, error) {
 // LoadComponentsFile sets the internal Component array based on the contents of the specified JSON file
 func (builder ImageBuilder) LoadComponentsFile(fileName string) (Builder, error) {
 	b := builder
-	// 1. Load initial data into template object
+	// Load initial data into template object
 	fileData, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		return builder, err
@@ -93,47 +95,144 @@ func (builder ImageBuilder) LoadComponentsFile(fileName string) (Builder, error)
 		return builder, err
 	}
 
-	// 2. Parse background image info
-	dataSet := template.BaseImage.Data == ""
-	fileSet := template.BaseImage.FileName == ""
-	typeSet := template.BaseImage.FileType == ""
-	if !dataSet || !fileSet || !typeSet {
-		if !dataSet && !fileSet {
-			return builder, fmt.Errorf("Cannot load base image from file and load from data string, specify only data or fileName")
-		}
-		if dataSet && fileSet {
-			return builder, fmt.Errorf("Cannot load base image, please specify either fileName or data")
-		}
-		//	get image data from string or file
-		var imageData []byte
-		if dataSet {
-			sReader := strings.NewReader(template.BaseImage.Data)
-			decoder := base64.NewDecoder(base64.RawStdEncoding, sReader)
-			_, err = decoder.Read(imageData)
-			if err != nil {
-				return builder, err
-			}
-		} else {
-			imageData, err = ioutil.ReadFile(template.BaseImage.FileName)
-			if err != nil {
-				return builder, err
-			}
-		}
-		imageBuffer := bytes.NewBuffer(imageData)
-		resultImage, _, err := image.Decode(imageBuffer)
-		if err != nil {
-			return builder, err
-		}
-		targetHeight, targetWidth := builder.Canvas.GetHeight(), builder.Canvas.GetWidth()
-		currentHeight, currentWidth := resultImage.Bounds().Size().Y, resultImage.Bounds().Size().X
-		if targetHeight != currentHeight || targetWidth != currentWidth {
-
-		}
+	// Parse background image info
+	b.Canvas, err = setBackgroundImage(b.Canvas, template)
+	if err != nil {
+		return builder, err
 	}
 
-	// 3. Try each known component type to fit the properties
+	// Try each known component type to fit the properties
 
 	return b, nil
+}
+
+func setBackgroundImage(canvas Canvas, template Template) (Canvas, error) {
+	c := canvas
+	// Check the state of the optional and required properties
+	dataSet := template.BaseImage.Data != ""
+	fileSet := template.BaseImage.FileName != ""
+	typeSet := template.BaseImage.FileType != ""
+	if !dataSet && !fileSet && !typeSet {
+	}
+	if dataSet && fileSet {
+		return canvas, fmt.Errorf("Cannot load base image from file and load from data string, specify only data or fileName")
+	}
+	if !dataSet && !fileSet {
+		return canvas, fmt.Errorf("Cannot load base image, please specify either fileName or data")
+	}
+	// Get image data from string or file
+	var imageData []byte
+	var err error
+	if dataSet {
+		sReader := strings.NewReader(template.BaseImage.Data)
+		decoder := base64.NewDecoder(base64.RawStdEncoding, sReader)
+		_, err = decoder.Read(imageData)
+		if err != nil {
+			return canvas, err
+		}
+	} else {
+		imageData, err = ioutil.ReadFile(template.BaseImage.FileName)
+		if err != nil {
+			return canvas, err
+		}
+	}
+	// Decode image data
+	imageBuffer := bytes.NewBuffer(imageData)
+	var baseImage image.Image
+	baseImage, _, err = image.Decode(imageBuffer)
+	if err != nil {
+		return canvas, err
+	}
+	currentHeight, currentWidth := baseImage.Bounds().Size().Y, baseImage.Bounds().Size().X
+	if currentWidth == 0 || currentHeight == 0 {
+		// No current image, use loaded image instead
+		drawImg, ok := baseImage.(draw.Image)
+		if !ok {
+			return canvas, fmt.Errorf("Could not create write-access Image from image data")
+		}
+		c = c.SetUnderlyingImage(drawImg)
+		return c, nil
+	}
+	// Check if resizing is necessary
+	targetHeight, targetWidth := c.GetHeight(), c.GetWidth()
+	if targetHeight != currentHeight || targetWidth != currentWidth {
+		// Compare aspect ratios
+		targetAspect := float64(targetWidth) / float64(targetHeight)
+		currentAspect := float64(currentWidth) / float64(currentHeight)
+		var resizedWidth, resizedHeight int
+		if targetAspect == currentAspect {
+			// Identical apsect ratios
+			resizedWidth = targetWidth
+			resizedHeight = targetHeight
+		} else if targetAspect < currentAspect {
+			// Fit wide image into thin frame
+			resizedHeight = targetHeight
+		} else {
+			// Fit thin image into wide frame
+			resizedWidth = targetWidth
+		}
+		baseImage = imaging.Resize(baseImage, resizedWidth, resizedHeight, imaging.Lanczos)
+	}
+	c.SubImage(image.Point{X: 0, Y: 0}, baseImage)
+	return c, nil
+}
+
+func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, NamedProperties, error) {
+	var results []ToggleableComponent
+	var namedProperties NamedProperties
+	for tCount, template := range templates {
+		//Handle conditional first
+		var result ToggleableComponent
+		tempProperties := namedProperties
+		result.Conditional = template.Conditional
+		for key, value := range result.Conditional.GetNamedPropertiesList() {
+			tempProperties[key] = value
+		}
+		var typeRange []string
+		switch template.Type {
+		case "circle", "Circle", "rectangle", "Rectangle", "rect", "Rect", "image", "Image", "photo", "Photo", "text", "Text", "words", "Words":
+			typeRange = []string{template.Type}
+		default:
+			typeRange = []string{"circle", "Circle", "rectange", "Rectangle", "rect", "Rect", "image", "Image", "photo", "Photo", "text", "Text", "words", "Words"}
+		}
+		for _, compType := range typeRange {
+			var newComponent Component
+			switch compType {
+			case "circle", "Circle":
+				newComponent = CircleComponent{}
+			case "rectangle", "Rectangle", "rect", "Rect":
+				newComponent = RectangleComponent{}
+			case "image", "Image", "photo", "Photo":
+				newComponent = RectangleComponent{} //FIXME: replace with image
+			case "text", "Text", "words", "Words":
+				newComponent = RectangleComponent{} //FIXME: replace with text
+			}
+			// Get JSON struct to parse into
+			shape := newComponent.GetJSONFormat()
+			err := json.Unmarshal(template.Properties, shape)
+			if err != nil {
+				// Invalid JSON
+				return results, namedProperties, err
+			}
+			// Set real properties from JSON struct
+			newComponent, compNamedProps, err := newComponent.VerifyAndSetJSONData(shape)
+			if err != nil {
+				// Didn't match this type
+				continue
+			}
+			for key, value := range compNamedProps {
+				tempProperties[key] = value
+			}
+			results[tCount] = result
+			namedProperties = tempProperties
+		}
+		if len(results) <= tCount {
+			// Failed to find a matching type
+			return results, namedProperties, fmt.Errorf("Failed to find type matching component with user-specified type %v", template.Type)
+		}
+	}
+	return results, namedProperties, nil
+
 }
 
 // GetCanvas returns the internal Canvas object

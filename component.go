@@ -269,3 +269,19 @@ func (conditional ComponentConditional) Validate() (bool, error) {
 	}
 	return false, fmt.Errorf("Invalid group operator %v", op)
 }
+
+// GetNamedProps returns a list of all named props found in the conditional
+func (conditional ComponentConditional) GetNamedPropertiesList() NamedProperties {
+	var results NamedProperties
+	type invalidData struct {
+		Message string
+	}
+	results[conditional.Name] = invalidData{Message: "Please replace this struct with real data"}
+	for _, subConditional := range conditional.Group.Conditionals {
+		subResults := subConditional.GetNamedPropertiesList()
+		for key, value := range subResults {
+			results[key] = value
+		}
+	}
+	return results
+}
