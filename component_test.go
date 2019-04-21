@@ -361,6 +361,112 @@ func TestConditionals(t *testing.T) {
 			validateError:  errors.New("Attempted to validate conditional age2 > smith without setting age2"),
 		},
 		testSet{
+			name: "invalid operator",
+			conditional: ComponentConditional{
+				Name:     "age",
+				Not:      false,
+				Operator: ">=",
+				Value:    "18",
+				Group: struct {
+					Operator     groupOperator          `json:"groupOperator"`
+					Conditionals []ComponentConditional `json:"conditionals"`
+				}(testGroup{
+					Operator: and,
+					Conditionals: []ComponentConditional{
+						ComponentConditional{
+							Name:     "username",
+							Not:      false,
+							Operator: "is exactly",
+							Value:    "john smith",
+						},
+					},
+				}),
+			},
+			namedProperties: []testProperty{
+				testProperty{
+					name:   "age",
+					value:  18,
+					setErr: nil,
+				},
+				testProperty{
+					name:   "username",
+					value:  "john smith",
+					setErr: errors.New("Invalid conditional operator is exactly"),
+				},
+			},
+			validateResult: false,
+			validateError:  errors.New("Attempted to validate conditional username is exactly john smith without setting username"),
+		},
+		testSet{
+			name: "unset inner conditional",
+			conditional: ComponentConditional{
+				Name:     "age",
+				Not:      false,
+				Operator: ">=",
+				Value:    "18",
+				Group: struct {
+					Operator     groupOperator          `json:"groupOperator"`
+					Conditionals []ComponentConditional `json:"conditionals"`
+				}(testGroup{
+					Operator: xor,
+					Conditionals: []ComponentConditional{
+						ComponentConditional{
+							Name:     "username",
+							Not:      false,
+							Operator: "equals",
+							Value:    "john smith",
+						},
+					},
+				}),
+			},
+			namedProperties: []testProperty{
+				testProperty{
+					name:   "age",
+					value:  18,
+					setErr: nil,
+				},
+			},
+			validateResult: false,
+			validateError:  errors.New("Attempted to validate conditional username equals john smith without setting username"),
+		},
+		testSet{
+			name: "unset inner conditional",
+			conditional: ComponentConditional{
+				Name:     "age",
+				Not:      false,
+				Operator: ">=",
+				Value:    "18",
+				Group: struct {
+					Operator     groupOperator          `json:"groupOperator"`
+					Conditionals []ComponentConditional `json:"conditionals"`
+				}(testGroup{
+					Operator: "some other operator",
+					Conditionals: []ComponentConditional{
+						ComponentConditional{
+							Name:     "username",
+							Not:      false,
+							Operator: "equals",
+							Value:    "john smith",
+						},
+					},
+				}),
+			},
+			namedProperties: []testProperty{
+				testProperty{
+					name:   "age",
+					value:  18,
+					setErr: nil,
+				},
+				testProperty{
+					name:   "username",
+					value:  "john smith",
+					setErr: nil,
+				},
+			},
+			validateResult: false,
+			validateError:  errors.New("Invalid group operator some other operator"),
+		},
+		testSet{
 			name: "one of everything, all passing",
 			conditional: ComponentConditional{
 				Name:     "prop1",

@@ -269,8 +269,6 @@ func (conditional ComponentConditional) Validate() (bool, error) {
 			result = !result
 		}
 		return result, nil
-	} else {
-		return false, fmt.Errorf("Invalid group operator %v", op)
 	}
-
+	return false, fmt.Errorf("Invalid group operator %v", op)
 }
