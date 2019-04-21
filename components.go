@@ -16,9 +16,9 @@ type CircleComponent struct {
 }
 
 // Write draws a circle on the canvas
-func (component *CircleComponent) Write(canvas Canvas) error {
+func (component *CircleComponent) Write(canvas Canvas) (Canvas, error) {
 	if len(component.NamedPropertiesMap) != 0 {
-		return fmt.Errorf("Cannot draw circle, not all named properties are set: %v", component.NamedPropertiesMap)
+		return canvas, fmt.Errorf("Cannot draw circle, not all named properties are set: %v", component.NamedPropertiesMap)
 	}
 	return canvas.Circle(component.Centre, component.Radius, component.Colour)
 }
@@ -107,8 +107,8 @@ type RectangleComponent struct {
 }
 
 // Write draws a rectangle on the canvas
-func (component *RectangleComponent) Write(canvas Canvas) error {
-	return fmt.Errorf("Not implemented yet")
+func (component *RectangleComponent) Write(canvas Canvas) (Canvas, error) {
+	return canvas, fmt.Errorf("Not implemented yet")
 }
 
 // SetNamedProperties proceses the named properties and sets them into the rectangle properties

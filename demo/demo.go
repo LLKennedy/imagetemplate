@@ -21,11 +21,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create builder: %v", err)
 	}
-	err = canvas.Rectangle(image.Point{X: 110, Y: 40}, 60, 87, color.NRGBA{R: 255, G: 100, B: 0, A: 255})
+	canvas, err = canvas.Rectangle(image.Point{X: 110, Y: 40}, 60, 87, color.NRGBA{R: 255, G: 100, B: 0, A: 255})
 	if err != nil {
 		log.Fatalf("Failed to create rectangle: %v", err)
 	}
-	err = canvas.Circle(image.Point{X: 301, Y: 253}, 57, color.NRGBA{R: 0, G: 100, B: 255, A: 255})
+	canvas, err = canvas.Circle(image.Point{X: 301, Y: 253}, 57, color.NRGBA{R: 0, G: 100, B: 255, A: 255})
 	if err != nil {
 		log.Fatalf("Failed to create circle: %v", err)
 	}

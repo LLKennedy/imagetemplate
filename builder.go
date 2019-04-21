@@ -47,14 +47,16 @@ type ToggleableComponent struct {
 
 // ImageBuilder uses golang's native Image package to implement the Builder interface
 type ImageBuilder struct {
-	Canvas     Canvas
-	Components []ToggleableComponent
+	Canvas          Canvas
+	Components      []ToggleableComponent
+	NamedProperties NamedProperties
 }
 
 // NewBuilder generates a new ImageBuilder with an internal canvas of the specified width and height, and optionally the specified starting colour. No provided colour will result in defaults for Image.
 func NewBuilder(canvas Canvas, startingColour color.Color) (ImageBuilder, error) {
 	if startingColour != nil {
-		err := canvas.Rectangle(image.Point{}, canvas.GetWidth(), canvas.GetHeight(), startingColour)
+		var err error
+		canvas, err = canvas.Rectangle(image.Point{}, canvas.GetWidth(), canvas.GetHeight(), startingColour)
 		if err != nil {
 			return ImageBuilder{}, err
 		}
@@ -106,7 +108,7 @@ func (builder ImageBuilder) SetComponents(components []ToggleableComponent) Buil
 
 // GetNamedProperties returns the list of named properties in the builder object
 func (builder ImageBuilder) GetNamedPropertiesList() NamedProperties {
-	return nil //FIXME: not implemented
+	return builder.NamedProperties
 }
 
 // SetNamedProperties sets the values of names properties in all components and conditionals in the builder
@@ -130,7 +132,20 @@ func (builder ImageBuilder) SetNamedProperties(properties NamedProperties) (Buil
 
 // ApplyComponents iterates over the internal Component array, applying each in turn to the Canvas
 func (builder ImageBuilder) ApplyComponents() (Builder, error) {
-	return builder, errors.New("Not implemented yet")
+	b := builder
+	for _, tComponent := range b.Components {
+		valid, err := tComponent.Conditional.Validate()
+		if err != nil {
+			return builder, err
+		}
+		if valid {
+			b.Canvas, err = tComponent.Component.Write(b.Canvas)
+			if err != nil {
+				return builder, err
+			}
+		}
+	}
+	return b, nil
 }
 
 // LoadComponentsFile sets the internal Component array based on the contents of the specified JSON file

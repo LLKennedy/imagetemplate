@@ -10,7 +10,7 @@ type NamedProperties map[string]interface{}
 
 // Component provides a generic interface for operations to perform on a canvas
 type Component interface {
-	Write(canvas Canvas) error
+	Write(canvas Canvas) (Canvas, error)
 	SetNamedProperties(properties NamedProperties) error
 	GetJSONFormat() interface{}
 	VerifyAndSetJSONData(interface{}) (NamedProperties, error)
