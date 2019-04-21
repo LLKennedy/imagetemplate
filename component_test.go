@@ -311,6 +311,40 @@ func TestConditionals(t *testing.T) {
 								},
 							}),
 						},
+						ComponentConditional{
+							Name:     "prop8",
+							Not:      false,
+							Operator: "ci_endswith",
+							Value:    "E8!",
+							Group: struct {
+								Operator     groupOperator          `json:"groupOperator"`
+								Conditionals []ComponentConditional `json:"conditionals"`
+							}(testGroup{
+								Operator: nand,
+								Conditionals: []ComponentConditional{
+									ComponentConditional{
+										Name:     "prop9",
+										Not:      true,
+										Operator: "endswith",
+										Value:    "E9!",
+										Group: struct {
+											Operator     groupOperator          `json:"groupOperator"`
+											Conditionals []ComponentConditional `json:"conditionals"`
+										}(testGroup{
+											Operator: nor,
+											Conditionals: []ComponentConditional{
+												ComponentConditional{
+													Name:     "prop10",
+													Not:      false,
+													Operator: "<",
+													Value:    "100",
+												},
+											},
+										}),
+									},
+								},
+							}),
+						},
 					},
 				}),
 			},
@@ -348,6 +382,21 @@ func TestConditionals(t *testing.T) {
 				testProperty{
 					name:   "prop7",
 					value:  "vAlUe7!",
+					setErr: nil,
+				},
+				testProperty{
+					name:   "prop8",
+					value:  "vAlUe8!",
+					setErr: nil,
+				},
+				testProperty{
+					name:   "prop9",
+					value:  "vAlUe9!",
+					setErr: nil,
+				},
+				testProperty{
+					name:   "prop10",
+					value:  10,
 					setErr: nil,
 				},
 			},

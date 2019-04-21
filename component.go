@@ -205,6 +205,9 @@ func (c ComponentConditional) SetValue(name string, value interface{}) (Componen
 		default:
 			return c, fmt.Errorf("Invalid conditional operator %v", conditional.Operator)
 		}
+		if conditional.Not {
+			conditional.validated = !conditional.validated
+		}
 		conditional.valueSet = true
 	}
 	return conditional, nil
@@ -237,18 +240,19 @@ func (conditional ComponentConditional) Validate() (bool, error) {
 		}
 		return trueCount == 1, nil
 	}
-	var result, negate bool
-	result = conditional.validated
+	var result bool
+	var negate bool
 	if op == nand || op == nor {
 		negate = true
 	}
+	result = conditional.validated
 	if op == and || op == nand || op == or || op == nor {
 		for _, subConditional := range group {
 			subResult, err := subConditional.Validate()
 			if err != nil {
 				return false, err
 			}
-			if op == and {
+			if op == and || op == nand {
 				result = result && subResult
 			} else {
 				result = result || subResult
