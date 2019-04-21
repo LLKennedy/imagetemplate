@@ -13,13 +13,13 @@ import (
 // Builder manipulates Canvas objects and outputs to a bitmap
 type Builder interface {
 	GetCanvas() Canvas
-	SetCanvas(newCanvas Canvas)
+	SetCanvas(newCanvas Canvas) Builder
 	GetComponents() []Component
-	SetComponents(components []Component)
-	GetNamedProperties() NamedProperties
-	SetNamedProperties(properties NamedProperties)
-	ApplyComponents() error
-	LoadComponentsFile(fileName string) error
+	SetComponents(components []ToggleableComponent) Builder
+	GetNamedPropertiesList() NamedProperties
+	SetNamedProperties(properties NamedProperties) (Builder, error)
+	ApplyComponents() (Builder, error)
+	LoadComponentsFile(fileName string) (Builder, error)
 	WriteToBMP() ([]byte, error)
 }
 
@@ -30,36 +30,40 @@ type Template struct {
 		Data     string `json:"data"`
 		FileType string `json:"fileType"`
 	} `json:"baseImage"`
-	Components []ComponentsElement `json:"components"`
+	Components []ComponentTemplate `json:"components"`
 }
 
 // ComponentsElement represents a partial unmarshalled Component, with its properties left in raw form to be handled by each known type of Component.
-type ComponentsElement struct {
+type ComponentTemplate struct {
 	Type        string               `json:"type"`
 	Conditional ComponentConditional `json:"conditional"`
 	Properties  json.RawMessage      `json:"properties"`
 }
 
+type ToggleableComponent struct {
+	Conditional ComponentConditional
+	Component   Component
+}
+
 // ImageBuilder uses golang's native Image package to implement the Builder interface
 type ImageBuilder struct {
-	Canvas          Canvas
-	Components      []Component
-	NamedProperties NamedProperties
+	Canvas     Canvas
+	Components []ToggleableComponent
 }
 
 // NewBuilder generates a new ImageBuilder with an internal canvas of the specified width and height, and optionally the specified starting colour. No provided colour will result in defaults for Image.
-func NewBuilder(canvas Canvas, startingColour color.Color) (*ImageBuilder, error) {
+func NewBuilder(canvas Canvas, startingColour color.Color) (ImageBuilder, error) {
 	if startingColour != nil {
 		err := canvas.Rectangle(image.Point{}, canvas.GetWidth(), canvas.GetHeight(), startingColour)
 		if err != nil {
-			return nil, err
+			return ImageBuilder{}, err
 		}
 	}
-	return &ImageBuilder{Canvas: canvas}, nil
+	return ImageBuilder{Canvas: canvas}, nil
 }
 
 // WriteToBMP outputs the contents of the builder to a BMP byte array
-func (builder *ImageBuilder) WriteToBMP() ([]byte, error) {
+func (builder ImageBuilder) WriteToBMP() ([]byte, error) {
 	var buf bytes.Buffer
 	err := bmp.Encode(&buf, builder.Canvas.GetUnderlyingImage())
 	if err != nil {
@@ -69,41 +73,67 @@ func (builder *ImageBuilder) WriteToBMP() ([]byte, error) {
 }
 
 // GetCanvas returns the internal Canvas object
-func (builder *ImageBuilder) GetCanvas() Canvas {
+func (builder ImageBuilder) GetCanvas() Canvas {
 	return builder.Canvas
 }
 
 // SetCanvas sets the internal Canvas object
-func (builder *ImageBuilder) SetCanvas(newCanvas Canvas) {
+func (builder ImageBuilder) SetCanvas(newCanvas Canvas) Builder {
 	builder.Canvas = newCanvas
+	return builder
 }
 
 // GetComponents gets the internal Component array
-func (builder *ImageBuilder) GetComponents() []Component {
-	return builder.Components
+func (builder ImageBuilder) GetComponents() []Component {
+	result := []Component{}
+	for _, tComponent := range builder.Components {
+		valid, err := tComponent.Conditional.Validate()
+		if err != nil {
+			continue
+		}
+		if valid {
+			result = append(result, tComponent.Component)
+		}
+	}
+	return result
 }
 
 // SetComponents sets the internal Component array
-func (builder *ImageBuilder) SetComponents(components []Component) {
+func (builder ImageBuilder) SetComponents(components []ToggleableComponent) Builder {
 	builder.Components = components
+	return builder
 }
 
 // GetNamedProperties returns the list of named properties in the builder object
-func (builder *ImageBuilder) GetNamedProperties() NamedProperties {
-	return builder.NamedProperties
+func (builder ImageBuilder) GetNamedPropertiesList() NamedProperties {
+	return nil //FIXME: not implemented
 }
 
-// SetNamedProperties sets the list of named properties in the builder object
-func (builder *ImageBuilder) SetNamedProperties(properties NamedProperties) {
-	builder.NamedProperties = properties
+// SetNamedProperties sets the values of names properties in all components and conditionals in the builder
+func (builder ImageBuilder) SetNamedProperties(properties NamedProperties) (Builder, error) {
+	b := builder
+	for tIndex, tComponent := range b.Components {
+		err := tComponent.Component.SetNamedProperties(properties)
+		if err != nil {
+			return builder, err
+		}
+		for key, value := range properties {
+			tComponent.Conditional, err = tComponent.Conditional.SetValue(key, value)
+			if err != nil {
+				return builder, err
+			}
+		}
+		b.Components[tIndex] = tComponent
+	}
+	return builder, nil
 }
 
 // ApplyComponents iterates over the internal Component array, applying each in turn to the Canvas
-func (builder *ImageBuilder) ApplyComponents() error {
-	return errors.New("Not implemented yet")
+func (builder ImageBuilder) ApplyComponents() (Builder, error) {
+	return builder, errors.New("Not implemented yet")
 }
 
 // LoadComponentsFile sets the internal Component array based on the contents of the specified JSON file
-func (builder *ImageBuilder) LoadComponentsFile(fileName string) error {
-	return errors.New("Not implemented yet")
+func (builder ImageBuilder) LoadComponentsFile(fileName string) (Builder, error) {
+	return builder, errors.New("Not implemented yet")
 }
