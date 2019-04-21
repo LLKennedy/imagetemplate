@@ -207,9 +207,9 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, Name
 			case "rectangle", "Rectangle", "rect", "Rect":
 				newComponent = RectangleComponent{}
 			case "image", "Image", "photo", "Photo":
-				newComponent = RectangleComponent{} //FIXME: replace with image
+				newComponent = ImageComponent{}
 			case "text", "Text", "words", "Words":
-				newComponent = RectangleComponent{} //FIXME: replace with text
+				newComponent = TextComponent{}
 			}
 			// Get JSON struct to parse into
 			shape := newComponent.GetJSONFormat()

@@ -117,12 +117,70 @@ func (component RectangleComponent) SetNamedProperties(properties NamedPropertie
 	return component, fmt.Errorf("Not implemented yet")
 }
 
-// GetJSONFormat returns the JSON structure of a circle component
+// GetJSONFormat returns the JSON structure of a rectangle component
 func (component RectangleComponent) GetJSONFormat() interface{} {
 	return fmt.Errorf("Not implemented yet")
 }
 
-// VerifyAndSetJSONData processes the data parsed from JSON and uses it to set circle properties and fill the named properties map
+// VerifyAndSetJSONData processes the data parsed from JSON and uses it to set rectangle properties and fill the named properties map
 func (component RectangleComponent) VerifyAndSetJSONData(interface{}) (Component, NamedProperties, error) {
+	return component, nil, fmt.Errorf("Not implemented yet")
+}
+
+// ImageComponent implements the Component interface for images
+type ImageComponent struct {
+	NamedPropertiesMap map[string][]string
+	Image              image.Image
+	TopLeft            image.Point
+	Width              int
+	Height             int
+}
+
+// Write draws an image on the canvas
+func (component ImageComponent) Write(canvas Canvas) (Canvas, error) {
+	return canvas, fmt.Errorf("Not implemented yet")
+}
+
+// SetNamedProperties proceses the named properties and sets them into the image properties
+func (component ImageComponent) SetNamedProperties(properties NamedProperties) (Component, error) {
+	return component, fmt.Errorf("Not implemented yet")
+}
+
+// GetJSONFormat returns the JSON structure of a image component
+func (component ImageComponent) GetJSONFormat() interface{} {
+	return fmt.Errorf("Not implemented yet")
+}
+
+// VerifyAndSetJSONData processes the data parsed from JSON and uses it to set image properties and fill the named properties map
+func (component ImageComponent) VerifyAndSetJSONData(interface{}) (Component, NamedProperties, error) {
+	return component, nil, fmt.Errorf("Not implemented yet")
+}
+
+// TextComponent implements the Component interface for text
+type TextComponent struct {
+	NamedPropertiesMap map[string][]string
+	TopLeft            image.Point
+	Width              int
+	Height             int
+	Colour             color.Color
+}
+
+// Write draws text on the canvas
+func (component TextComponent) Write(canvas Canvas) (Canvas, error) {
+	return canvas, fmt.Errorf("Not implemented yet")
+}
+
+// SetNamedProperties proceses the named properties and sets them into the text properties
+func (component TextComponent) SetNamedProperties(properties NamedProperties) (Component, error) {
+	return component, fmt.Errorf("Not implemented yet")
+}
+
+// GetJSONFormat returns the JSON structure of a text component
+func (component TextComponent) GetJSONFormat() interface{} {
+	return fmt.Errorf("Not implemented yet")
+}
+
+// VerifyAndSetJSONData processes the data parsed from JSON and uses it to set text properties and fill the named properties map
+func (component TextComponent) VerifyAndSetJSONData(interface{}) (Component, NamedProperties, error) {
 	return component, nil, fmt.Errorf("Not implemented yet")
 }
