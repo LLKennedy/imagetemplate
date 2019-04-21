@@ -102,6 +102,10 @@ func (builder ImageBuilder) LoadComponentsFile(fileName string) (Builder, error)
 	}
 
 	// Try each known component type to fit the properties
+	b.Components, b.NamedProperties, err = parseComponents(template.Components)
+	if err != nil {
+		return builder, err
+	}
 
 	return b, nil
 }
