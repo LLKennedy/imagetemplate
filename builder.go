@@ -3,11 +3,16 @@ package imagetemplate
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"golang.org/x/image/bmp"
 	"image"
 	"image/color"
+	_ "image/jpeg"
+	_ "image/png"
+	"io/ioutil"
+	"strings"
 )
 
 // Builder manipulates Canvas objects and outputs to a bitmap
@@ -72,6 +77,63 @@ func (builder ImageBuilder) WriteToBMP() ([]byte, error) {
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+// LoadComponentsFile sets the internal Component array based on the contents of the specified JSON file
+func (builder ImageBuilder) LoadComponentsFile(fileName string) (Builder, error) {
+	b := builder
+	// 1. Load initial data into template object
+	fileData, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return builder, err
+	}
+	var template Template
+	err = json.Unmarshal(fileData, &template)
+	if err != nil {
+		return builder, err
+	}
+
+	// 2. Parse background image info
+	dataSet := template.BaseImage.Data == ""
+	fileSet := template.BaseImage.FileName == ""
+	typeSet := template.BaseImage.FileType == ""
+	if !dataSet || !fileSet || !typeSet {
+		if !dataSet && !fileSet {
+			return builder, fmt.Errorf("Cannot load base image from file and load from data string, specify only data or fileName")
+		}
+		if dataSet && fileSet {
+			return builder, fmt.Errorf("Cannot load base image, please specify either fileName or data")
+		}
+		//	get image data from string or file
+		var imageData []byte
+		if dataSet {
+			sReader := strings.NewReader(template.BaseImage.Data)
+			decoder := base64.NewDecoder(base64.RawStdEncoding, sReader)
+			_, err = decoder.Read(imageData)
+			if err != nil {
+				return builder, err
+			}
+		} else {
+			imageData, err = ioutil.ReadFile(template.BaseImage.FileName)
+			if err != nil {
+				return builder, err
+			}
+		}
+		imageBuffer := bytes.NewBuffer(imageData)
+		resultImage, _, err := image.Decode(imageBuffer)
+		if err != nil {
+			return builder, err
+		}
+		targetHeight, targetWidth := builder.Canvas.GetHeight(), builder.Canvas.GetWidth()
+		currentHeight, currentWidth := resultImage.Bounds().Size().Y, resultImage.Bounds().Size().X
+		if targetHeight != currentHeight || targetWidth != currentWidth {
+
+		}
+	}
+
+	// 3. Try each known component type to fit the properties
+
+	return b, nil
 }
 
 // GetCanvas returns the internal Canvas object
@@ -147,9 +209,4 @@ func (builder ImageBuilder) ApplyComponents() (Builder, error) {
 		}
 	}
 	return b, nil
-}
-
-// LoadComponentsFile sets the internal Component array based on the contents of the specified JSON file
-func (builder ImageBuilder) LoadComponentsFile(fileName string) (Builder, error) {
-	return builder, errors.New("Not implemented yet")
 }
