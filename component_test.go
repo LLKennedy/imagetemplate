@@ -251,7 +251,7 @@ func TestConditionals(t *testing.T) {
 			validateError:  errors.New("Attempted to validate conditional age >= 18 without setting age"),
 		},
 		testSet{
-			name: "failing xor",
+			name: "int condition, mismatched value name",
 			conditional: ComponentConditional{
 				Name:     "age",
 				Not:      false,
@@ -269,7 +269,7 @@ func TestConditionals(t *testing.T) {
 			validateError:  errors.New("Attempted to validate conditional age >= 18 without setting age"),
 		},
 		testSet{
-			name: "int condition, mismatched value name",
+			name: "failing xor",
 			conditional: ComponentConditional{
 				Name:     "age",
 				Not:      false,
@@ -284,21 +284,81 @@ func TestConditionals(t *testing.T) {
 						ComponentConditional{
 							Name:     "height",
 							Not:      false,
-							Operator: "equals",
-							Value:    "vAlUe2!",
+							Operator: "==",
+							Value:    "180",
 						},
 					},
 				}),
 			},
 			namedProperties: []testProperty{
 				testProperty{
-					name:   "Age",
+					name:   "age",
 					value:  18,
+					setErr: nil,
+				},
+				testProperty{
+					name:   "height",
+					value:  180,
 					setErr: nil,
 				},
 			},
 			validateResult: false,
-			validateError:  errors.New("Attempted to validate conditional age >= 18 without setting age"),
+			validateError:  nil,
+		},
+		testSet{
+			name: "overflowing endswith",
+			conditional: ComponentConditional{
+				Name:     "username",
+				Not:      false,
+				Operator: "endswith",
+				Value:    "aklsdijghyaos;idjghasldkf",
+			},
+			namedProperties: []testProperty{
+				testProperty{
+					name:   "username",
+					value:  "john smith",
+					setErr: nil,
+				},
+			},
+			validateResult: false,
+			validateError:  nil,
+		},
+		testSet{
+			name: "invalid float condition",
+			conditional: ComponentConditional{
+				Name:     "age1",
+				Not:      false,
+				Operator: ">=",
+				Value:    "18",
+				Group: struct {
+					Operator     groupOperator          `json:"groupOperator"`
+					Conditionals []ComponentConditional `json:"conditionals"`
+				}(testGroup{
+					Operator: and,
+					Conditionals: []ComponentConditional{
+						ComponentConditional{
+							Name:     "age2",
+							Not:      false,
+							Operator: ">",
+							Value:    "smith",
+						},
+					},
+				}),
+			},
+			namedProperties: []testProperty{
+				testProperty{
+					name:   "age1",
+					value:  18,
+					setErr: nil,
+				},
+				testProperty{
+					name:   "age2",
+					value:  20,
+					setErr: errors.New("Failed to convert conditional value to float: smith"),
+				},
+			},
+			validateResult: false,
+			validateError:  errors.New("Attempted to validate conditional age2 > smith without setting age2"),
 		},
 		testSet{
 			name: "one of everything, all passing",
