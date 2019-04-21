@@ -115,7 +115,8 @@ func (builder ImageBuilder) GetNamedPropertiesList() NamedProperties {
 func (builder ImageBuilder) SetNamedProperties(properties NamedProperties) (Builder, error) {
 	b := builder
 	for tIndex, tComponent := range b.Components {
-		err := tComponent.Component.SetNamedProperties(properties)
+		var err error
+		tComponent.Component, err = tComponent.Component.SetNamedProperties(properties)
 		if err != nil {
 			return builder, err
 		}
