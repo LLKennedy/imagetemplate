@@ -24,7 +24,7 @@ func (component *CircleComponent) Write(canvas Canvas) error {
 }
 
 // SetNamedProperties processes the named properties and sets them into the circle properties
-func (component *CircleComponent) SetNamedProperties(properties []NamedProperty) error {
+func (component *CircleComponent) SetNamedProperties(properties NamedProperties) error {
 	setFunc := func(name string, value interface{}) error {
 		if strings.Contains("RGBA", name) && len(name) == 1 {
 			//Process colours
@@ -93,7 +93,7 @@ func (component *CircleComponent) GetJSONFormat() interface{} {
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set circle properties and fill the named properties map
-func (component *CircleComponent) VerifyAndSetJSONData(interface{}) ([]NamedProperty, error) {
+func (component *CircleComponent) VerifyAndSetJSONData(interface{}) (NamedProperties, error) {
 	return nil, fmt.Errorf("Not implemented yet")
 }
 
@@ -112,7 +112,7 @@ func (component *RectangleComponent) Write(canvas Canvas) error {
 }
 
 // SetNamedProperties proceses the named properties and sets them into the rectangle properties
-func (component *RectangleComponent) SetNamedProperties(properties []NamedProperty) error {
+func (component *RectangleComponent) SetNamedProperties(properties NamedProperties) error {
 	return fmt.Errorf("Not implemented yet")
 }
 
@@ -122,6 +122,6 @@ func (component *RectangleComponent) GetJSONFormat() interface{} {
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set circle properties and fill the named properties map
-func (component *RectangleComponent) VerifyAndSetJSONData(interface{}) ([]NamedProperty, error) {
+func (component *RectangleComponent) VerifyAndSetJSONData(interface{}) (NamedProperties, error) {
 	return nil, fmt.Errorf("Not implemented yet")
 }

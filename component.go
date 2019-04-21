@@ -6,27 +6,27 @@ import (
 	"strings"
 )
 
+type NamedProperties map[string]interface{}
+
 // Component provides a generic interface for operations to perform on a canvas
 type Component interface {
 	Write(canvas Canvas) error
-	SetNamedProperties(properties []NamedProperty) error
+	SetNamedProperties(properties NamedProperties) error
 	GetJSONFormat() interface{}
-	VerifyAndSetJSONData(interface{}) ([]NamedProperty, error)
+	VerifyAndSetJSONData(interface{}) (NamedProperties, error)
 }
 
 // PropertySetFunc maps property names and values to component inner properties
 type PropertySetFunc func(string, interface{}) error
 
 // StandardSetNamedProperties iterates over all named properties, retrieves their value, and calls the provided function to map properties to inner component properties. Each implementation of Component should call this within its SetNamedProperties function.
-func StandardSetNamedProperties(properties []NamedProperty, propMap map[string][]string, setFunc PropertySetFunc) (leftovers map[string][]string, err error) {
-	for _, prop := range properties {
-		name := prop.GetName()
+func StandardSetNamedProperties(properties NamedProperties, propMap map[string][]string, setFunc PropertySetFunc) (leftovers map[string][]string, err error) {
+	for name, value := range properties {
 		innerPropNames := propMap[name]
 		if len(innerPropNames) <= 0 {
 			// Not matching props, keep going
 			continue
 		}
-		value, err := prop.GetValue()
 		if err != nil {
 			return propMap, err
 		}

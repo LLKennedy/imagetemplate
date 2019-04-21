@@ -6,6 +6,58 @@ import (
 	"testing"
 )
 
+func TestStandardSetNamedProperties(t *testing.T) {
+	type setPropTest struct {
+		name            string
+		properties      NamedProperties
+		propMap         map[string][]string
+		setFunc         PropertySetFunc
+		resultLeftovers map[string][]string
+		resultErr       error
+	}
+	successSetFunc := func(string, interface{}) error {
+		return nil
+	}
+	errorSetFunc := func(string, interface{}) error {
+		return errors.New("Failed to set property")
+	}
+	testArray := []setPropTest{
+		setPropTest{
+			name: "single property success",
+			properties: NamedProperties{
+				"username": "john smith",
+			},
+			propMap: map[string][]string{
+				"username": []string{"innerPropUsername"},
+			},
+			setFunc:         successSetFunc,
+			resultLeftovers: map[string][]string{},
+			resultErr:       nil,
+		},
+		setPropTest{
+			name: "single property success",
+			properties: NamedProperties{
+				"username": "john smith",
+			},
+			propMap: map[string][]string{
+				"username": []string{"innerPropUsername"},
+			},
+			setFunc: errorSetFunc,
+			resultLeftovers: map[string][]string{
+				"username": []string{"innerPropUsername"},
+			},
+			resultErr: errors.New("Failed to set property"),
+		},
+	}
+	for _, test := range testArray {
+		t.Run(test.name, func(t *testing.T) {
+			leftovers, err := StandardSetNamedProperties(test.properties, test.propMap, test.setFunc)
+			assert.Equal(t, test.resultLeftovers, leftovers)
+			assert.Equal(t, test.resultErr, err)
+		})
+	}
+}
+
 func TestParseDataValue(t *testing.T) {
 	type parseTest struct {
 		name               string

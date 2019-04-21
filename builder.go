@@ -16,8 +16,8 @@ type Builder interface {
 	SetCanvas(newCanvas Canvas)
 	GetComponents() []Component
 	SetComponents(components []Component)
-	GetNamedProperties() []NamedProperty
-	SetNamedProperties(properties []NamedProperty)
+	GetNamedProperties() NamedProperties
+	SetNamedProperties(properties NamedProperties)
 	ApplyComponents() error
 	LoadComponentsFile(fileName string) error
 	WriteToBMP() ([]byte, error)
@@ -44,7 +44,7 @@ type ComponentsElement struct {
 type ImageBuilder struct {
 	Canvas          Canvas
 	Components      []Component
-	NamedProperties []NamedProperty
+	NamedProperties NamedProperties
 }
 
 // NewBuilder generates a new ImageBuilder with an internal canvas of the specified width and height, and optionally the specified starting colour. No provided colour will result in defaults for Image.
@@ -89,12 +89,12 @@ func (builder *ImageBuilder) SetComponents(components []Component) {
 }
 
 // GetNamedProperties returns the list of named properties in the builder object
-func (builder *ImageBuilder) GetNamedProperties() []NamedProperty {
+func (builder *ImageBuilder) GetNamedProperties() NamedProperties {
 	return builder.NamedProperties
 }
 
 // SetNamedProperties sets the list of named properties in the builder object
-func (builder *ImageBuilder) SetNamedProperties(properties []NamedProperty) {
+func (builder *ImageBuilder) SetNamedProperties(properties NamedProperties) {
 	builder.NamedProperties = properties
 }
 
