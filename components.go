@@ -16,7 +16,7 @@ type CircleComponent struct {
 }
 
 // Write draws a circle on the canvas
-func (component *CircleComponent) Write(canvas Canvas) (Canvas, error) {
+func (component CircleComponent) Write(canvas Canvas) (Canvas, error) {
 	if len(component.NamedPropertiesMap) != 0 {
 		return canvas, fmt.Errorf("Cannot draw circle, not all named properties are set: %v", component.NamedPropertiesMap)
 	}
@@ -24,7 +24,8 @@ func (component *CircleComponent) Write(canvas Canvas) (Canvas, error) {
 }
 
 // SetNamedProperties processes the named properties and sets them into the circle properties
-func (component *CircleComponent) SetNamedProperties(properties NamedProperties) error {
+func (component CircleComponent) SetNamedProperties(properties NamedProperties) (Component, error) {
+	c := component
 	setFunc := func(name string, value interface{}) error {
 		if strings.Contains("RGBA", name) && len(name) == 1 {
 			//Process colours
@@ -34,16 +35,16 @@ func (component *CircleComponent) SetNamedProperties(properties NamedProperties)
 			}
 			switch name {
 			case "R":
-				component.Colour.R = colourVal
+				c.Colour.R = colourVal
 				return nil
 			case "G":
-				component.Colour.G = colourVal
+				c.Colour.G = colourVal
 				return nil
 			case "B":
-				component.Colour.B = colourVal
+				c.Colour.B = colourVal
 				return nil
 			case "A":
-				component.Colour.A = colourVal
+				c.Colour.A = colourVal
 				return nil
 			default:
 				//What? How did you get here?
@@ -56,28 +57,28 @@ func (component *CircleComponent) SetNamedProperties(properties NamedProperties)
 		}
 		switch name {
 		case "centreX":
-			component.Centre.X = numberVal
+			c.Centre.X = numberVal
 			return nil
 		case "centreY":
-			component.Centre.Y = numberVal
+			c.Centre.Y = numberVal
 			return nil
 		case "radius":
-			component.Radius = numberVal
+			c.Radius = numberVal
 			return nil
 		default:
 			return fmt.Errorf("Invalid component property in named property map: %v", name)
 		}
 	}
 	var err error
-	component.NamedPropertiesMap, err = StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
+	c.NamedPropertiesMap, err = StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
 	if err != nil {
-		return err
+		return component, err
 	}
-	return nil
+	return c, nil
 }
 
 // GetJSONFormat returns the JSON structure of a circle component
-func (component *CircleComponent) GetJSONFormat() interface{} {
+func (component CircleComponent) GetJSONFormat() interface{} {
 	type format struct {
 		CentreX string `json:"centreX"`
 		CentreY string `json:"centreY"`
@@ -93,8 +94,8 @@ func (component *CircleComponent) GetJSONFormat() interface{} {
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set circle properties and fill the named properties map
-func (component *CircleComponent) VerifyAndSetJSONData(interface{}) (NamedProperties, error) {
-	return nil, fmt.Errorf("Not implemented yet")
+func (component CircleComponent) VerifyAndSetJSONData(interface{}) (Component, NamedProperties, error) {
+	return component, nil, fmt.Errorf("Not implemented yet")
 }
 
 // RectangleComponent implements the Component interface for rectangles
@@ -107,21 +108,21 @@ type RectangleComponent struct {
 }
 
 // Write draws a rectangle on the canvas
-func (component *RectangleComponent) Write(canvas Canvas) (Canvas, error) {
+func (component RectangleComponent) Write(canvas Canvas) (Canvas, error) {
 	return canvas, fmt.Errorf("Not implemented yet")
 }
 
 // SetNamedProperties proceses the named properties and sets them into the rectangle properties
-func (component *RectangleComponent) SetNamedProperties(properties NamedProperties) error {
-	return fmt.Errorf("Not implemented yet")
+func (component RectangleComponent) SetNamedProperties(properties NamedProperties) (Component, error) {
+	return component, fmt.Errorf("Not implemented yet")
 }
 
 // GetJSONFormat returns the JSON structure of a circle component
-func (component *RectangleComponent) GetJSONFormat() interface{} {
+func (component RectangleComponent) GetJSONFormat() interface{} {
 	return fmt.Errorf("Not implemented yet")
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set circle properties and fill the named properties map
-func (component *RectangleComponent) VerifyAndSetJSONData(interface{}) (NamedProperties, error) {
-	return nil, fmt.Errorf("Not implemented yet")
+func (component RectangleComponent) VerifyAndSetJSONData(interface{}) (Component, NamedProperties, error) {
+	return component, nil, fmt.Errorf("Not implemented yet")
 }
