@@ -15,6 +15,18 @@ type CircleComponent struct {
 	Colour             color.NRGBA
 }
 
+type circleFormat struct {
+	CentreX string `json:"centreX"`
+	CentreY string `json:"centreY"`
+	Radius  string `json:"radius"`
+	Colour  struct {
+		Red   string `json:"R"`
+		Green string `json:"G"`
+		Blue  string `json:"B"`
+		Alpha string `json:"A"`
+	} `json:"colour"`
+}
+
 // Write draws a circle on the canvas
 func (component CircleComponent) Write(canvas Canvas) (Canvas, error) {
 	if len(component.NamedPropertiesMap) != 0 {
@@ -79,23 +91,20 @@ func (component CircleComponent) SetNamedProperties(properties NamedProperties) 
 
 // GetJSONFormat returns the JSON structure of a circle component
 func (component CircleComponent) GetJSONFormat() interface{} {
-	type format struct {
-		CentreX string `json:"centreX"`
-		CentreY string `json:"centreY"`
-		Radius  string `json:"radius"`
-		Colour  struct {
-			Red   string `json:"R"`
-			Green string `json:"G"`
-			Blue  string `json:"B"`
-			Alpha string `json:"A"`
-		} `json:"colour"`
-	}
-	return &format{}
+	return &circleFormat{}
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set circle properties and fill the named properties map
-func (component CircleComponent) VerifyAndSetJSONData(interface{}) (Component, NamedProperties, error) {
-	return component, nil, fmt.Errorf("Not implemented yet")
+func (component CircleComponent) VerifyAndSetJSONData(data interface{}) (Component, NamedProperties, error) {
+	c := component
+	var props NamedProperties
+	stringStruct, ok := data.(*circleFormat)
+	if !ok {
+		return component, props, fmt.Errorf("Failed to convert returned data to component properties")
+	}
+	// Get named properties and assign each real property
+
+	return c, props, nil
 }
 
 // RectangleComponent implements the Component interface for rectangles
@@ -105,6 +114,18 @@ type RectangleComponent struct {
 	Width              int
 	Height             int
 	Colour             color.Color
+}
+
+type rectangleFormat struct {
+	CentreX string `json:"centreX"`
+	CentreY string `json:"centreY"`
+	Radius  string `json:"radius"`
+	Colour  struct {
+		Red   string `json:"R"`
+		Green string `json:"G"`
+		Blue  string `json:"B"`
+		Alpha string `json:"A"`
+	} `json:"colour"`
 }
 
 // Write draws a rectangle on the canvas
@@ -119,7 +140,7 @@ func (component RectangleComponent) SetNamedProperties(properties NamedPropertie
 
 // GetJSONFormat returns the JSON structure of a rectangle component
 func (component RectangleComponent) GetJSONFormat() interface{} {
-	return fmt.Errorf("Not implemented yet")
+	return &rectangleFormat
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set rectangle properties and fill the named properties map
@@ -136,6 +157,18 @@ type ImageComponent struct {
 	Height             int
 }
 
+type imageFormat struct {
+	CentreX string `json:"centreX"`
+	CentreY string `json:"centreY"`
+	Radius  string `json:"radius"`
+	Colour  struct {
+		Red   string `json:"R"`
+		Green string `json:"G"`
+		Blue  string `json:"B"`
+		Alpha string `json:"A"`
+	} `json:"colour"`
+}
+
 // Write draws an image on the canvas
 func (component ImageComponent) Write(canvas Canvas) (Canvas, error) {
 	return canvas, fmt.Errorf("Not implemented yet")
@@ -148,7 +181,7 @@ func (component ImageComponent) SetNamedProperties(properties NamedProperties) (
 
 // GetJSONFormat returns the JSON structure of a image component
 func (component ImageComponent) GetJSONFormat() interface{} {
-	return fmt.Errorf("Not implemented yet")
+	return &imageFormat
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set image properties and fill the named properties map
@@ -165,6 +198,18 @@ type TextComponent struct {
 	Colour             color.Color
 }
 
+type textFormat struct {
+	CentreX string `json:"centreX"`
+	CentreY string `json:"centreY"`
+	Radius  string `json:"radius"`
+	Colour  struct {
+		Red   string `json:"R"`
+		Green string `json:"G"`
+		Blue  string `json:"B"`
+		Alpha string `json:"A"`
+	} `json:"colour"`
+}
+
 // Write draws text on the canvas
 func (component TextComponent) Write(canvas Canvas) (Canvas, error) {
 	return canvas, fmt.Errorf("Not implemented yet")
@@ -177,7 +222,7 @@ func (component TextComponent) SetNamedProperties(properties NamedProperties) (C
 
 // GetJSONFormat returns the JSON structure of a text component
 func (component TextComponent) GetJSONFormat() interface{} {
-	return fmt.Errorf("Not implemented yet")
+	return &textFormat{}
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set text properties and fill the named properties map
