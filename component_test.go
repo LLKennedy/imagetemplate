@@ -109,6 +109,20 @@ func TestConditionals(t *testing.T) {
 		validateResult  bool
 		validateError   error
 	}
+	var test testSet
+	testFunc := func(t *testing.T) {
+		for _, prop := range test.namedProperties {
+			t.Run(prop.name, func(t *testing.T) {
+				var err error
+				test.conditional, err = test.conditional.SetValue(prop.name, prop.value)
+				assert.Equal(t, prop.setErr, err)
+			})
+		}
+		success, err := test.conditional.Validate()
+		assert.Equal(t, test.validateResult, success)
+		assert.Equal(t, test.validateError, err)
+	}
+
 	testArray := []testSet{
 		testSet{
 			name: "single string condition",
@@ -478,18 +492,7 @@ func TestConditionals(t *testing.T) {
 			validateError:  nil,
 		},
 	}
-	for _, test := range testArray {
-		t.Run(test.name, func(t *testing.T) {
-			for _, prop := range test.namedProperties {
-				t.Run(prop.name, func(t *testing.T) {
-					var err error
-					test.conditional, err = test.conditional.SetValue(prop.name, prop.value)
-					assert.Equal(t, prop.setErr, err)
-				})
-			}
-			success, err := test.conditional.Validate()
-			assert.Equal(t, test.validateResult, success)
-			assert.Equal(t, test.validateError, err)
-		})
+	for _, test = range testArray {
+		t.Run(test.name, testFunc)
 	}
 }
