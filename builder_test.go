@@ -64,3 +64,45 @@ func TestNewBuilder(t *testing.T) {
 		}
 	}
 }
+
+func TestLoadComponentsData(t *testing.T) {
+	t.Run("circles", func(t *testing.T) {
+		newCanvas, err := NewCanvas(500, 500)
+		if err != nil {
+			t.Fatalf("canvas returned error: %v", err)
+		}
+		sampleData := `{
+			"baseImage": {
+				"width": "500",
+				"height": "500",
+				"baseColour": {
+					"R": "220", 
+					"G": "220", 
+					"B": "220",
+					"A": "255"
+				}
+			},
+			"components": [
+				{
+					"type": "circle",
+					"properties": {
+						"centreX": "105",
+						"centreY": "105",
+						"radius": "50",
+						"colour": {
+							"R": "255",
+							"G": "0",
+							"B": "0",
+							"A": "255"
+						}
+					}
+				}
+			]
+		}`
+		var newBuilder Builder
+		newBuilder, err = NewBuilder(newCanvas, color.NRGBA{R: 255, G: 255, B: 255, A: 255})
+		assert.Nil(t, err)
+		newBuilder, err = newBuilder.LoadComponentsData([]byte(sampleData))
+		assert.Nil(t, err)
+	})
+}

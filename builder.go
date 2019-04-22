@@ -27,6 +27,7 @@ type Builder interface {
 	SetNamedProperties(properties NamedProperties) (Builder, error)
 	ApplyComponents() (Builder, error)
 	LoadComponentsFile(fileName string) (Builder, error)
+	LoadComponentsData(fileData []byte) (Builder, error)
 	WriteToBMP() ([]byte, error)
 }
 
@@ -89,8 +90,14 @@ func (builder ImageBuilder) LoadComponentsFile(fileName string) (Builder, error)
 	if err != nil {
 		return builder, err
 	}
+	return b.LoadComponentsData(fileData)
+}
+
+// LoadComponentsData sets the internal component array based on the contents of the specified JSON data
+func (builder ImageBuilder) LoadComponentsData(fileData []byte) (Builder, error) {
+	b := builder
 	var template Template
-	err = json.Unmarshal(fileData, &template)
+	err := json.Unmarshal(fileData, &template)
 	if err != nil {
 		return builder, err
 	}
@@ -236,7 +243,6 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, Name
 		}
 	}
 	return results, namedProperties, nil
-
 }
 
 // GetCanvas returns the internal Canvas object
