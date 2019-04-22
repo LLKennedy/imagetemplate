@@ -331,7 +331,7 @@ func (conditional ComponentConditional) Validate() (bool, error) {
 
 // GetNamedProps returns a list of all named props found in the conditional
 func (conditional ComponentConditional) GetNamedPropertiesList() NamedProperties {
-	var results NamedProperties
+	results := NamedProperties{}
 	type invalidData struct {
 		Message string
 	}

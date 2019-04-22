@@ -8,12 +8,13 @@ import (
 	"fmt"
 	"github.com/disintegration/imaging"
 	"golang.org/x/image/bmp"
+	"golang.org/x/image/draw"
 	"image"
 	"image/color"
-	"image/draw"
 	_ "image/jpeg" // jpeg imported for image decoding
 	_ "image/png"  // png imported for image decoding
 	"io/ioutil"
+	"strconv"
 	"strings"
 )
 
@@ -34,9 +35,16 @@ type Builder interface {
 // Template is the format of the JSON file used as a template for building images. See samples.json for examples, each element in the samples array is a complete and valid template object.
 type Template struct {
 	BaseImage struct {
-		FileName string `json:"fileName"`
-		Data     string `json:"data"`
-		FileType string `json:"fileType"`
+		FileName   string `json:"fileName"`
+		Data       string `json:"data"`
+		BaseColour struct {
+			Red   string `json:"R"`
+			Green string `json:"G"`
+			Blue  string `json:"B"`
+			Alpha string `json:"A"`
+		} `json:"baseColour"`
+		BaseWidth  string `json:"width"`
+		BaseHeight string `json:"height"`
 	} `json:"baseImage"`
 	Components []ComponentTemplate `json:"components"`
 }
@@ -122,37 +130,69 @@ func setBackgroundImage(canvas Canvas, template Template) (Canvas, error) {
 	// Check the state of the optional and required properties
 	dataSet := template.BaseImage.Data != ""
 	fileSet := template.BaseImage.FileName != ""
-	typeSet := template.BaseImage.FileType != ""
-	if !dataSet && !fileSet && !typeSet {
+	baseColourSet := template.BaseImage.BaseColour.Red != ""
+	if (dataSet && fileSet) || (dataSet && baseColourSet) || fileSet && baseColourSet {
+		return canvas, fmt.Errorf("Cannot load base image from file and load from data string and generate from base colour, specify only data or fileName or base colour")
 	}
-	if dataSet && fileSet {
-		return canvas, fmt.Errorf("Cannot load base image from file and load from data string, specify only data or fileName")
-	}
-	if !dataSet && !fileSet {
-		return canvas, fmt.Errorf("Cannot load base image, please specify either fileName or data")
+	if !dataSet && !fileSet && !baseColourSet {
+		return c, nil
 	}
 	// Get image data from string or file
 	var imageData []byte
 	var err error
-	if dataSet {
-		sReader := strings.NewReader(template.BaseImage.Data)
-		decoder := base64.NewDecoder(base64.RawStdEncoding, sReader)
-		_, err = decoder.Read(imageData)
-		if err != nil {
-			return canvas, err
-		}
-	} else {
-		imageData, err = ioutil.ReadFile(template.BaseImage.FileName)
-		if err != nil {
-			return canvas, err
-		}
-	}
-	// Decode image data
-	imageBuffer := bytes.NewBuffer(imageData)
 	var baseImage image.Image
-	baseImage, _, err = image.Decode(imageBuffer)
-	if err != nil {
-		return canvas, err
+	if baseColourSet {
+		width, err := strconv.Atoi(template.BaseImage.BaseWidth)
+		if err != nil {
+			return canvas, err
+		}
+		height, err := strconv.Atoi(template.BaseImage.BaseWidth)
+		if err != nil {
+			return canvas, err
+		}
+		red, err := strconv.ParseUint(template.BaseImage.BaseColour.Red, 0, 8)
+		if err != nil {
+			return canvas, err
+		}
+		green, err := strconv.ParseUint(template.BaseImage.BaseColour.Green, 0, 8)
+		if err != nil {
+			return canvas, err
+		}
+		blue, err := strconv.ParseUint(template.BaseImage.BaseColour.Blue, 0, 8)
+		if err != nil {
+			return canvas, err
+		}
+		alpha, err := strconv.ParseUint(template.BaseImage.BaseColour.Alpha, 0, 8)
+		if err != nil {
+			return canvas, err
+		}
+		var rectImage image.Image
+		var colourPlane image.Image
+		rectangle := image.Rect(0, 0, width, height)
+		rectImage = image.NewNRGBA(rectangle)
+		colourPlane = image.NewUniform(color.NRGBA{R: uint8(red), G: uint8(green), B: uint8(blue), A: uint8(alpha)})
+		draw.Draw(rectImage.(draw.Image), rectangle, colourPlane, image.Point{X: 0, Y: 0}, draw.Over)
+		baseImage = rectImage
+	} else {
+		if dataSet {
+			sReader := strings.NewReader(template.BaseImage.Data)
+			decoder := base64.NewDecoder(base64.RawStdEncoding, sReader)
+			_, err = decoder.Read(imageData)
+			if err != nil {
+				return canvas, err
+			}
+		} else {
+			imageData, err = ioutil.ReadFile(template.BaseImage.FileName)
+			if err != nil {
+				return canvas, err
+			}
+		}
+		// Decode image data
+		imageBuffer := bytes.NewBuffer(imageData)
+		baseImage, _, err = image.Decode(imageBuffer)
+		if err != nil {
+			return canvas, err
+		}
 	}
 	currentHeight, currentWidth := baseImage.Bounds().Size().Y, baseImage.Bounds().Size().X
 	if currentWidth == 0 || currentHeight == 0 {
@@ -190,10 +230,10 @@ func setBackgroundImage(canvas Canvas, template Template) (Canvas, error) {
 
 func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, NamedProperties, error) {
 	var results []ToggleableComponent
-	var namedProperties NamedProperties
+	namedProperties := NamedProperties{}
 	for tCount, template := range templates {
 		//Handle conditional first
-		var result ToggleableComponent
+		result := ToggleableComponent{}
 		tempProperties := namedProperties
 		result.Conditional = template.Conditional
 		for key, value := range result.Conditional.GetNamedPropertiesList() {
@@ -234,7 +274,8 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, Name
 			for key, value := range compNamedProps {
 				tempProperties[key] = value
 			}
-			results[tCount] = result
+			result.Component = newComponent
+			results = append(results, result)
 			namedProperties = tempProperties
 		}
 		if len(results) <= tCount {
@@ -306,14 +347,22 @@ func (builder ImageBuilder) SetNamedProperties(properties NamedProperties) (Buil
 func (builder ImageBuilder) ApplyComponents() (Builder, error) {
 	b := builder
 	for _, tComponent := range b.Components {
-		valid, err := tComponent.Conditional.Validate()
-		if err != nil {
-			return builder, err
-		}
-		if valid {
+		if tComponent.Conditional.Name == "" {
+			var err error
 			b.Canvas, err = tComponent.Component.Write(b.Canvas)
 			if err != nil {
 				return builder, err
+			}
+		} else {
+			valid, err := tComponent.Conditional.Validate()
+			if err != nil {
+				return builder, err
+			}
+			if valid {
+				b.Canvas, err = tComponent.Component.Write(b.Canvas)
+				if err != nil {
+					return builder, err
+				}
 			}
 		}
 	}

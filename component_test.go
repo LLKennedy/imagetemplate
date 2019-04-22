@@ -140,7 +140,7 @@ func TestParseDataValue(t *testing.T) {
 			value:              "some data",
 			hasNamedProperties: false,
 			cleanValues:        []string{"some data"},
-			propNames:          []string{},
+			propNames:          []string(nil),
 			err:                nil,
 		},
 		parseTest{
@@ -148,7 +148,7 @@ func TestParseDataValue(t *testing.T) {
 			value:              "123",
 			hasNamedProperties: false,
 			cleanValues:        []string{"123"},
-			propNames:          []string{},
+			propNames:          []string(nil),
 			err:                nil,
 		},
 		parseTest{
@@ -156,7 +156,7 @@ func TestParseDataValue(t *testing.T) {
 			value:              "#4: This. Is. Just. Data!~",
 			hasNamedProperties: false,
 			cleanValues:        []string{"#4: This. Is. Just. Data!~"},
-			propNames:          []string{},
+			propNames:          []string(nil),
 			err:                nil,
 		},
 		parseTest{
@@ -164,7 +164,7 @@ func TestParseDataValue(t *testing.T) {
 			value:              "some $$ data 2 be pr$$ocessed!",
 			hasNamedProperties: false,
 			cleanValues:        []string{"some $ data 2 be pr$ocessed!"},
-			propNames:          []string{},
+			propNames:          []string(nil),
 			err:                nil,
 		},
 		parseTest{
@@ -195,8 +195,8 @@ func TestParseDataValue(t *testing.T) {
 			name:               "empty value",
 			value:              "",
 			hasNamedProperties: false,
-			cleanValues:        []string{},
-			propNames:          []string{},
+			cleanValues:        []string(nil),
+			propNames:          []string(nil),
 			err:                errors.New("Could not parse empty property"),
 		},
 	}
