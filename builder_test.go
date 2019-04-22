@@ -110,9 +110,9 @@ func TestLoadComponentsData(t *testing.T) {
 		assert.Nil(t, err)
 		bmpData, err := newBuilder.WriteToBMP()
 		assert.Nil(t, err)
-		err = ioutil.WriteFile("testLoad1.bmp", bmpData, os.ModeExclusive)
-		if err != nil {
-			t.Fatalf("Failed to write bitmap to file: %v", err)
-		}
+		// err = ioutil.WriteFile("testLoad1.bmp", bmpData, os.ModeExclusive)
+		// if err != nil {
+		// 	t.Fatalf("Failed to write bitmap to file: %v", err)
+		// }
 	})
 }
