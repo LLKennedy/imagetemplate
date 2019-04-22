@@ -103,7 +103,57 @@ func (component CircleComponent) VerifyAndSetJSONData(data interface{}) (Compone
 		return component, props, fmt.Errorf("Failed to convert returned data to component properties")
 	}
 	// Get named properties and assign each real property
-
+	var newVal interface{}
+	var err error
+	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.CentreX, "centreX", intType, c.NamedPropertiesMap)
+	if err != nil {
+		return component, props, err
+	}
+	if newVal != nil {
+		c.Centre.X = newVal.(int)
+	}
+	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.CentreY, "centreY", intType, c.NamedPropertiesMap)
+	if err != nil {
+		return component, props, err
+	}
+	if newVal != nil {
+		c.Centre.Y = newVal.(int)
+	}
+	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Radius, "radius", intType, c.NamedPropertiesMap)
+	if err != nil {
+		return component, props, err
+	}
+	if newVal != nil {
+		c.Radius = newVal.(int)
+	}
+	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Colour.Red, "R", uint8Type, c.NamedPropertiesMap)
+	if err != nil {
+		return component, props, err
+	}
+	if newVal != nil {
+		c.Colour.R = newVal.(uint8)
+	}
+	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Colour.Green, "G", uint8Type, c.NamedPropertiesMap)
+	if err != nil {
+		return component, props, err
+	}
+	if newVal != nil {
+		c.Colour.G = newVal.(uint8)
+	}
+	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Colour.Blue, "B", uint8Type, c.NamedPropertiesMap)
+	if err != nil {
+		return component, props, err
+	}
+	if newVal != nil {
+		c.Colour.B = newVal.(uint8)
+	}
+	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Colour.Alpha, "A", uint8Type, c.NamedPropertiesMap)
+	if err != nil {
+		return component, props, err
+	}
+	if newVal != nil {
+		c.Colour.A = newVal.(uint8)
+	}
 	return c, props, nil
 }
 
@@ -140,7 +190,7 @@ func (component RectangleComponent) SetNamedProperties(properties NamedPropertie
 
 // GetJSONFormat returns the JSON structure of a rectangle component
 func (component RectangleComponent) GetJSONFormat() interface{} {
-	return &rectangleFormat
+	return &rectangleFormat{}
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set rectangle properties and fill the named properties map
@@ -181,7 +231,7 @@ func (component ImageComponent) SetNamedProperties(properties NamedProperties) (
 
 // GetJSONFormat returns the JSON structure of a image component
 func (component ImageComponent) GetJSONFormat() interface{} {
-	return &imageFormat
+	return &imageFormat{}
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set image properties and fill the named properties map

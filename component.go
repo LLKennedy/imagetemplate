@@ -38,10 +38,69 @@ func StandardSetNamedProperties(properties NamedProperties, propMap map[string][
 	return propMap, nil
 }
 
+// DeconstructedDataValue is a string broken down into static values and property names. The reconstruction always starts with a static value, always has one more static value than props, and always alternates static, prop, static, prop... if any props exist.
+type DeconstructedDataValue struct {
+	StaticValues []string
+	PropNames    []string
+}
+
+func isSingleProp(d DeconstructedDataValue) bool {
+	return len(d.PropNames) == 1 && len(d.StaticValues) == 2 && d.StaticValues[0] == "" && d.StaticValues[1] == ""
+}
+
+type propType string
+
+const (
+	intType    propType = "int"
+	stringType propType = "string"
+	boolType   propType = "bool"
+	uint8Type  propType = "uint8"
+)
+
+func extractSingleProp(inputVal, propName string, typeName propType, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, extractedValue interface{}, err error) {
+	npm := namedPropsMap
+	hasNamedProps, deconstructed, err := ParseDataValue(inputVal)
+	if err != nil {
+		return namedPropsMap, nil, err
+	}
+	if hasNamedProps {
+		if !isSingleProp(deconstructed) {
+			return namedPropsMap, nil, fmt.Errorf("Composite properties are not yet supported: %v", inputVal)
+		}
+		propName := deconstructed.PropNames[0]
+		npm[propName] = append(npm[propName], propName)
+		return npm, nil, nil
+	} else {
+		switch typeName {
+		case intType:
+			intVal, err := strconv.Atoi(inputVal)
+			if err != nil {
+				return namedPropsMap, nil, fmt.Errorf("Failed to convert property %v to integer: %v", propName, err)
+			}
+			return npm, intVal, nil
+		case stringType:
+			return npm, inputVal, nil
+		case boolType:
+			boolVal, err := strconv.ParseBool(inputVal)
+			if err != nil {
+				return namedPropsMap, nil, fmt.Errorf("Failed to convert property %v to bool: %v", propName, err)
+			}
+			return npm, boolVal, nil
+		case uint8Type:
+			uintVal, err := strconv.ParseUint(inputVal, 0, 8)
+			if err != nil {
+				return namedPropsMap, nil, err
+			}
+			uint8Val := uint8(uintVal)
+			return npm, uint8Val, nil
+		}
+	}
+	return namedPropsMap, nil, fmt.Errorf("Cannot convert property %v to unsupported type %v", propName, typeName)
+}
+
 // ParseDataValue determines whether a string represents raw data or a named variable and returns this information as well as the data cleaned of any variable definitions
-func ParseDataValue(value string) (hasNamedProperties bool, cleanValues []string, propNames []string, err error) {
-	cleanValues = []string{}
-	propNames = []string{}
+func ParseDataValue(value string) (hasNamedProperties bool, deconstructed DeconstructedDataValue, err error) {
+	deconstructed = DeconstructedDataValue{}
 	cleanString := ""
 	if len(value) == 0 {
 		err = fmt.Errorf("Could not parse empty property")
@@ -69,11 +128,11 @@ func ParseDataValue(value string) (hasNamedProperties bool, cleanValues []string
 			continue
 		}
 		hasNamedProperties = true
-		cleanValues = append(cleanValues, cleanString)
+		deconstructed.StaticValues = append(deconstructed.StaticValues, cleanString)
 		cleanString = ""
-		propNames = append(propNames, subString)
+		deconstructed.PropNames = append(deconstructed.PropNames, subString)
 	}
-	cleanValues = append(cleanValues, cleanString)
+	deconstructed.StaticValues = append(deconstructed.StaticValues, cleanString)
 	return
 }
 

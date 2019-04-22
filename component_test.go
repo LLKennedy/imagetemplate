@@ -202,10 +202,10 @@ func TestParseDataValue(t *testing.T) {
 	}
 	for _, test := range testArray {
 		t.Run(test.name, func(t *testing.T) {
-			hasNamedProperties, cleanValues, propNames, err := ParseDataValue(test.value)
+			hasNamedProperties, deconstructed, err := ParseDataValue(test.value)
 			assert.Equal(t, test.hasNamedProperties, hasNamedProperties)
-			assert.Equal(t, test.cleanValues, cleanValues)
-			assert.Equal(t, test.propNames, propNames)
+			assert.Equal(t, test.cleanValues, deconstructed.StaticValues)
+			assert.Equal(t, test.propNames, deconstructed.PropNames)
 			assert.Equal(t, test.err, err)
 		})
 	}
