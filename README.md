@@ -6,5 +6,5 @@ This project defines a template file for drawing custom images from pre-defined 
 [![Coverage Status](https://coveralls.io/repos/github/LLKennedy/imagetemplate/badge.svg?branch=master&service=github)](https://coveralls.io/github/LLKennedy/imagetemplate?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/LLKennedy/imagetemplate)](https://goreportcard.com/report/github.com/LLKennedy/imagetemplate)
 
-## Testing
+## Testing 
 `go test . -covermode=count -coverprofile="coverage.out"; go tool cover -html="coverage.out"`
