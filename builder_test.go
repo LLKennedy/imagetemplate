@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"image/color"
-	"io/ioutil"
-	"os"
 	"testing"
 )
 
