@@ -193,7 +193,7 @@ func setBackgroundImage(canvas Canvas, template Template) (Canvas, error) {
 		if ycbcr, ok := baseImage.(*image.YCbCr); ok {
 			var newImage draw.Image
 			newImage = image.NewNRGBA(ycbcr.Rect)
-			draw.Draw(newImage, ycbcr.Rect, ycbcr, ycbcr.Bounds().Min, draw.Src)
+			draw.Draw(newImage, ycbcr.Rect, ycbcr, ycbcr.Bounds().Min, draw.Over)
 			baseImage = newImage
 		}
 		if err != nil {
@@ -202,11 +202,10 @@ func setBackgroundImage(canvas Canvas, template Template) (Canvas, error) {
 	}
 	if c == nil {
 		// No current image, use loaded image instead
-		drawImg, ok := baseImage.(draw.Image)
-		if !ok {
-			return canvas, fmt.Errorf("Could not create write-access Image from image data")
-		}
-		c = ImageCanvas{Image: drawImg}
+		var drawImage draw.Image
+		drawImage = image.NewNRGBA(baseImage.Bounds())
+		draw.Draw(drawImage, baseImage.Bounds(), baseImage, baseImage.Bounds().Min, draw.Over)
+		c = ImageCanvas{Image: drawImage}
 		return c, nil
 	}
 	// Check if resizing is necessary

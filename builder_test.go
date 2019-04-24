@@ -77,20 +77,6 @@ func TestLoadComponentsData(t *testing.T) {
 				{
 					"type": "circle",
 					"properties": {
-						"centreX": "105",
-						"centreY": "105",
-						"radius": "50",
-						"colour": {
-							"R": "255",
-							"G": "0",
-							"B": "0",
-							"A": "255"
-						}
-					}
-				},
-				{
-					"type": "circle",
-					"properties": {
 						"centreX": "145",
 						"centreY": "300",
 						"radius": "25",
@@ -140,6 +126,34 @@ func TestLoadComponentsData(t *testing.T) {
 							"R": "127",
 							"G": "127",
 							"B": "127",
+							"A": "255"
+						}
+					}
+				},
+				{
+					"type": "circle",
+					"properties": {
+						"centreX": "350",
+						"centreY": "390",
+						"radius": "80",
+						"colour": {
+							"R": "255",
+							"G": "174",
+							"B": "201",
+							"A": "255"
+						}
+					}
+				},
+				{
+					"type": "circle",
+					"properties": {
+						"centreX": "105",
+						"centreY": "105",
+						"radius": "50",
+						"colour": {
+							"R": "255",
+							"G": "0",
+							"B": "0",
 							"A": "255"
 						}
 					}
