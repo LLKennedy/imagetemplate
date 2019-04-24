@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"github.com/disintegration/imaging"
 	"golang.org/x/image/bmp"
-	"golang.org/x/image/draw"
 	"image"
 	"image/color"
+	"image/draw"
 	_ "image/jpeg" // jpeg imported for image decoding
 	_ "image/png"  // png imported for image decoding
 	"io/ioutil"
@@ -190,6 +190,12 @@ func setBackgroundImage(canvas Canvas, template Template) (Canvas, error) {
 		// Decode image data
 		imageBuffer := bytes.NewBuffer(imageData)
 		baseImage, _, err = image.Decode(imageBuffer)
+		if ycbcr, ok := baseImage.(*image.YCbCr); ok {
+			var newImage draw.Image
+			newImage = image.NewNRGBA(ycbcr.Rect)
+			draw.Draw(newImage, ycbcr.Rect, ycbcr, ycbcr.Bounds().Min, draw.Src)
+			baseImage = newImage
+		}
 		if err != nil {
 			return canvas, err
 		}
