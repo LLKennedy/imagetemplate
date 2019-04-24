@@ -194,17 +194,17 @@ func setBackgroundImage(canvas Canvas, template Template) (Canvas, error) {
 			return canvas, err
 		}
 	}
-	currentHeight, currentWidth := baseImage.Bounds().Size().Y, baseImage.Bounds().Size().X
-	if currentWidth == 0 || currentHeight == 0 {
+	if c == nil {
 		// No current image, use loaded image instead
 		drawImg, ok := baseImage.(draw.Image)
 		if !ok {
 			return canvas, fmt.Errorf("Could not create write-access Image from image data")
 		}
-		c = c.SetUnderlyingImage(drawImg)
+		c = ImageCanvas{Image: drawImg}
 		return c, nil
 	}
 	// Check if resizing is necessary
+	currentHeight, currentWidth := baseImage.Bounds().Size().Y, baseImage.Bounds().Size().X
 	targetHeight, targetWidth := c.GetHeight(), c.GetWidth()
 	if targetHeight != currentHeight || targetWidth != currentWidth {
 		// Compare aspect ratios
