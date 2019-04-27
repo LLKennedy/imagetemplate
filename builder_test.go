@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"image/color"
-	"io/ioutil"
-	"os"
 	"testing"
 )
 
@@ -169,9 +167,5 @@ func TestLoadComponentsData(t *testing.T) {
 		bmpData, err := newBuilder.WriteToBMP()
 		assert.Nil(t, err)
 		assert.NotNil(t, bmpData) //TODO: test this matches expected output bytes
-		err = ioutil.WriteFile("testLoad1.bmp", bmpData, os.ModeExclusive)
-		if err != nil {
-			t.Fatalf("Failed to write bitmap to file: %v", err)
-		}
 	})
 }
