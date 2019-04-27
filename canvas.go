@@ -21,7 +21,7 @@ import (
 
 // Canvas holds the image struct and associated properties
 type Canvas interface {
-	SetUnderlyingImage(newImage draw.Image) Canvas
+	SetUnderlyingImage(newImage image.Image) Canvas
 	GetUnderlyingImage() image.Image
 	GetWidth() int
 	GetHeight() int
@@ -55,8 +55,14 @@ func NewCanvas(width, height int) (ImageCanvas, error) {
 }
 
 // SetUnderlyingImage sets the internal Image property to the given object
-func (canvas ImageCanvas) SetUnderlyingImage(newImage draw.Image) Canvas {
-	canvas.Image = newImage
+func (canvas ImageCanvas) SetUnderlyingImage(newImage image.Image) Canvas {
+	drawImage, ok := newImage.(draw.Image)
+	if !ok {
+		bounds := newImage.Bounds()
+		drawImage = image.NewNRGBA(bounds)
+		draw.Draw(drawImage, bounds, newImage, bounds.Min, draw.Src)
+	}
+	canvas.Image = drawImage
 	return canvas
 }
 
