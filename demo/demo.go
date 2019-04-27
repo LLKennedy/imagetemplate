@@ -31,51 +31,51 @@ func main() {
 	// if err != nil {
 	// 	log.Fatalf("Failed to create circle: %v", err)
 	// }
-	canvas, err = canvas.Barcode(img.BarcodeTypeQR, []byte("www.github.com/LLKennedy/imagetemplate"), img.BarcodeExtraData{QRLevel:qr.Q, QRMode: qr.Unicode}, image.ZP, 400, 400)
+	canvas, err = canvas.Barcode(img.BarcodeTypeQR, []byte("www.github.com/LLKennedy/imagetemplate"), img.BarcodeExtraData{QRLevel:qr.Q, QRMode: qr.Unicode}, image.ZP, 400, 400, nil, nil)
 	if err != nil {
 		log.Println(err)
 	}
-	canvas, err = canvas.Barcode(img.BarcodeTypeAztec, []byte("www.github.com/LLKennedy/imagetemplate"), img.BarcodeExtraData{AztecMinECCPercent: 50, AztecUserSpecifiedLayers: 4}, image.Point{X:401, Y:0}, 400, 400)
+	canvas, err = canvas.Barcode(img.BarcodeTypeAztec, []byte("www.github.com/LLKennedy/imagetemplate"), img.BarcodeExtraData{AztecMinECCPercent: 50, AztecUserSpecifiedLayers: 4}, image.Point{X:400, Y:0}, 400, 400, color.NRGBA{G:255, A:255}, color.NRGBA{B:255, A:255})
 	if err != nil {
 		log.Println(err)
 	}
-	canvas, err = canvas.Barcode(img.BarcodeTypeCode128, []byte("Luke"), img.BarcodeExtraData{}, image.Point{X:801, Y:0}, 400, 400)
+	canvas, err = canvas.Barcode(img.BarcodeTypePDF, []byte("Luke"), img.BarcodeExtraData{PDFSecurityLevel: 4}, image.Point{X:800, Y:0}, 400, 400, nil, nil)
 	if err != nil {
 		log.Println(err)
 	}
-	canvas, err = canvas.Barcode(img.BarcodeTypeCode39, []byte("Luke"), img.BarcodeExtraData{Code39IncludeChecksum: true, Code39FullAsciiMode: true}, image.Point{X:1201, Y:0}, 400, 400)
+	canvas, err = canvas.Barcode(img.BarcodeTypeDataMatrix, []byte("https://www.github.com/LLKennedy/imagetemplate/demo"), img.BarcodeExtraData{}, image.Point{X:1200, Y:0}, 400, 400, color.Transparent, nil)
 	if err != nil {
 		log.Println(err)
 	}
-	canvas, err = canvas.Barcode(img.BarcodeTypeCode93, []byte("Luke"), img.BarcodeExtraData{Code93IncludeChecksum: true, Code93FullAsciiMode: true}, image.Point{X:0, Y:401}, 400, 400)
+	canvas, err = canvas.Barcode(img.BarcodeTypeCode93, []byte("Luke"), img.BarcodeExtraData{Code93IncludeChecksum: true, Code93FullAsciiMode: true}, image.Point{X:0, Y:400}, 400, 200, nil, color.Transparent)
 	if err != nil {
 		log.Println(err)
 	}
-	canvas, err = canvas.Barcode(img.BarcodeType2of5, []byte("12345678"), img.BarcodeExtraData{}, image.Point{X:401, Y:401}, 400, 400)
+	canvas, err = canvas.Barcode(img.BarcodeType2of5, []byte("12345678"), img.BarcodeExtraData{}, image.Point{X:400, Y:400}, 400, 200, color.NRGBA{R: 255, A:255}, nil)
 	if err != nil {
 		log.Println(err)
 	}
-	canvas, err = canvas.Barcode(img.BarcodeType2of5Interleaved, []byte("12345678"), img.BarcodeExtraData{}, image.Point{X:801, Y:401}, 400, 400)
+	canvas, err = canvas.Barcode(img.BarcodeType2of5Interleaved, []byte("12345678"), img.BarcodeExtraData{}, image.Point{X:800, Y:400}, 400, 200, nil, nil)
 	if err != nil {
 		log.Println(err)
 	}
-	canvas, err = canvas.Barcode(img.BarcodeTypeCodabar, []byte("B123456D"), img.BarcodeExtraData{}, image.Point{X:1201, Y:401}, 400, 400)
+	canvas, err = canvas.Barcode(img.BarcodeTypeCodabar, []byte("B123456D"), img.BarcodeExtraData{}, image.Point{X:1200, Y:400}, 400, 200, nil, nil)
 	if err != nil {
 		log.Println(err)
 	}
-	canvas, err = canvas.Barcode(img.BarcodeTypeDataMatrix, []byte("Luke"), img.BarcodeExtraData{}, image.Point{X:0, Y:801}, 400, 400)
+	canvas, err = canvas.Barcode(img.BarcodeTypeCode128, []byte("Luke"), img.BarcodeExtraData{}, image.Point{X:0, Y:600}, 400, 200, nil, nil)
 	if err != nil {
 		log.Println(err)
 	}
-	canvas, err = canvas.Barcode(img.BarcodeTypeEAN13, []byte("5901234123457"), img.BarcodeExtraData{}, image.Point{X:401, Y:801}, 400, 400)
+	canvas, err = canvas.Barcode(img.BarcodeTypeEAN13, []byte("5901234123457"), img.BarcodeExtraData{}, image.Point{X:400, Y:600}, 400, 200, nil, nil)
 	if err != nil {
 		log.Println(err)
 	}
-	canvas, err = canvas.Barcode(img.BarcodeTypeEAN8, []byte("11223344"), img.BarcodeExtraData{}, image.Point{X:801, Y:801}, 400, 400)
+	canvas, err = canvas.Barcode(img.BarcodeTypeEAN8, []byte("11223344"), img.BarcodeExtraData{}, image.Point{X:800, Y:600}, 400, 200, nil, nil)
 	if err != nil {
 		log.Println(err)
 	}
-	canvas, err = canvas.Barcode(img.BarcodeTypePDF, []byte("Luke"), img.BarcodeExtraData{PDFSecurityLevel: 4}, image.Point{X:1201, Y:801}, 400, 400)
+	canvas, err = canvas.Barcode(img.BarcodeTypeCode39, []byte("Luke"), img.BarcodeExtraData{Code39IncludeChecksum: true, Code39FullAsciiMode: true}, image.Point{X:1200, Y:600}, 400, 200, nil, nil)
 	if err != nil {
 		log.Println(err)
 	}

@@ -29,7 +29,7 @@ type Canvas interface {
 	Circle(centre image.Point, radius int, colour color.Color) (Canvas, error)
 	Text(text string, start image.Point, typeFace font.Face, colour color.Color, fontSize, maxWidth, maxLines int) (Canvas, error)
 	SubImage(start image.Point, subImage image.Image) (Canvas, error)
-	Barcode(codeType BarcodeType, content []byte, extra BarcodeExtraData, start image.Point, width, height int) (Canvas, error)
+	Barcode(codeType BarcodeType, content []byte, extra BarcodeExtraData, start image.Point, width, height int, dataColour color.Color, bgColour color.Color) (Canvas, error)
 }
 
 // ImageCanvas uses golang's native Image package to implement the Canvas interface
@@ -181,7 +181,7 @@ type BarcodeExtraData struct {
 }
 
 // Barcode draws a barcode on the canvas
-func (canvas ImageCanvas) Barcode(codeType BarcodeType, content []byte, extra BarcodeExtraData, start image.Point, width, height int) (Canvas, error) {
+func (canvas ImageCanvas) Barcode(codeType BarcodeType, content []byte, extra BarcodeExtraData, start image.Point, width, height int, dataColour color.Color, backgroundColour color.Color) (Canvas, error) {
 	c := canvas
 	var encodedBarcode barcode.Barcode
 	var err error
@@ -257,8 +257,16 @@ func (canvas ImageCanvas) Barcode(codeType BarcodeType, content []byte, extra Ba
 	if err != nil {
 		return canvas, err
 	}
-	//TODO: add support for colouring barcode and square, including transparency, using masks
-	draw.Draw(c.Image, image.Rect(start.X, start.Y, start.X+width, start.Y+height), encodedBarcode, image.ZP, draw.Over)
+
+	if dataColour == nil {
+		dataColour = color.Black
+	}
+	if backgroundColour == nil {
+		backgroundColour = color.White
+	}
+	boundRect := encodedBarcode.Bounds()
+	draw.DrawMask(c.Image, image.Rect(start.X, start.Y, start.X+width, start.Y+height), image.NewUniform(backgroundColour), image.ZP, blackAndWhiteMask{bw: encodedBarcode, bColour: color.Transparent, wColour: color.Opaque}, boundRect.Min, draw.Over)
+	draw.DrawMask(c.Image, image.Rect(start.X, start.Y, start.X+width, start.Y+height), image.NewUniform(dataColour), image.ZP, blackAndWhiteMask{bw: encodedBarcode, bColour: color.Opaque, wColour: color.Transparent}, boundRect.Min, draw.Over)
 	return c, nil
 }
 
@@ -282,4 +290,25 @@ func (c *circle) At(x, y int) color.Color {
 		return color.Alpha{255}
 	}
 	return color.Alpha{0}
+}
+
+type blackAndWhiteMask struct {
+	bw      image.Image
+	bColour color.Alpha16
+	wColour color.Alpha16
+}
+
+func (m blackAndWhiteMask) ColorModel() color.Model {
+	return color.AlphaModel
+}
+
+func (m blackAndWhiteMask) Bounds() image.Rectangle {
+	return m.bw.Bounds()
+}
+
+func (m blackAndWhiteMask) At(x, y int) color.Color {
+	if m.bw.At(x, y) == color.Black {
+		return m.bColour
+	}
+	return m.wColour
 }
