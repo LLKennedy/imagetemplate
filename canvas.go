@@ -84,7 +84,6 @@ func (canvas ImageCanvas) GetHeight() int {
 // Rectangle draws a rectangle of a specific colour on the canvas
 func (canvas ImageCanvas) Rectangle(topLeft image.Point, width, height int, colour color.Color) (Canvas, error) {
 	c := canvas
-	colourPlane := image.Uniform{C: colour}
 	if width <= 0 && height <= 0 {
 		return canvas, errors.New("Invalid width and height")
 	} else if width <= 0 {
@@ -92,26 +91,18 @@ func (canvas ImageCanvas) Rectangle(topLeft image.Point, width, height int, colo
 	} else if height <= 0 {
 		return canvas, errors.New("Invalid height")
 	}
-	rect := image.Rectangle{
-		Min: image.Point{
-			X: topLeft.X,
-			Y: topLeft.Y,
-		},
-		Max: image.Point{
-			X: topLeft.X + width,
-			Y: topLeft.Y + height,
-		},
-	}
-	draw.Draw(c.Image, rect, &colourPlane, topLeft, draw.Over)
+	draw.Draw(c.Image, image.Rect(topLeft.X, topLeft.Y, topLeft.X+width, topLeft.Y+height), image.NewUniform(colour), topLeft, draw.Over)
 	return c, nil
 }
 
 // Circle draws a circle of a specific colour on the canvas
 func (canvas ImageCanvas) Circle(centre image.Point, radius int, colour color.Color) (Canvas, error) {
 	c := canvas
-	colourPlane := image.Uniform{C: colour}
+	if radius <= 0 {
+		return canvas, errors.New("Invalid radius")
+	}
 	mask := &circle{p: centre, r: radius}
-	draw.DrawMask(c.Image, mask.Bounds(), &colourPlane, image.ZP, mask, mask.Bounds().Min, draw.Over)
+	draw.DrawMask(c.Image, mask.Bounds(), image.NewUniform(colour), image.ZP, mask, mask.Bounds().Min, draw.Over)
 	return c, nil
 }
 
