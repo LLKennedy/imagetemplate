@@ -67,22 +67,81 @@ func TestNewBuilder(t *testing.T) {
 
 func TestLoadComponentsData(t *testing.T) {
 	t.Run("circles", func(t *testing.T) {
-		newCanvas, err := NewCanvas(500, 500)
-		if err != nil {
-			t.Fatalf("canvas returned error: %v", err)
-		}
 		sampleData := `{
 			"baseImage": {
-				"width": "500",
-				"height": "500",
-				"baseColour": {
-					"R": "220", 
-					"G": "220", 
-					"B": "220",
-					"A": "255"
-				}
+				"fileName": "baseone.bmp"
 			},
 			"components": [
+				{
+					"type": "circle",
+					"properties": {
+						"centreX": "145",
+						"centreY": "300",
+						"radius": "25",
+						"colour": {
+							"R": "0",
+							"G": "255",
+							"B": "0",
+							"A": "255"
+						}
+					}
+				},
+				{
+					"type": "circle",
+					"properties": {
+						"centreX": "380",
+						"centreY": "154",
+						"radius": "81",
+						"colour": {
+							"R": "0",
+							"G": "0",
+							"B": "255",
+							"A": "255"
+						}
+					}
+				},
+				{
+					"type": "circle",
+					"properties": {
+						"centreX": "297",
+						"centreY": "185",
+						"radius": "48",
+						"colour": {
+							"R": "255",
+							"G": "127",
+							"B": "39",
+							"A": "255"
+						}
+					}
+				},
+				{
+					"type": "circle",
+					"properties": {
+						"centreX": "133",
+						"centreY": "388",
+						"radius": "80",
+						"colour": {
+							"R": "127",
+							"G": "127",
+							"B": "127",
+							"A": "255"
+						}
+					}
+				},
+				{
+					"type": "circle",
+					"properties": {
+						"centreX": "350",
+						"centreY": "390",
+						"radius": "80",
+						"colour": {
+							"R": "255",
+							"G": "174",
+							"B": "201",
+							"A": "255"
+						}
+					}
+				},
 				{
 					"type": "circle",
 					"properties": {
@@ -100,18 +159,13 @@ func TestLoadComponentsData(t *testing.T) {
 			]
 		}`
 		var newBuilder Builder
-		newBuilder, err = NewBuilder(newCanvas, color.NRGBA{R: 255, G: 255, B: 255, A: 255})
-		assert.Nil(t, err)
-		newBuilder, err = newBuilder.LoadComponentsData([]byte(sampleData))
+		newBuilder = ImageBuilder{}
+		newBuilder, err := newBuilder.LoadComponentsData([]byte(sampleData))
 		assert.Nil(t, err)
 		newBuilder, err = newBuilder.ApplyComponents()
 		assert.Nil(t, err)
 		bmpData, err := newBuilder.WriteToBMP()
 		assert.Nil(t, err)
 		assert.NotNil(t, bmpData) //TODO: test this matches expected output bytes
-		// err = ioutil.WriteFile("testLoad1.bmp", bmpData, os.ModeExclusive)
-		// if err != nil {
-		// 	t.Fatalf("Failed to write bitmap to file: %v", err)
-		// }
 	})
 }

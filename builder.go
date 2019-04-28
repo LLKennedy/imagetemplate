@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"github.com/disintegration/imaging"
 	"golang.org/x/image/bmp"
-	"golang.org/x/image/draw"
 	"image"
 	"image/color"
+	"image/draw"
 	_ "image/jpeg" // jpeg imported for image decoding
 	_ "image/png"  // png imported for image decoding
 	"io/ioutil"
@@ -190,21 +190,26 @@ func setBackgroundImage(canvas Canvas, template Template) (Canvas, error) {
 		// Decode image data
 		imageBuffer := bytes.NewBuffer(imageData)
 		baseImage, _, err = image.Decode(imageBuffer)
+		if ycbcr, ok := baseImage.(*image.YCbCr); ok {
+			var newImage draw.Image
+			newImage = image.NewNRGBA(ycbcr.Rect)
+			draw.Draw(newImage, ycbcr.Rect, ycbcr, ycbcr.Bounds().Min, draw.Over)
+			baseImage = newImage
+		}
 		if err != nil {
 			return canvas, err
 		}
 	}
-	currentHeight, currentWidth := baseImage.Bounds().Size().Y, baseImage.Bounds().Size().X
-	if currentWidth == 0 || currentHeight == 0 {
+	if c == nil {
 		// No current image, use loaded image instead
-		drawImg, ok := baseImage.(draw.Image)
-		if !ok {
-			return canvas, fmt.Errorf("Could not create write-access Image from image data")
-		}
-		c = c.SetUnderlyingImage(drawImg)
+		var drawImage draw.Image
+		drawImage = image.NewNRGBA(baseImage.Bounds())
+		draw.Draw(drawImage, baseImage.Bounds(), baseImage, baseImage.Bounds().Min, draw.Over)
+		c = ImageCanvas{Image: drawImage}
 		return c, nil
 	}
 	// Check if resizing is necessary
+	currentHeight, currentWidth := baseImage.Bounds().Size().Y, baseImage.Bounds().Size().X
 	targetHeight, targetWidth := c.GetHeight(), c.GetWidth()
 	if targetHeight != currentHeight || targetWidth != currentWidth {
 		// Compare aspect ratios
@@ -224,7 +229,7 @@ func setBackgroundImage(canvas Canvas, template Template) (Canvas, error) {
 		}
 		baseImage = imaging.Resize(baseImage, resizedWidth, resizedHeight, imaging.Lanczos)
 	}
-	c.SubImage(image.Point{X: 0, Y: 0}, baseImage)
+	c.DrawImage(image.Point{X: 0, Y: 0}, baseImage)
 	return c, nil
 }
 
