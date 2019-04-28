@@ -29,7 +29,7 @@ type Canvas interface {
 	Rectangle(topLeft image.Point, width, height int, colour color.Color) (Canvas, error)
 	Circle(centre image.Point, radius int, colour color.Color) (Canvas, error)
 	Text(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (Canvas, error)
-	DrawImage(start image.Point, subImage image.Image) (Canvas, error)
+	DrawImage(start image.Point, subImage image.Image) Canvas
 	Barcode(codeType BarcodeType, content []byte, extra BarcodeExtraData, start image.Point, width, height int, dataColour color.Color, bgColour color.Color) (Canvas, error)
 }
 
@@ -129,10 +129,13 @@ func (canvas ImageCanvas) Text(text string, start image.Point, typeFace font.Fac
 }
 
 // DrawImage draws another image on the canvas
-func (canvas ImageCanvas) DrawImage(start image.Point, subImage image.Image) (Canvas, error) {
+func (canvas ImageCanvas) DrawImage(start image.Point, subImage image.Image) Canvas {
 	c := canvas
-	draw.Draw(c.Image, subImage.Bounds(), subImage, start, draw.Over)
-	return c, nil
+	subBounds := subImage.Bounds()
+	width := subBounds.Max.X - subBounds.Min.X
+	height := subBounds.Max.Y - subBounds.Min.Y
+	draw.Draw(c.Image, image.Rect(start.X, start.Y, start.X+width, start.Y+height), subImage, image.ZP, draw.Over)
+	return c
 }
 
 // BarcodeType wraps the barcode types into a single enum

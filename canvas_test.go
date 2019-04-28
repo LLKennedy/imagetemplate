@@ -347,3 +347,28 @@ func TestText(t *testing.T) {
 		}
 	})
 }
+
+func TestDrawImage(t *testing.T) {
+	var newCanvas, otherCanvas Canvas
+	sx := 30
+	sy := 50
+	w := 20
+	h := 20
+	newCanvas, _ = NewCanvas(100, 100)
+	newCanvas, _ = newCanvas.Rectangle(image.ZP, 100, 100, color.NRGBA{B: 255, A: 255})
+	otherCanvas, _ = NewCanvas(20, 20)
+	otherCanvas, _ = otherCanvas.Rectangle(image.ZP, w, h, color.NRGBA{G: 255, A: 255})
+	modifiedCanvas := newCanvas.DrawImage(image.Pt(sx, sy), otherCanvas.GetUnderlyingImage())
+	result := modifiedCanvas.GetUnderlyingImage()
+	for x := 0; x < 100; x++ {
+		for y := 0; y < 100; y++ {
+			t.Run(fmt.Sprintf("x=%d,y=%d", x, y), func(t *testing.T) {
+				if x >= sx && x < sx+w && y >= sy && y < sy+h {
+					assert.Equal(t, color.NRGBA{G: 255, A: 255}, result.At(x, y))
+				} else {
+					assert.Equal(t, color.NRGBA{B: 255, A: 255}, result.At(x, y))
+				}
+			})
+		}
+	}
+}
