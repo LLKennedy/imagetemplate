@@ -1,0 +1,128 @@
+{
+	"samples": [
+		{
+			"baseImage": {
+				"fileName": "path/to/file.ext"
+			},
+			"components": []
+		},
+		{
+			"baseImage": {
+				"fileName": "path/to/file.ext",
+				"filetype": "png"
+			},
+			"components": []
+		},
+		{
+			"baseImage": {
+				"data": "Qk2GAAAAAAAAADYAAAAoAAAABQAAAAUAAAABABgAAAAAAFAAAAAAAAAAAAAAAAAAAAAAAAAA////////////zEg/////AP///////////////////wD///////////////////8A////JBzt////////////AP///////////////wDy/wA=",
+				"filetype": "bmp"
+			},
+			"components": []
+		},
+		{
+			"baseImage": {
+				"width": "800",
+				"height": "600",
+				"baseColour": {
+					"R": "255", 
+					"G": "255", 
+					"B": "255",
+					"A": "255"
+				}
+			},
+			"components": []
+		},
+		{
+			"baseImage": {
+				"fileName": "path/to/file.ext",
+				"filetype": "png"
+			},
+			"components": [
+				{
+					"type": "text",
+					"properties": {
+						"startX": "200",
+						"startY": "300",
+						"content": "Label Text Here",
+						"fontSize": "12",
+						"typeFace": "Times New Roman",
+						"colour": {
+							"R": "0",
+							"G": "0",
+							"B": "0",
+							"A": "255"
+						}
+					}
+				},
+				{
+					"type": "circle",
+					"properties": {
+						"centreX": "56",
+						"centreY": "42",
+						"radius": "12",
+						"colour": {
+							"R": "255",
+							"G": "0",
+							"B": "0",
+							"A": "255"
+						}
+					}
+				},
+				{
+					"type": "rectangle",
+					"conditional": {
+						"name": "username",
+						"boolNot": false,
+						"operator": "contains",
+						"value": "Smith",
+						"group": {
+							"groupOperator": "and",
+							"conditionals": [
+								{
+									"name": "username",
+									"boolNot": true,
+									"operator": "ci_contains",
+									"value": "joHn"
+								}
+							]
+						}
+					},
+					"properties": {
+						"topLeftX": "350",
+						"topLeftY": "400",
+						"width": "80",
+						"height": "100",
+						"colour": {
+							"R": "0",
+							"G": "255",
+							"B": "0",
+							"A": "255"
+						}
+					}
+				},
+				{
+					"type": "image",
+					"properties": {
+						"topLeftX": "580",
+						"topLeftY": "450",
+						"width": "150",
+						"height": "100",
+						"fileName": "path/to/file.ext"
+					}
+				},
+				{
+					"type": "image",
+					"properties": {
+						"topLeftX": "20",
+						"topLeftY": "30",
+						"width": "50",
+						"height": "50",
+						"data": "Qk2GAAAAAAAAADYAAAAoAAAABQAAAAUAAAABABgAAAAAAFAAAAAAAAAAAAAAAAAAAAAAAAAA////////////zEg/////AP///////////////////wD///////////////////8A////JBzt////////////AP///////////////wDy/wA=",
+						"filetype": "bmp"
+					}
+				}
+			]
+		}
+	]
+}
