@@ -14,6 +14,7 @@ import (
 	"github.com/boombuler/barcode/qr"
 	"github.com/boombuler/barcode/twooffive"
 	"golang.org/x/image/font"
+	"golang.org/x/image/math/fixed"
 	"image"
 	"image/color"
 	"image/draw"
@@ -27,8 +28,8 @@ type Canvas interface {
 	GetHeight() int
 	Rectangle(topLeft image.Point, width, height int, colour color.Color) (Canvas, error)
 	Circle(centre image.Point, radius int, colour color.Color) (Canvas, error)
-	Text(text string, start image.Point, typeFace font.Face, colour color.Color, fontSize, maxWidth, maxLines int) (Canvas, error)
-	SubImage(start image.Point, subImage image.Image) (Canvas, error)
+	Text(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (Canvas, error)
+	DrawImage(start image.Point, subImage image.Image) (Canvas, error)
 	Barcode(codeType BarcodeType, content []byte, extra BarcodeExtraData, start image.Point, width, height int, dataColour color.Color, bgColour color.Color) (Canvas, error)
 }
 
@@ -107,19 +108,28 @@ func (canvas ImageCanvas) Circle(centre image.Point, radius int, colour color.Co
 }
 
 // Text draws text on the canvas
-func (canvas ImageCanvas) Text(text string, start image.Point, typeFace font.Face, colour color.Color, fontSize, maxWidth, maxLines int) (Canvas, error) {
+func (canvas ImageCanvas) Text(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (Canvas, error) {
+	if maxWidth <= 0 {
+		return canvas, errors.New("Invalid maxWidth")
+	}
 	c := canvas
+	//FIXME: how to use start?
 	drawer := &font.Drawer{
+		Dot:  fixed.Point26_6{X: fixed.I(start.X), Y: fixed.I(start.Y)},
 		Dst:  c.Image,
 		Face: typeFace,
 		Src:  image.NewUniform(colour),
+	}
+	width := drawer.MeasureString(text).Ceil()
+	if width > maxWidth {
+		return canvas, errors.New("Resultant drawn text was longer than maxWidth")
 	}
 	drawer.DrawString(text)
 	return c, nil
 }
 
-// SubImage draws another image on the canvas
-func (canvas ImageCanvas) SubImage(start image.Point, subImage image.Image) (Canvas, error) {
+// DrawImage draws another image on the canvas
+func (canvas ImageCanvas) DrawImage(start image.Point, subImage image.Image) (Canvas, error) {
 	c := canvas
 	draw.Draw(c.Image, subImage.Bounds(), subImage, start, draw.Over)
 	return c, nil

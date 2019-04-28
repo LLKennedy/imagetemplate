@@ -229,7 +229,7 @@ func setBackgroundImage(canvas Canvas, template Template) (Canvas, error) {
 		}
 		baseImage = imaging.Resize(baseImage, resizedWidth, resizedHeight, imaging.Lanczos)
 	}
-	c.SubImage(image.Point{X: 0, Y: 0}, baseImage)
+	c.DrawImage(image.Point{X: 0, Y: 0}, baseImage)
 	return c, nil
 }
 

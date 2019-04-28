@@ -1,8 +1,13 @@
 package imagetemplate
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/golang/freetype/truetype"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/image/bmp"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/gofont/goregular"
 	"image"
 	"image/color"
 	"image/draw"
@@ -304,6 +309,41 @@ func TestCircle(t *testing.T) {
 					}
 				})
 			}
+		}
+	})
+}
+
+func TestText(t *testing.T) {
+	var newCanvas Canvas
+	newCanvas, _ = NewCanvas(30, 30)
+	newCanvas = newCanvas.SetUnderlyingImage(image.NewNRGBA(newCanvas.GetUnderlyingImage().Bounds()))
+	var regFont font.Face
+	ttFont, _ := truetype.Parse(goregular.TTF)
+	regFont = truetype.NewFace(ttFont, &truetype.Options{Size: 14, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64})
+	t.Run("invalid maxWidth", func(t *testing.T) {
+		modifiedCanvas, err := newCanvas.Text("a", image.Pt(2, 10), regFont, color.White, -1)
+		assert.Equal(t, newCanvas, modifiedCanvas)
+		assert.NotNil(t, err)
+		if err != nil {
+			assert.Equal(t, "Invalid maxWidth", err.Error())
+		}
+	})
+	t.Run("valid text", func(t *testing.T) {
+		purple := color.NRGBA{R: 130, B: 200, A: 255}
+		modifiedCanvas, err := newCanvas.Text("test", image.Pt(2, 15), regFont, purple, 28)
+		assert.Nil(t, err)
+		assert.NotNil(t, modifiedCanvas)
+		var data bytes.Buffer
+		err = bmp.Encode(&data, modifiedCanvas.GetUnderlyingImage())
+		assert.Nil(t, err)
+		assert.Equal(t, testTextOutput, data.Bytes())
+	})
+	t.Run("oversized text", func(t *testing.T) {
+		purple := color.NRGBA{R: 130, B: 200, A: 255}
+		_, err := newCanvas.Text("test this much longer string which definitely won't fit", image.Pt(2, 15), regFont, purple, 28)
+		assert.NotNil(t, err)
+		if err != nil {
+			assert.Equal(t, "Resultant drawn text was longer than maxWidth", err.Error())
 		}
 	})
 }
