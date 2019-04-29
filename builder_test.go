@@ -164,8 +164,6 @@ func TestLoadComponentsData(t *testing.T) {
 		assert.Nil(t, err)
 		newBuilder, err = newBuilder.ApplyComponents()
 		assert.Nil(t, err)
-		bmpData, err := newBuilder.WriteToBMP()
-		assert.Nil(t, err)
-		assert.NotNil(t, bmpData) //TODO: test this matches expected output bytes
+		//TODO: output and check results
 	})
 }

@@ -83,6 +83,9 @@ func NewBuilder(canvas Canvas, startingColour color.Color) (ImageBuilder, error)
 // WriteToBMP outputs the contents of the builder to a BMP byte array
 func (builder ImageBuilder) WriteToBMP() ([]byte, error) {
 	var buf bytes.Buffer
+	if builder.Canvas == nil {
+		return nil, fmt.Errorf("Error: no canvas, cannot write output")
+	}
 	err := bmp.Encode(&buf, builder.Canvas.GetUnderlyingImage())
 	if err != nil {
 		return nil, err
