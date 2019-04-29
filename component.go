@@ -174,16 +174,18 @@ Float operators: "=", ">", "<", "<=", ">=".
 
 Group operators can be "and", "or", "nand", "nor", "xor".*/
 type ComponentConditional struct {
-	Name     string              `json:"name"`
-	Not      bool                `json:"boolNot"`
-	Operator conditionalOperator `json:"operator"`
-	Value    string              `json:"value"`
-	Group    struct {
-		Operator     groupOperator          `json:"groupOperator"`
-		Conditionals []ComponentConditional `json:"conditionals"`
-	} `json:"group"`
-	valueSet  bool // Represents whether this individual component has had its value set and its condition evaluated at least once
-	validated bool // Represents whether this individual component at this level is validated. Use ComponentConditional.Validate() to evaluate the logic of entire groups.
+	Name      string              `json:"name"`
+	Not       bool                `json:"boolNot"`
+	Operator  conditionalOperator `json:"operator"`
+	Value     string              `json:"value"`
+	Group     conditionalGroup    `json:"group"`
+	valueSet  bool                // Represents whether this individual component has had its value set and its condition evaluated at least once
+	validated bool                // Represents whether this individual component at this level is validated. Use ComponentConditional.Validate() to evaluate the logic of entire groups.
+}
+
+type conditionalGroup struct {
+	Operator     groupOperator          `json:"groupOperator"`
+	Conditionals []ComponentConditional `json:"conditionals"`
 }
 
 // SetValue sets the value of a specific named property through this conditional chain, evaluating any conditions along the way
