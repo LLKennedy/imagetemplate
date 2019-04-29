@@ -3,7 +3,7 @@ This project defines a template file for drawing custom images from pre-defined 
 
 [![GoDoc](https://godoc.org/github.com/LLKennedy/imagetemplate?status.svg)](https://godoc.org/github.com/LLKennedy/imagetemplate)
 [![Build Status](https://travis-ci.org/disintegration/imaging.svg?branch=master)](https://travis-ci.org/LLKennedy/imagetemplate)
-[![Coverage Status](https://coveralls.io/repos/github/LLKennedy/imagetemplate/badge.svg?branch=master&service=github)](https://coveralls.io/github/LLKennedy/imagetemplate?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/LLKennedy/imagetemplate/badge.svg?branch=master)](https://coveralls.io/github/LLKennedy/imagetemplate?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/LLKennedy/imagetemplate)](https://goreportcard.com/report/github.com/LLKennedy/imagetemplate)
 
 ## Testing
