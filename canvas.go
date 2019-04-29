@@ -29,7 +29,7 @@ type Canvas interface {
 	Rectangle(topLeft image.Point, width, height int, colour color.Color) (Canvas, error)
 	Circle(centre image.Point, radius int, colour color.Color) (Canvas, error)
 	Text(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (Canvas, error)
-	DrawImage(start image.Point, subImage image.Image) Canvas
+	DrawImage(start image.Point, subImage image.Image) (Canvas, error)
 	Barcode(codeType BarcodeType, content []byte, extra BarcodeExtraData, start image.Point, width, height int, dataColour color.Color, bgColour color.Color) (Canvas, error)
 }
 
@@ -72,13 +72,19 @@ func (canvas ImageCanvas) GetUnderlyingImage() image.Image {
 	return canvas.Image
 }
 
-// GetWidth returns the width of the underlying Image
+// GetWidth returns the width of the underlying Image. Returns -1 if no canvas is set.
 func (canvas ImageCanvas) GetWidth() int {
+	if canvas.Image == nil {
+		return -1
+	}
 	return canvas.Image.Bounds().Size().X
 }
 
-// GetWidth returns the width of the underlying Image
+// GetHeight returns the geight of the underlying Image. Returns -1 if no canvas is set.
 func (canvas ImageCanvas) GetHeight() int {
+	if canvas.Image == nil {
+		return -1
+	}
 	return canvas.Image.Bounds().Size().Y
 }
 
@@ -92,6 +98,9 @@ func (canvas ImageCanvas) Rectangle(topLeft image.Point, width, height int, colo
 	} else if height <= 0 {
 		return canvas, errors.New("Invalid height")
 	}
+	if c.Image == nil {
+		return canvas, errors.New("No image set for canvas to draw on")
+	}
 	draw.Draw(c.Image, image.Rect(topLeft.X, topLeft.Y, topLeft.X+width, topLeft.Y+height), image.NewUniform(colour), topLeft, draw.Over)
 	return c, nil
 }
@@ -102,6 +111,9 @@ func (canvas ImageCanvas) Circle(centre image.Point, radius int, colour color.Co
 	if radius <= 0 {
 		return canvas, errors.New("Invalid radius")
 	}
+	if c.Image == nil {
+		return canvas, errors.New("No image set for canvas to draw on")
+	}
 	mask := &circle{p: centre, r: radius}
 	draw.DrawMask(c.Image, mask.Bounds(), image.NewUniform(colour), image.ZP, mask, mask.Bounds().Min, draw.Over)
 	return c, nil
@@ -111,6 +123,9 @@ func (canvas ImageCanvas) Circle(centre image.Point, radius int, colour color.Co
 func (canvas ImageCanvas) Text(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (Canvas, error) {
 	if maxWidth <= 0 {
 		return canvas, errors.New("Invalid maxWidth")
+	}
+	if canvas.Image == nil {
+		return canvas, errors.New("No image set for canvas to draw on")
 	}
 	c := canvas
 	//FIXME: how to use start?
@@ -129,13 +144,16 @@ func (canvas ImageCanvas) Text(text string, start image.Point, typeFace font.Fac
 }
 
 // DrawImage draws another image on the canvas
-func (canvas ImageCanvas) DrawImage(start image.Point, subImage image.Image) Canvas {
+func (canvas ImageCanvas) DrawImage(start image.Point, subImage image.Image) (Canvas, error) {
 	c := canvas
+	if c.Image == nil {
+		return canvas, errors.New("No image set for canvas to draw on")
+	}
 	subBounds := subImage.Bounds()
 	width := subBounds.Max.X - subBounds.Min.X
 	height := subBounds.Max.Y - subBounds.Min.Y
 	draw.Draw(c.Image, image.Rect(start.X, start.Y, start.X+width, start.Y+height), subImage, image.ZP, draw.Over)
-	return c
+	return c, nil
 }
 
 // BarcodeType wraps the barcode types into a single enum
@@ -193,6 +211,9 @@ type BarcodeExtraData struct {
 // Barcode draws a barcode on the canvas
 func (canvas ImageCanvas) Barcode(codeType BarcodeType, content []byte, extra BarcodeExtraData, start image.Point, width, height int, dataColour color.Color, backgroundColour color.Color) (Canvas, error) {
 	c := canvas
+	if c.Image == nil {
+		return canvas, errors.New("No image set for canvas to draw on")
+	}
 	var encodedBarcode barcode.Barcode
 	var err error
 	switch codeType {
