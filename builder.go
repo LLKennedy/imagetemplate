@@ -61,23 +61,36 @@ type ToggleableComponent struct {
 	Component   Component
 }
 
+type fileReader interface {
+	ReadFile(string) ([]byte, error)
+}
+
+type ioutilFileReader struct{}
+
+func (r ioutilFileReader) ReadFile(filename string) ([]byte, error) {
+	return ioutil.ReadFile(filename)
+}
+
 // ImageBuilder uses golang's native Image package to implement the Builder interface
 type ImageBuilder struct {
 	Canvas          Canvas
 	Components      []ToggleableComponent
 	NamedProperties NamedProperties
+	reader          fileReader
 }
 
 // NewBuilder generates a new ImageBuilder with an internal canvas of the specified width and height, and optionally the specified starting colour. No provided colour will result in defaults for Image.
 func NewBuilder(canvas Canvas, startingColour color.Color) (ImageBuilder, error) {
+	newBuilder := ImageBuilder{reader: ioutilFileReader{}}
 	if startingColour != nil {
 		var err error
 		canvas, err = canvas.Rectangle(image.Point{}, canvas.GetWidth(), canvas.GetHeight(), startingColour)
 		if err != nil {
-			return ImageBuilder{}, err
+			return newBuilder, err
 		}
 	}
-	return ImageBuilder{Canvas: canvas}, nil
+	newBuilder.Canvas = canvas
+	return newBuilder, nil
 }
 
 // WriteToBMP outputs the contents of the builder to a BMP byte array
@@ -97,7 +110,7 @@ func (builder ImageBuilder) WriteToBMP() ([]byte, error) {
 func (builder ImageBuilder) LoadComponentsFile(fileName string) (Builder, error) {
 	b := builder
 	// Load initial data into template object
-	fileData, err := ioutil.ReadFile(fileName)
+	fileData, err := builder.reader.ReadFile(fileName)
 	if err != nil {
 		return builder, err
 	}
@@ -114,7 +127,7 @@ func (builder ImageBuilder) LoadComponentsData(fileData []byte) (Builder, error)
 	}
 
 	// Parse background image info
-	b.Canvas, err = setBackgroundImage(b.Canvas, template)
+	b.Canvas, err = b.setBackgroundImage(b.Canvas, template)
 	if err != nil {
 		return builder, err
 	}
@@ -128,7 +141,7 @@ func (builder ImageBuilder) LoadComponentsData(fileData []byte) (Builder, error)
 	return b, nil
 }
 
-func setBackgroundImage(canvas Canvas, template Template) (Canvas, error) {
+func (builder ImageBuilder) setBackgroundImage(canvas Canvas, template Template) (Canvas, error) {
 	c := canvas
 	// Check the state of the optional and required properties
 	dataSet := template.BaseImage.Data != ""
@@ -185,7 +198,7 @@ func setBackgroundImage(canvas Canvas, template Template) (Canvas, error) {
 				return canvas, err
 			}
 		} else {
-			imageData, err = ioutil.ReadFile(template.BaseImage.FileName)
+			imageData, err = builder.reader.ReadFile(template.BaseImage.FileName)
 			if err != nil {
 				return canvas, err
 			}
