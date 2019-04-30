@@ -690,4 +690,3 @@ func TestBarcode(t *testing.T) {
 	}
 }
 */
-
