@@ -451,6 +451,7 @@ func TestDrawImage(t *testing.T) {
 	}
 }
 
+/*
 func TestBarcode(t *testing.T) {
 	for i := 0; i < 1; i++ {
 		t.Run(fmt.Sprintf("random colours, run number %d", i), func(t *testing.T) {
@@ -688,3 +689,5 @@ func TestBarcode(t *testing.T) {
 		})
 	}
 }
+*/
+
