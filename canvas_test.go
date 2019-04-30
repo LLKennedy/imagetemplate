@@ -2,7 +2,6 @@ package imagetemplate
 
 import (
 	"bytes"
-	"crypto/rand"
 	"fmt"
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/aztec"
@@ -14,6 +13,7 @@ import (
 	"github.com/boombuler/barcode/ean"
 	"github.com/boombuler/barcode/pdf417"
 	"github.com/boombuler/barcode/qr"
+	"math/rand"
 	// "github.com/boombuler/barcode/twooffive"
 	"github.com/golang/freetype/truetype"
 	"github.com/stretchr/testify/assert"
@@ -455,7 +455,11 @@ func TestBarcode(t *testing.T) {
 	for i := 0; i < 1; i++ {
 		t.Run(fmt.Sprintf("random colours, run number %d", i), func(t *testing.T) {
 			var grandCanvas Canvas
-			grandCanvas, err := NewCanvas(1600, 800)
+			grandWidth := 520
+			grandHeight := grandWidth / 2
+			squareSize := grandWidth / 4
+			flatHeight := grandWidth / 8
+			grandCanvas, err := NewCanvas(grandWidth, grandHeight)
 			assert.NoError(t, err)
 			colours := make([]color.Color, 24)
 			for c := range colours {
@@ -490,8 +494,8 @@ func TestBarcode(t *testing.T) {
 					content:          []byte("www.github.com/LLKennedy/imagetemplate"),
 					extra:            BarcodeExtraData{QRLevel: qr.Q, QRMode: qr.Unicode},
 					start:            image.ZP,
-					width:            400,
-					height:           400,
+					width:            squareSize,
+					height:           squareSize,
 					dataColour:       nextColour(),
 					backgroundColour: nextColour(),
 				},
@@ -503,9 +507,9 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypeAztec,
 					content:          []byte("www.github.com/LLKennedy/imagetemplate"),
 					extra:            BarcodeExtraData{AztecMinECCPercent: 50, AztecUserSpecifiedLayers: 4},
-					start:            image.Point{X: 400, Y: 0},
-					width:            400,
-					height:           400,
+					start:            image.Point{X: squareSize, Y: 0},
+					width:            squareSize,
+					height:           squareSize,
 					dataColour:       nextColour(),
 					backgroundColour: nextColour(),
 				},
@@ -517,9 +521,9 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypePDF,
 					content:          []byte("Luke"),
 					extra:            BarcodeExtraData{PDFSecurityLevel: 4},
-					start:            image.Point{X: 800, Y: 0},
-					width:            400,
-					height:           400,
+					start:            image.Point{X: squareSize * 2, Y: 0},
+					width:            squareSize,
+					height:           squareSize,
 					dataColour:       nextColour(),
 					backgroundColour: nextColour(),
 				},
@@ -531,9 +535,9 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypeDataMatrix,
 					content:          []byte("https://www.github.com/LLKennedy/imagetemplate"),
 					extra:            BarcodeExtraData{},
-					start:            image.Point{X: 1200, Y: 0},
-					width:            400,
-					height:           400,
+					start:            image.Point{X: squareSize * 3, Y: 0},
+					width:            squareSize,
+					height:           squareSize,
 					dataColour:       nextColour(),
 					backgroundColour: nextColour(),
 				},
@@ -545,9 +549,9 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypeCode93,
 					content:          []byte("Luke"),
 					extra:            BarcodeExtraData{Code93IncludeChecksum: true, Code93FullAsciiMode: true},
-					start:            image.Point{X: 0, Y: 400},
-					width:            400,
-					height:           200,
+					start:            image.Point{X: 0, Y: squareSize},
+					width:            squareSize,
+					height:           flatHeight,
 					dataColour:       nextColour(),
 					backgroundColour: nextColour(),
 				},
@@ -559,9 +563,9 @@ func TestBarcode(t *testing.T) {
 				// 	codeType:         BarcodeType2of5,
 				// 	content:          []byte("12345678"),
 				// 	extra:            BarcodeExtraData{},
-				// 	start:            image.Point{X: 400, Y: 400},
-				// 	width:            400,
-				// 	height:           200,
+				// 	start:            image.Point{X: squareSize, Y: squareSize},
+				// 	width:            squareSize,
+				// 	height:           flatHeight,
 				// 	dataColour:       nextColour(),
 				// 	backgroundColour: nextColour(),
 				// },
@@ -573,9 +577,9 @@ func TestBarcode(t *testing.T) {
 				// 	codeType:         BarcodeType2of5,
 				// 	content:          []byte("12345678"),
 				// 	extra:            BarcodeExtraData{},
-				// 	start:            image.Point{X: 800, Y: 400},
-				// 	width:            400,
-				// 	height:           200,
+				// 	start:            image.Point{X: squareSize*2, Y: squareSize},
+				// 	width:            squareSize,
+				// 	height:           flatHeight,
 				// 	dataColour:       nextColour(),
 				// 	backgroundColour: nextColour(),
 				// },
@@ -587,9 +591,9 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypeCodabar,
 					content:          []byte("B123456D"),
 					extra:            BarcodeExtraData{},
-					start:            image.Point{X: 1200, Y: 400},
-					width:            400,
-					height:           200,
+					start:            image.Point{X: squareSize * 3, Y: squareSize},
+					width:            squareSize,
+					height:           flatHeight,
 					dataColour:       nextColour(),
 					backgroundColour: nextColour(),
 				},
@@ -601,9 +605,9 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypeCode128,
 					content:          []byte("Luke"),
 					extra:            BarcodeExtraData{},
-					start:            image.Point{X: 0, Y: 600},
-					width:            400,
-					height:           200,
+					start:            image.Point{X: 0, Y: flatHeight * 3},
+					width:            squareSize,
+					height:           flatHeight,
 					dataColour:       nextColour(),
 					backgroundColour: nextColour(),
 				},
@@ -615,9 +619,9 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypeEAN13,
 					content:          []byte("5901234123457"),
 					extra:            BarcodeExtraData{},
-					start:            image.Point{X: 400, Y: 600},
-					width:            400,
-					height:           200,
+					start:            image.Point{X: squareSize, Y: flatHeight * 3},
+					width:            squareSize,
+					height:           flatHeight,
 					dataColour:       nextColour(),
 					backgroundColour: nextColour(),
 				},
@@ -629,9 +633,9 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypeEAN8,
 					content:          []byte("11223344"),
 					extra:            BarcodeExtraData{},
-					start:            image.Point{X: 800, Y: 600},
-					width:            400,
-					height:           200,
+					start:            image.Point{X: squareSize * 2, Y: flatHeight * 3},
+					width:            squareSize,
+					height:           flatHeight,
 					dataColour:       nextColour(),
 					backgroundColour: nextColour(),
 				},
@@ -643,19 +647,26 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypeCode39,
 					content:          []byte("Luke"),
 					extra:            BarcodeExtraData{Code39IncludeChecksum: true, Code39FullAsciiMode: true},
-					start:            image.Point{X: 1200, Y: 600},
-					width:            400,
-					height:           200,
+					start:            image.Point{X: squareSize * 3, Y: flatHeight * 3},
+					width:            squareSize,
+					height:           flatHeight,
 					dataColour:       nextColour(),
 					backgroundColour: nextColour(),
 				},
 			}
 			for _, test := range tests {
 				t.Run(test.name, func(t *testing.T) {
+					grandCanvas, err = NewCanvas(grandWidth, grandHeight)
 					rawBarcode, err := test.encodeFunc(test.content, test.extra)
 					assert.NoError(t, err)
+					if err != nil {
+						t.Fatal(err)
+					}
 					rawBarcode, err = barcode.Scale(rawBarcode, test.width, test.height)
 					assert.NoError(t, err)
+					if err != nil {
+						t.Fatal(err)
+					}
 					grandCanvas, err = grandCanvas.Barcode(test.codeType, test.content, test.extra, test.start, test.width, test.height, test.dataColour, test.backgroundColour)
 					assert.NoError(t, err)
 					underlyingImage := grandCanvas.GetUnderlyingImage()
