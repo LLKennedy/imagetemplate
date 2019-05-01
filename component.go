@@ -118,7 +118,7 @@ func ParseDataValue(value string) (hasNamedProperties bool, deconstructed Decons
 			}
 		}
 		if j >= len(value) || value[j] != '$' {
-			err = fmt.Errorf("Unclosed named property in %v", value)
+			err = fmt.Errorf("unclosed named property in '%v'", value)
 			return
 		}
 		subString := value[i+1 : j]
