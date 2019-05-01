@@ -172,7 +172,7 @@ func (component BarcodeComponent) GetJSONFormat() interface{} {
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set barcode properties and fill the named properties map
 func (component BarcodeComponent) VerifyAndSetJSONData(data interface{}) (Component, NamedProperties, error) {
 	c := component
-	var props NamedProperties
+	props := make(NamedProperties)
 	stringStruct, ok := data.(*barcodeFormat)
 	if !ok {
 		return component, props, fmt.Errorf("failed to convert returned data to component properties")
@@ -270,6 +270,12 @@ func (component BarcodeComponent) VerifyAndSetJSONData(data interface{}) (Compon
 	}
 	if newVal != nil {
 		c.BackgroundColour.A = newVal.(uint8)
+	}
+	type invalidStruct struct {
+		Message string
+	}
+	for key := range c.NamedPropertiesMap {
+		props[key] = invalidStruct{Message:"Please replace me with real data"}
 	}
 	return c, props, nil
 }
