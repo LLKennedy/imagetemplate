@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// NamedProperties is a map of property names to property values - application variables to be set
 type NamedProperties map[string]interface{}
 
 // Component provides a generic interface for operations to perform on a canvas
@@ -70,30 +71,29 @@ func extractSingleProp(inputVal, propName string, typeName propType, namedPropsM
 		propName := deconstructed.PropNames[0]
 		npm[propName] = append(npm[propName], propName)
 		return npm, nil, nil
-	} else {
-		switch typeName {
-		case intType:
-			intVal, err := strconv.Atoi(inputVal)
-			if err != nil {
-				return namedPropsMap, nil, fmt.Errorf("Failed to convert property %v to integer: %v", propName, err)
-			}
-			return npm, intVal, nil
-		case stringType:
-			return npm, inputVal, nil
-		case boolType:
-			boolVal, err := strconv.ParseBool(inputVal)
-			if err != nil {
-				return namedPropsMap, nil, fmt.Errorf("Failed to convert property %v to bool: %v", propName, err)
-			}
-			return npm, boolVal, nil
-		case uint8Type:
-			uintVal, err := strconv.ParseUint(inputVal, 0, 8)
-			if err != nil {
-				return namedPropsMap, nil, err
-			}
-			uint8Val := uint8(uintVal)
-			return npm, uint8Val, nil
+	}
+	switch typeName {
+	case intType:
+		intVal, err := strconv.Atoi(inputVal)
+		if err != nil {
+			return namedPropsMap, nil, fmt.Errorf("Failed to convert property %v to integer: %v", propName, err)
 		}
+		return npm, intVal, nil
+	case stringType:
+		return npm, inputVal, nil
+	case boolType:
+		boolVal, err := strconv.ParseBool(inputVal)
+		if err != nil {
+			return namedPropsMap, nil, fmt.Errorf("Failed to convert property %v to bool: %v", propName, err)
+		}
+		return npm, boolVal, nil
+	case uint8Type:
+		uintVal, err := strconv.ParseUint(inputVal, 0, 8)
+		if err != nil {
+			return namedPropsMap, nil, err
+		}
+		uint8Val := uint8(uintVal)
+		return npm, uint8Val, nil
 	}
 	return namedPropsMap, nil, fmt.Errorf("Cannot convert property %v to unsupported type %v", propName, typeName)
 }
@@ -118,7 +118,7 @@ func ParseDataValue(value string) (hasNamedProperties bool, deconstructed Decons
 			}
 		}
 		if j >= len(value) || value[j] != '$' {
-			err = fmt.Errorf("Unclosed named property in %v", value)
+			err = fmt.Errorf("unclosed named property in '%v'", value)
 			return
 		}
 		subString := value[i+1 : j]
@@ -143,10 +143,10 @@ const (
 	contains       conditionalOperator = "contains"
 	startswith     conditionalOperator = "startswith"
 	endswith       conditionalOperator = "endswith"
-	ci_equals      conditionalOperator = "ci_equals"
-	ci_contains    conditionalOperator = "ci_contains"
-	ci_startswith  conditionalOperator = "ci_startswith"
-	ci_endswith    conditionalOperator = "ci_endswith"
+	ciEquals       conditionalOperator = "ci_equals"
+	ciContains     conditionalOperator = "ci_contains"
+	ciStartswith   conditionalOperator = "ci_startswith"
+	ciEndswith     conditionalOperator = "ci_endswith"
 	numequals      conditionalOperator = "=="
 	lessthan       conditionalOperator = "<"
 	greaterthan    conditionalOperator = ">"
@@ -164,7 +164,7 @@ const (
 	xor  groupOperator = "xor"
 )
 
-/* ComponentConditional enables or disables a component based on named properties.
+/*ComponentConditional enables or disables a component based on named properties.
 
 All properties will be assumed to be either strings or floats based on the operator.
 
@@ -200,7 +200,7 @@ func (c ComponentConditional) SetValue(name string, value interface{}) (Componen
 	}
 	if conditional.Name == name {
 		switch conditional.Operator {
-		case equals, contains, startswith, endswith, ci_equals, ci_contains, ci_startswith, ci_endswith:
+		case equals, contains, startswith, endswith, ciEquals, ciContains, ciStartswith, ciEndswith:
 			// Handle string operators
 			stringVal, ok := value.(string)
 			if !ok {
@@ -208,19 +208,19 @@ func (c ComponentConditional) SetValue(name string, value interface{}) (Componen
 			}
 			conVal := conditional.Value
 			switch conditional.Operator {
-			case ci_equals:
+			case ciEquals:
 				conVal = strings.ToLower(conVal)
 				stringVal = strings.ToLower(stringVal)
 				fallthrough
 			case equals:
 				conditional.validated = conVal == stringVal
-			case ci_contains:
+			case ciContains:
 				conVal = strings.ToLower(conVal)
 				stringVal = strings.ToLower(stringVal)
 				fallthrough
 			case contains:
 				conditional.validated = strings.Contains(stringVal, conVal)
-			case ci_startswith:
+			case ciStartswith:
 				conVal = strings.ToLower(conVal)
 				stringVal = strings.ToLower(stringVal)
 				fallthrough
@@ -230,7 +230,7 @@ func (c ComponentConditional) SetValue(name string, value interface{}) (Componen
 					break
 				}
 				conditional.validated = stringVal[:len(conVal)] == conVal
-			case ci_endswith:
+			case ciEndswith:
 				conVal = strings.ToLower(conVal)
 				stringVal = strings.ToLower(stringVal)
 				fallthrough
@@ -279,19 +279,19 @@ func (c ComponentConditional) SetValue(name string, value interface{}) (Componen
 }
 
 // Validate validates this conditional chain, erroring if a value down the line has not been set and evaluated
-func (conditional ComponentConditional) Validate() (bool, error) {
-	if !conditional.valueSet {
-		return false, fmt.Errorf("Attempted to validate conditional %v %v %v without setting %v", conditional.Name, conditional.Operator, conditional.Value, conditional.Name)
+func (c ComponentConditional) Validate() (bool, error) {
+	if !c.valueSet {
+		return false, fmt.Errorf("Attempted to validate conditional %v %v %v without setting %v", c.Name, c.Operator, c.Value, c.Name)
 	}
-	group := conditional.Group.Conditionals
+	group := c.Group.Conditionals
 	if len(group) == 0 {
-		return conditional.validated, nil
+		return c.validated, nil
 	}
-	op := conditional.Group.Operator
+	op := c.Group.Operator
 	if op == xor {
 		//Evaluate XOR on a group as meaning only one of all results in the list can be true, and one must be true.
 		trueCount := 0
-		if conditional.validated {
+		if c.validated {
 			trueCount++
 		}
 		for _, subConditional := range group {
@@ -310,7 +310,7 @@ func (conditional ComponentConditional) Validate() (bool, error) {
 	if op == nand || op == nor {
 		negate = true
 	}
-	result = conditional.validated
+	result = c.validated
 	if op == and || op == nand || op == or || op == nor {
 		for _, subConditional := range group {
 			subResult, err := subConditional.Validate()
@@ -331,14 +331,14 @@ func (conditional ComponentConditional) Validate() (bool, error) {
 	return false, fmt.Errorf("Invalid group operator %v", op)
 }
 
-// GetNamedProps returns a list of all named props found in the conditional
-func (conditional ComponentConditional) GetNamedPropertiesList() NamedProperties {
+// GetNamedPropertiesList returns a list of all named props found in the conditional
+func (c ComponentConditional) GetNamedPropertiesList() NamedProperties {
 	results := NamedProperties{}
 	type invalidData struct {
 		Message string
 	}
-	results[conditional.Name] = invalidData{Message: "Please replace this struct with real data"}
-	for _, subConditional := range conditional.Group.Conditionals {
+	results[c.Name] = invalidData{Message: "Please replace this struct with real data"}
+	for _, subConditional := range c.Group.Conditionals {
 		subResults := subConditional.GetNamedPropertiesList()
 		for key, value := range subResults {
 			results[key] = value

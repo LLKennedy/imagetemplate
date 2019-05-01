@@ -194,12 +194,12 @@ type BarcodeExtraData struct {
 	AztecUserSpecifiedLayers int
 	// Code39IncludeChecksum    is required for code39 barcodes
 	Code39IncludeChecksum bool
-	// Code39FullAsciiMode      is required for code39 barcodes
-	Code39FullAsciiMode bool
+	// Code39FullASCIIMode      is required for code39 barcodes
+	Code39FullASCIIMode bool
 	// Code93IncludeChecksum    is required for code93 barcodes
 	Code93IncludeChecksum bool
-	// Code93FullAsciiMode      is required for code93 barcodes
-	Code93FullAsciiMode bool
+	// Code93FullASCIIMode      is required for code93 barcodes
+	Code93FullASCIIMode bool
 	// PDFSecurityLevel         is required for pdf417 barcodes
 	PDFSecurityLevel byte
 	// QRLevel                  is required for qr barcodes
@@ -233,12 +233,12 @@ func (canvas ImageCanvas) Barcode(codeType BarcodeType, content []byte, extra Ba
 			return canvas, err
 		}
 	case BarcodeTypeCode39:
-		encodedBarcode, err = code39.Encode(string(content), extra.Code39IncludeChecksum, extra.Code39FullAsciiMode)
+		encodedBarcode, err = code39.Encode(string(content), extra.Code39IncludeChecksum, extra.Code39FullASCIIMode)
 		if err != nil {
 			return canvas, err
 		}
 	case BarcodeTypeCode93:
-		encodedBarcode, err = code93.Encode(string(content), extra.Code93IncludeChecksum, extra.Code93FullAsciiMode)
+		encodedBarcode, err = code93.Encode(string(content), extra.Code93IncludeChecksum, extra.Code93FullASCIIMode)
 		if err != nil {
 			return canvas, err
 		}
