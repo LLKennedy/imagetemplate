@@ -178,7 +178,7 @@ func (component TextComponent) GetJSONFormat() interface{} {
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set text properties and fill the named properties map
 func (component TextComponent) VerifyAndSetJSONData(data interface{}) (Component, NamedProperties, error) {
 	c := component
-	var props NamedProperties
+	props := make(NamedProperties)
 	stringStruct, ok := data.(*textFormat)
 	if !ok {
 		return component, props, fmt.Errorf("failed to convert returned data to component properties")
@@ -310,6 +310,12 @@ func (component TextComponent) VerifyAndSetJSONData(data interface{}) (Component
 	}
 	if newVal != nil {
 		c.Colour.A = newVal.(uint8)
+	}
+	type invalidStruct struct {
+		Message string
+	}
+	for key := range c.NamedPropertiesMap {
+		props[key] = invalidStruct{Message:"Please replace me with real data"}
 	}
 	return c, props, nil
 }
