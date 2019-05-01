@@ -105,6 +105,36 @@ func extractSingleProp(inputVal, propName string, typeName propType, namedPropsM
 	return namedPropsMap, nil, fmt.Errorf("cannot convert property %v to unsupported type %v", propName, typeName)
 }
 
+func extractExclusiveProp(inputVals, propNames []string, typeNames []propType, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, extractedValue interface{}, validIndex int, err error) {
+	listSize := len(inputVals)
+	if len(propNames) != listSize || len(typeNames) != listSize {
+		return namedPropsMap, nil, -1, fmt.Errorf("input arrays are misaligned: %d : %d : %d", listSize, len(propNames), len(typeNames))
+	}
+	propsArray := make([]map[string][]string, listSize)
+	errArray := make([]error, listSize)
+	allVals := make([]interface{}, listSize)
+	setCount := 0
+	validIndex = -1
+	for i := 0; i < listSize; i++ {
+		propsArray[i] = make(map[string][]string)
+		propsArray[i], allVals[i], errArray[i] = extractSingleProp(inputVals[i], propNames[i], typeNames[i], propsArray[i])
+		if len(propsArray[i]) != 0 || errArray[i] == nil {
+			setCount++
+			validIndex = i
+		}
+	}
+	if setCount != 1 {
+		return namedPropsMap, nil, -1, fmt.Errorf("exactly one of (%v) must be set", strings.Join(propNames, ", "))
+	}
+	returnedPropsMap = namedPropsMap
+	for key, value := range propsArray[validIndex] {
+		returnedPropsMap[key] = append(returnedPropsMap[key], value...)
+	}
+	extractedValue = allVals[validIndex]
+	err = nil
+	return
+}
+
 // ParseDataValue determines whether a string represents raw data or a named variable and returns this information as well as the data cleaned of any variable definitions
 func ParseDataValue(value string) (hasNamedProperties bool, deconstructed DeconstructedDataValue, err error) {
 	deconstructed = DeconstructedDataValue{}

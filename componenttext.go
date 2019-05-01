@@ -187,56 +187,37 @@ func (component TextComponent) VerifyAndSetJSONData(data interface{}) (Component
 	var newVal interface{}
 	var err error
 	// Deal with the font restrictions
+	inputs := []string{
+		stringStruct.Font.FontName,
+		stringStruct.Font.FontFile,
+		stringStruct.Font.FontURL,
+	}
+	propNames := []string{
+		"fontName",
+		"fontFile",
+		"fontURL",
+	}
+	types := []propType{
+		stringType,
+		stringType,
+		stringType,
+	}
+	var extractedVal interface{}
+	validIndex := -1
+	c.NamedPropertiesMap, extractedVal, validIndex, err = extractExclusiveProp(inputs, propNames, types, c.NamedPropertiesMap)
+	if err != nil {
+		return component, props, err
+	}
 	var fName, fFile, fURL interface{}
-	c.NamedPropertiesMap, fName, err = extractSingleProp(stringStruct.Font.FontName, "fontName", stringType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	c.NamedPropertiesMap, fFile, err = extractSingleProp(stringStruct.Font.FontFile, "fontFile", stringType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	c.NamedPropertiesMap, fURL, err = extractSingleProp(stringStruct.Font.FontURL, "fontURL", stringType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	fNameSet := false
-	fFileSet := false
-	fURLSet := false
-	for _, val := range c.NamedPropertiesMap {
-		for _, cProp := range val {
-			if cProp == "fontName" {
-				fNameSet = true
-			}
-			if cProp == "fontFile" {
-				fFileSet = true
-			}
-			if cProp == "fontURL" {
-				fURLSet = true
-			}
-		}
-	}
-	setCount := 0
-	if fNameSet {
-		setCount++
-	}
-	if fFileSet {
-		setCount++
-	}
-	if fURLSet {
-		setCount++
-	}
-	if fName != nil {
-		setCount++
-	}
-	if fFile != nil {
-		setCount++
-	}
-	if fURL != nil {
-		setCount++
-	}
-	if setCount != 1 {
-		return component, props, fmt.Errorf("exactly one of fontName, fontFile, fontURL must be set")
+	switch validIndex {
+	case 0:
+		fName = extractedVal
+	case 1:
+		fFile = extractedVal
+	case 2:
+		fURL = extractedVal
+	default:
+		return component, props, fmt.Errorf("failed to extract font")
 	}
 	if fName != nil {
 		stringVal := fName.(string)

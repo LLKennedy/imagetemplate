@@ -127,42 +127,31 @@ func (component ImageComponent) VerifyAndSetJSONData(data interface{}) (Componen
 	var newVal interface{}
 	var err error
 	// Deal with the file/data restrictions
+	inputs := []string{
+		stringStruct.FileName,
+		stringStruct.Data,
+	}
+	propNames := []string{
+		"fileName",
+	}
+	types := []propType{
+		stringType,
+		stringType,
+	}
+	var extractedVal interface{}
+	validIndex := -1
+	c.NamedPropertiesMap, extractedVal, validIndex, err = extractExclusiveProp(inputs, propNames, types, c.NamedPropertiesMap)
+	if err != nil {
+		return component, props, err
+	}
 	var file, fdata interface{}
-	c.NamedPropertiesMap, file, err = extractSingleProp(stringStruct.FileName, "fileName", stringType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	c.NamedPropertiesMap, fdata, err = extractSingleProp(stringStruct.Data, "data", stringType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	fileSet := false
-	dataSet := false
-	for _, val := range c.NamedPropertiesMap {
-		for _, cProp := range val {
-			if cProp == "fileName" {
-				fileSet = true
-			}
-			if cProp == "data" {
-				dataSet = true
-			}
-		}
-	}
-	setCount := 0
-	if fileSet {
-		setCount++
-	}
-	if dataSet {
-		setCount++
-	}
-	if file != nil {
-		setCount++
-	}
-	if fdata != nil {
-		setCount++
-	}
-	if setCount != 1 {
-		return component, props, fmt.Errorf("exactly one of fileName and data must be set")
+	switch validIndex {
+	case 0:
+		file = extractedVal
+	case 1:
+		fdata = extractedVal
+	default:
+		return component, props, fmt.Errorf("failed to extract image file")
 	}
 	if fdata != nil {
 		base64Val := fdata.(string)
