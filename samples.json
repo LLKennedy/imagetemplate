@@ -46,7 +46,12 @@
 						"startY": "300",
 						"content": "Label Text Here",
 						"fontSize": "12",
-						"typeFace": "Times New Roman",
+						"font": {
+							"comment": "Only use one of these",
+							"fontName": "Times New Roman",
+							"fontFile": "assets/font.ttf",
+							"fontURL": "https://myfont.com/files/font.ttf"
+						},
 						"colour": {
 							"R": "0",
 							"G": "0",
