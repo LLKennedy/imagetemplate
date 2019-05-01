@@ -133,6 +133,7 @@ func (component ImageComponent) VerifyAndSetJSONData(data interface{}) (Componen
 	}
 	propNames := []string{
 		"fileName",
+		"data",
 	}
 	types := []propType{
 		stringType,

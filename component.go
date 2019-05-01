@@ -371,6 +371,9 @@ func (c ComponentConditional) Validate() (bool, error) {
 // GetNamedPropertiesList returns a list of all named props found in the conditional
 func (c ComponentConditional) GetNamedPropertiesList() NamedProperties {
 	results := NamedProperties{}
+	if c.Name == "" && len(c.Group.Conditionals) == 0 {
+		return results
+	}
 	type invalidData struct {
 		Message string
 	}
