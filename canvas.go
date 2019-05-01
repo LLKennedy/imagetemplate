@@ -36,7 +36,7 @@ type Canvas interface {
 
 // ImageCanvas uses golang's native Image package to implement the Canvas interface
 type ImageCanvas struct {
-	Image draw.Image
+	Image  draw.Image
 	reader fileReader
 }
 

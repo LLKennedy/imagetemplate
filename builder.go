@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/disintegration/imaging"
 	"golang.org/x/image/bmp"
+	_ "golang.org/x/image/tiff" // tiff imported for image decoding
 	"image"
 	"image/color"
 	"image/draw"

@@ -19,7 +19,7 @@ type TextComponent struct {
 	MaxWidth           int
 	Font               *truetype.Font
 	Colour             color.NRGBA
-	reader fileReader
+	reader             fileReader
 }
 
 type textFormat struct {
@@ -91,6 +91,7 @@ func (component TextComponent) SetNamedProperties(properties NamedProperties) (C
 				return err
 			}
 			c.Font = rawFont
+			return nil
 		case "fontFile":
 			stringVal, ok := value.(string)
 			if !ok {
@@ -108,6 +109,7 @@ func (component TextComponent) SetNamedProperties(properties NamedProperties) (C
 				return err
 			}
 			c.Font = rawFont
+			return nil
 		case "fontURL":
 			return fmt.Errorf("fontURL not implemented")
 		case "size":
@@ -116,6 +118,7 @@ func (component TextComponent) SetNamedProperties(properties NamedProperties) (C
 				return fmt.Errorf("error converting %v to float64", value)
 			}
 			c.Size = float64Val
+			return nil
 		}
 		if strings.Contains("RGBA", name) && len(name) == 1 {
 			//Process colours
@@ -197,12 +200,43 @@ func (component TextComponent) VerifyAndSetJSONData(data interface{}) (Component
 	if err != nil {
 		return component, props, err
 	}
-	trueCount := 0
-	if fName != nil {trueCount++}
-	if fFile != nil {trueCount++}
-	if fURL != nil {trueCount++}
-	if trueCount != 1 {
-		return component, props, fmt.Errorf("exactly one of fontName, fontFile and fontURL must be set")
+	fNameSet := false
+	fFileSet := false
+	fURLSet := false
+	for _, val := range c.NamedPropertiesMap {
+		for _, cProp := range val {
+			if cProp == "fontName" {
+				fNameSet = true
+			}
+			if cProp == "fontFile" {
+				fFileSet = true
+			}
+			if cProp == "fontURL" {
+				fURLSet = true
+			}
+		}
+	}
+	setCount := 0
+	if fNameSet {
+		setCount++
+	}
+	if fFileSet {
+		setCount++
+	}
+	if fURLSet {
+		setCount++
+	}
+	if fName != nil {
+		setCount++
+	}
+	if fFile != nil {
+		setCount++
+	}
+	if fURL != nil {
+		setCount++
+	}
+	if setCount != 1 {
+		return component, props, fmt.Errorf("exactly one of fontName, fontFile, fontURL must be set")
 	}
 	if fName != nil {
 		stringVal := fName.(string)

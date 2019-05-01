@@ -52,10 +52,10 @@ func isSingleProp(d DeconstructedDataValue) bool {
 type propType string
 
 const (
-	intType    propType = "int"
-	stringType propType = "string"
-	boolType   propType = "bool"
-	uint8Type  propType = "uint8"
+	intType     propType = "int"
+	stringType  propType = "string"
+	boolType    propType = "bool"
+	uint8Type   propType = "uint8"
 	float64Type propType = "float64"
 )
 
