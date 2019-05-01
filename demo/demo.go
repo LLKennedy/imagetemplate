@@ -47,7 +47,7 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	}
-	canvas, err = canvas.Barcode(img.BarcodeTypeCode93, []byte("Luke"), img.BarcodeExtraData{Code93IncludeChecksum: true, Code93FullAsciiMode: true}, image.Point{X:0, Y:400}, 400, 200, nil, color.Transparent)
+	canvas, err = canvas.Barcode(img.BarcodeTypeCode93, []byte("Luke"), img.BarcodeExtraData{Code93IncludeChecksum: true, Code93FullASCIIMode: true}, image.Point{X:0, Y:400}, 400, 200, nil, color.Transparent)
 	if err != nil {
 		log.Println(err)
 	}
@@ -75,7 +75,7 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	}
-	canvas, err = canvas.Barcode(img.BarcodeTypeCode39, []byte("Luke"), img.BarcodeExtraData{Code39IncludeChecksum: true, Code39FullAsciiMode: true}, image.Point{X:1200, Y:600}, 400, 200, nil, nil)
+	canvas, err = canvas.Barcode(img.BarcodeTypeCode39, []byte("Luke"), img.BarcodeExtraData{Code39IncludeChecksum: true, Code39FullASCIIMode: true}, image.Point{X:1200, Y:600}, 400, 200, nil, nil)
 	if err != nil {
 		log.Println(err)
 	}

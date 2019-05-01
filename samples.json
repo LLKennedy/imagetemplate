@@ -46,6 +46,7 @@
 						"startY": "300",
 						"content": "Label Text Here",
 						"fontSize": "12",
+						"maxWidth": "100",
 						"font": {
 							"comment": "Only use one of these",
 							"fontName": "Times New Roman",

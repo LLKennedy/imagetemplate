@@ -49,13 +49,14 @@ type Template struct {
 	Components []ComponentTemplate `json:"components"`
 }
 
-// ComponentsElement represents a partial unmarshalled Component, with its properties left in raw form to be handled by each known type of Component.
+// ComponentTemplate is a partial unmarshalled Component, with its properties left in raw form to be handled by each known type of Component.
 type ComponentTemplate struct {
 	Type        string               `json:"type"`
 	Conditional ComponentConditional `json:"conditional"`
 	Properties  json.RawMessage      `json:"properties"`
 }
 
+// ToggleableComponent is a component with its conditional
 type ToggleableComponent struct {
 	Conditional ComponentConditional
 	Component   Component
@@ -339,7 +340,7 @@ func (builder ImageBuilder) SetComponents(components []ToggleableComponent) Buil
 	return builder
 }
 
-// GetNamedProperties returns the list of named properties in the builder object
+// GetNamedPropertiesList returns the list of named properties in the builder object
 func (builder ImageBuilder) GetNamedPropertiesList() NamedProperties {
 	return builder.NamedProperties
 }

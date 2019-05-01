@@ -189,7 +189,7 @@ func TestParseDataValue(t *testing.T) {
 			hasNamedProperties: true,
 			cleanValues:        []string{"Hello there, "},
 			propNames:          []string{"title"},
-			err:                errors.New("Unclosed named property in Hello there, $title$. $username!"),
+			err:                errors.New("unclosed named property in 'Hello there, $title$. $username!'"),
 		},
 		parseTest{
 			name:               "empty value",
