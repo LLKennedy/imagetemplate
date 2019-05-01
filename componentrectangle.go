@@ -32,7 +32,7 @@ type rectangleFormat struct {
 // Write draws a rectangle on the canvas
 func (component RectangleComponent) Write(canvas Canvas) (Canvas, error) {
 	if len(component.NamedPropertiesMap) != 0 {
-		return canvas, fmt.Errorf("Cannot draw rectangle, not all named properties are set: %v", component.NamedPropertiesMap)
+		return canvas, fmt.Errorf("cannot draw rectangle, not all named properties are set: %v", component.NamedPropertiesMap)
 	}
 	return canvas.Rectangle(component.TopLeft, component.Width, component.Height, component.Colour)
 }
@@ -45,7 +45,7 @@ func (component RectangleComponent) SetNamedProperties(properties NamedPropertie
 			//Process colours
 			colourVal, ok := value.(uint8)
 			if !ok {
-				return fmt.Errorf("Error converting %v to uint8", value)
+				return fmt.Errorf("error converting %v to uint8", value)
 			}
 			switch name {
 			case "R":
@@ -62,12 +62,12 @@ func (component RectangleComponent) SetNamedProperties(properties NamedPropertie
 				return nil
 			default:
 				//What? How did you get here?
-				return fmt.Errorf("Name was a string inside RGBA and Value was a valid uint8, but Name wasn't R, G, B, or A. Name was: %v", name)
+				return fmt.Errorf("name was a string inside RGBA and Value was a valid uint8, but Name wasn't R, G, B, or A. Name was: %v", name)
 			}
 		}
 		numberVal, ok := value.(int)
 		if !ok {
-			return fmt.Errorf("Error converting %v to int", value)
+			return fmt.Errorf("error converting %v to int", value)
 		}
 		switch name {
 		case "topLeftX":
@@ -83,7 +83,7 @@ func (component RectangleComponent) SetNamedProperties(properties NamedPropertie
 			c.Height = numberVal
 			return nil
 		default:
-			return fmt.Errorf("Invalid component property in named property map: %v", name)
+			return fmt.Errorf("invalid component property in named property map: %v", name)
 		}
 	}
 	var err error
@@ -105,7 +105,7 @@ func (component RectangleComponent) VerifyAndSetJSONData(data interface{}) (Comp
 	var props NamedProperties
 	stringStruct, ok := data.(*rectangleFormat)
 	if !ok {
-		return component, props, fmt.Errorf("Failed to convert returned data to component properties")
+		return component, props, fmt.Errorf("failed to convert returned data to component properties")
 	}
 	// Get named properties and assign each real property
 	var newVal interface{}

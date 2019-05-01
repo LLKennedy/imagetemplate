@@ -19,7 +19,7 @@ func TestStandardSetNamedProperties(t *testing.T) {
 		return nil
 	}
 	errorSetFunc := func(string, interface{}) error {
-		return errors.New("Failed to set property")
+		return errors.New("failed to set property")
 	}
 	testArray := []setPropTest{
 		setPropTest{
@@ -46,7 +46,7 @@ func TestStandardSetNamedProperties(t *testing.T) {
 			resultLeftovers: map[string][]string{
 				"username": []string{"innerPropUsername"},
 			},
-			resultErr: errors.New("Failed to set property"),
+			resultErr: errors.New("failed to set property"),
 		},
 		setPropTest{
 			name: "many properties success",
@@ -197,7 +197,7 @@ func TestParseDataValue(t *testing.T) {
 			hasNamedProperties: false,
 			cleanValues:        []string(nil),
 			propNames:          []string(nil),
-			err:                errors.New("Could not parse empty property"),
+			err:                errors.New("could not parse empty property"),
 		},
 	}
 	for _, test := range testArray {
@@ -269,11 +269,11 @@ func TestConditionals(t *testing.T) {
 				testProperty{
 					name:   "username",
 					value:  18,
-					setErr: errors.New("Invalid value for string operator: 18"),
+					setErr: errors.New("invalid value for string operator: 18"),
 				},
 			},
 			validateResult: false,
-			validateError:  errors.New("Attempted to validate conditional username equals john smith without setting username"),
+			validateError:  errors.New("attempted to validate conditional username equals john smith without setting username"),
 		},
 		testSet{
 			name: "string condition, mismatched value name",
@@ -291,7 +291,7 @@ func TestConditionals(t *testing.T) {
 				},
 			},
 			validateResult: false,
-			validateError:  errors.New("Attempted to validate conditional username equals john smith without setting username"),
+			validateError:  errors.New("attempted to validate conditional username equals john smith without setting username"),
 		},
 		testSet{
 			name: "string equals, fails on case sensitivity",
@@ -359,11 +359,11 @@ func TestConditionals(t *testing.T) {
 				testProperty{
 					name:   "age",
 					value:  "john smith",
-					setErr: errors.New("Invalid value for float operator: john smith"),
+					setErr: errors.New("invalid value for float operator: john smith"),
 				},
 			},
 			validateResult: false,
-			validateError:  errors.New("Attempted to validate conditional age >= 18 without setting age"),
+			validateError:  errors.New("attempted to validate conditional age >= 18 without setting age"),
 		},
 		testSet{
 			name: "int condition, mismatched value name",
@@ -377,11 +377,11 @@ func TestConditionals(t *testing.T) {
 				testProperty{
 					name:   "age",
 					value:  "john smith",
-					setErr: errors.New("Invalid value for float operator: john smith"),
+					setErr: errors.New("invalid value for float operator: john smith"),
 				},
 			},
 			validateResult: false,
-			validateError:  errors.New("Attempted to validate conditional age >= 18 without setting age"),
+			validateError:  errors.New("attempted to validate conditional age >= 18 without setting age"),
 		},
 		testSet{
 			name: "failing xor",
@@ -463,11 +463,11 @@ func TestConditionals(t *testing.T) {
 				testProperty{
 					name:   "age2",
 					value:  20,
-					setErr: errors.New("Failed to convert conditional value to float: smith"),
+					setErr: errors.New("failed to convert conditional value to float: smith"),
 				},
 			},
 			validateResult: false,
-			validateError:  errors.New("Attempted to validate conditional age2 > smith without setting age2"),
+			validateError:  errors.New("attempted to validate conditional age2 > smith without setting age2"),
 		},
 		testSet{
 			name: "invalid operator",
@@ -497,11 +497,11 @@ func TestConditionals(t *testing.T) {
 				testProperty{
 					name:   "username",
 					value:  "john smith",
-					setErr: errors.New("Invalid conditional operator is exactly"),
+					setErr: errors.New("invalid conditional operator is exactly"),
 				},
 			},
 			validateResult: false,
-			validateError:  errors.New("Attempted to validate conditional username is exactly john smith without setting username"),
+			validateError:  errors.New("attempted to validate conditional username is exactly john smith without setting username"),
 		},
 		testSet{
 			name: "unset inner conditional",
@@ -530,7 +530,7 @@ func TestConditionals(t *testing.T) {
 				},
 			},
 			validateResult: false,
-			validateError:  errors.New("Attempted to validate conditional username equals john smith without setting username"),
+			validateError:  errors.New("attempted to validate conditional username equals john smith without setting username"),
 		},
 		testSet{
 			name: "unset inner conditional",
@@ -564,7 +564,7 @@ func TestConditionals(t *testing.T) {
 				},
 			},
 			validateResult: false,
-			validateError:  errors.New("Invalid group operator some other operator"),
+			validateError:  errors.New("invalid group operator some other operator"),
 		},
 		testSet{
 			name: "one of everything, all passing",
