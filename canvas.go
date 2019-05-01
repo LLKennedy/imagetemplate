@@ -144,7 +144,7 @@ func (canvas ImageCanvas) Text(text string, start image.Point, typeFace font.Fac
 	return c, nil
 }
 
-// TryText draws text on the canvas
+// TryText returns whether the text would fit on the canvas, and the width the text would currently use up
 func (canvas ImageCanvas) TryText(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (bool, int) {
 	if maxWidth <= 0 {
 		return false, -1
