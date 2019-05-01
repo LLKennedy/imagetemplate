@@ -37,6 +37,7 @@ type Canvas interface {
 // ImageCanvas uses golang's native Image package to implement the Canvas interface
 type ImageCanvas struct {
 	Image draw.Image
+	reader fileReader
 }
 
 // NewCanvas generates a new canvas of the given width and height
@@ -53,6 +54,7 @@ func NewCanvas(width, height int) (ImageCanvas, error) {
 			Min: image.Point{X: 0, Y: 0},
 			Max: image.Point{X: width, Y: height},
 		}),
+		reader: ioutilFileReader{},
 	}, nil
 }
 

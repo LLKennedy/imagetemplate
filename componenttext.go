@@ -19,6 +19,7 @@ type TextComponent struct {
 	MaxWidth           int
 	Font               *truetype.Font
 	Colour             color.NRGBA
+	reader fileReader
 }
 
 type textFormat struct {
@@ -91,7 +92,22 @@ func (component TextComponent) SetNamedProperties(properties NamedProperties) (C
 			}
 			c.Font = rawFont
 		case "fontFile":
-			return fmt.Errorf("fontFile not implemented")
+			stringVal, ok := value.(string)
+			if !ok {
+				return fmt.Errorf("error converting %v to string", value)
+			}
+			if component.reader == nil {
+				component.reader = ioutilFileReader{}
+			}
+			ttfBytes, err := component.reader.ReadFile(stringVal)
+			if err != nil {
+				return err
+			}
+			rawFont, err := truetype.Parse(ttfBytes)
+			if err != nil {
+				return err
+			}
+			c.Font = rawFont
 		case "fontURL":
 			return fmt.Errorf("fontURL not implemented")
 		case "size":
@@ -198,7 +214,19 @@ func (component TextComponent) VerifyAndSetJSONData(data interface{}) (Component
 		c.Font = rawFont
 	}
 	if fFile != nil {
-		return component, props, fmt.Errorf("fontFile not implemented")
+		stringVal := fFile.(string)
+		if c.reader == nil {
+			c.reader = ioutilFileReader{}
+		}
+		ttfBytes, err := c.reader.ReadFile(stringVal)
+		if err != nil {
+			return component, props, err
+		}
+		rawFont, err := truetype.Parse(ttfBytes)
+		if err != nil {
+			return component, props, err
+		}
+		c.Font = rawFont
 	}
 	if fURL != nil {
 		return component, props, fmt.Errorf("fontURL not implemented")
