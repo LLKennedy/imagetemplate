@@ -28,12 +28,12 @@ type imageFormat struct {
 
 // Write draws an image on the canvas
 func (component ImageComponent) Write(canvas Canvas) (Canvas, error) {
-	return canvas, fmt.Errorf("Not implemented yet")
+	return canvas, fmt.Errorf("not implemented yet")
 }
 
 // SetNamedProperties proceses the named properties and sets them into the image properties
 func (component ImageComponent) SetNamedProperties(properties NamedProperties) (Component, error) {
-	return component, fmt.Errorf("Not implemented yet")
+	return component, fmt.Errorf("not implemented yet")
 }
 
 // GetJSONFormat returns the JSON structure of a image component
@@ -43,5 +43,5 @@ func (component ImageComponent) GetJSONFormat() interface{} {
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set image properties and fill the named properties map
 func (component ImageComponent) VerifyAndSetJSONData(interface{}) (Component, NamedProperties, error) {
-	return component, nil, fmt.Errorf("Not implemented yet")
+	return component, nil, fmt.Errorf("not implemented yet")
 }

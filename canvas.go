@@ -43,11 +43,11 @@ type ImageCanvas struct {
 // NewCanvas generates a new canvas of the given width and height
 func NewCanvas(width, height int) (ImageCanvas, error) {
 	if width <= 0 && height <= 0 {
-		return ImageCanvas{}, errors.New("Invalid width and height")
+		return ImageCanvas{}, errors.New("invalid width and height")
 	} else if width <= 0 {
-		return ImageCanvas{}, errors.New("Invalid width")
+		return ImageCanvas{}, errors.New("invalid width")
 	} else if height <= 0 {
-		return ImageCanvas{}, errors.New("Invalid height")
+		return ImageCanvas{}, errors.New("invalid height")
 	}
 	return ImageCanvas{
 		Image: image.NewNRGBA(image.Rectangle{
@@ -95,14 +95,14 @@ func (canvas ImageCanvas) GetHeight() int {
 func (canvas ImageCanvas) Rectangle(topLeft image.Point, width, height int, colour color.Color) (Canvas, error) {
 	c := canvas
 	if width <= 0 && height <= 0 {
-		return canvas, errors.New("Invalid width and height")
+		return canvas, errors.New("invalid width and height")
 	} else if width <= 0 {
-		return canvas, errors.New("Invalid width")
+		return canvas, errors.New("invalid width")
 	} else if height <= 0 {
-		return canvas, errors.New("Invalid height")
+		return canvas, errors.New("invalid height")
 	}
 	if c.Image == nil {
-		return canvas, errors.New("No image set for canvas to draw on")
+		return canvas, errors.New("no image set for canvas to draw on")
 	}
 	draw.Draw(c.Image, image.Rect(topLeft.X, topLeft.Y, topLeft.X+width, topLeft.Y+height), image.NewUniform(colour), topLeft, draw.Over)
 	return c, nil
@@ -112,10 +112,10 @@ func (canvas ImageCanvas) Rectangle(topLeft image.Point, width, height int, colo
 func (canvas ImageCanvas) Circle(centre image.Point, radius int, colour color.Color) (Canvas, error) {
 	c := canvas
 	if radius <= 0 {
-		return canvas, errors.New("Invalid radius")
+		return canvas, errors.New("invalid radius")
 	}
 	if c.Image == nil {
-		return canvas, errors.New("No image set for canvas to draw on")
+		return canvas, errors.New("no image set for canvas to draw on")
 	}
 	mask := &circle{p: centre, r: radius}
 	draw.DrawMask(c.Image, mask.Bounds(), image.NewUniform(colour), image.ZP, mask, mask.Bounds().Min, draw.Over)
@@ -125,10 +125,10 @@ func (canvas ImageCanvas) Circle(centre image.Point, radius int, colour color.Co
 // Text draws text on the canvas
 func (canvas ImageCanvas) Text(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (Canvas, error) {
 	if maxWidth <= 0 {
-		return canvas, errors.New("Invalid maxWidth")
+		return canvas, errors.New("invalid maxWidth")
 	}
 	if canvas.Image == nil {
-		return canvas, errors.New("No image set for canvas to draw on")
+		return canvas, errors.New("no image set for canvas to draw on")
 	}
 	c := canvas
 	//FIXME: how to use start?
@@ -140,7 +140,7 @@ func (canvas ImageCanvas) Text(text string, start image.Point, typeFace font.Fac
 	}
 	width := drawer.MeasureString(text).Ceil()
 	if width > maxWidth {
-		return canvas, errors.New("Resultant drawn text was longer than maxWidth")
+		return canvas, errors.New("resultant drawn text was longer than maxWidth")
 	}
 	drawer.DrawString(text)
 	return c, nil
@@ -169,7 +169,7 @@ func (canvas ImageCanvas) TryText(text string, start image.Point, typeFace font.
 func (canvas ImageCanvas) DrawImage(start image.Point, subImage image.Image) (Canvas, error) {
 	c := canvas
 	if c.Image == nil {
-		return canvas, errors.New("No image set for canvas to draw on")
+		return canvas, errors.New("no image set for canvas to draw on")
 	}
 	subBounds := subImage.Bounds()
 	width := subBounds.Max.X - subBounds.Min.X
@@ -234,7 +234,7 @@ type BarcodeExtraData struct {
 func (canvas ImageCanvas) Barcode(codeType BarcodeType, content []byte, extra BarcodeExtraData, start image.Point, width, height int, dataColour color.Color, backgroundColour color.Color) (Canvas, error) {
 	c := canvas
 	if c.Image == nil {
-		return canvas, errors.New("No image set for canvas to draw on")
+		return canvas, errors.New("no image set for canvas to draw on")
 	}
 	var encodedBarcode barcode.Barcode
 	var err error

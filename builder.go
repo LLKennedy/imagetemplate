@@ -98,7 +98,7 @@ func NewBuilder(canvas Canvas, startingColour color.Color) (ImageBuilder, error)
 func (builder ImageBuilder) WriteToBMP() ([]byte, error) {
 	var buf bytes.Buffer
 	if builder.Canvas == nil {
-		return nil, fmt.Errorf("Error: no canvas, cannot write output")
+		return nil, fmt.Errorf("no canvas, cannot write output")
 	}
 	err := bmp.Encode(&buf, builder.Canvas.GetUnderlyingImage())
 	if err != nil {
@@ -149,7 +149,7 @@ func (builder ImageBuilder) setBackgroundImage(canvas Canvas, template Template)
 	fileSet := template.BaseImage.FileName != ""
 	baseColourSet := template.BaseImage.BaseColour.Red != ""
 	if (dataSet && fileSet) || (dataSet && baseColourSet) || fileSet && baseColourSet {
-		return canvas, fmt.Errorf("Cannot load base image from file and load from data string and generate from base colour, specify only data or fileName or base colour")
+		return canvas, fmt.Errorf("cannot load base image from file and load from data string and generate from base colour, specify only data or fileName or base colour")
 	}
 	if !dataSet && !fileSet && !baseColourSet {
 		return c, nil
@@ -302,7 +302,7 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, Name
 		}
 		if len(results) <= tCount {
 			// Failed to find a matching type
-			return results, namedProperties, fmt.Errorf("Failed to find type matching component with user-specified type %v", template.Type)
+			return results, namedProperties, fmt.Errorf("failed to find type matching component with user-specified type %v", template.Type)
 		}
 	}
 	return results, namedProperties, nil

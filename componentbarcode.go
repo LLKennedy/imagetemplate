@@ -36,12 +36,12 @@ type barcodeFormat struct {
 
 // Write draws a barcode on the canvas
 func (component BarcodeComponent) Write(canvas Canvas) (Canvas, error) {
-	return canvas, fmt.Errorf("Not implemented yet")
+	return canvas, fmt.Errorf("not implemented yet")
 }
 
 // SetNamedProperties proceses the named properties and sets them into the barcode properties
 func (component BarcodeComponent) SetNamedProperties(properties NamedProperties) (Component, error) {
-	return component, fmt.Errorf("Not implemented yet")
+	return component, fmt.Errorf("not implemented yet")
 }
 
 // GetJSONFormat returns the JSON structure of a barcode component
@@ -51,5 +51,5 @@ func (component BarcodeComponent) GetJSONFormat() interface{} {
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set barcode properties and fill the named properties map
 func (component BarcodeComponent) VerifyAndSetJSONData(interface{}) (Component, NamedProperties, error) {
-	return component, nil, fmt.Errorf("Not implemented yet")
+	return component, nil, fmt.Errorf("not implemented yet")
 }

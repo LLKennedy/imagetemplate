@@ -33,7 +33,7 @@ func TestBlankCanvas(t *testing.T) {
 		assert.Equal(t, blankCanvas, modifiedCanvas)
 		assert.NotNil(t, err)
 		if err != nil {
-			assert.Equal(t, "No image set for canvas to draw on", err.Error())
+			assert.EqualError(t, err, "no image set for canvas to draw on")
 		}
 	})
 	t.Run("barcode", func(t *testing.T) {
@@ -41,7 +41,7 @@ func TestBlankCanvas(t *testing.T) {
 		assert.Equal(t, blankCanvas, modifiedCanvas)
 		assert.NotNil(t, err)
 		if err != nil {
-			assert.Equal(t, "No image set for canvas to draw on", err.Error())
+			assert.EqualError(t, err, "no image set for canvas to draw on")
 		}
 	})
 	t.Run("draw image", func(t *testing.T) {
@@ -49,7 +49,7 @@ func TestBlankCanvas(t *testing.T) {
 		assert.Equal(t, blankCanvas, modifiedCanvas)
 		assert.NotNil(t, err)
 		if err != nil {
-			assert.Equal(t, "No image set for canvas to draw on", err.Error())
+			assert.EqualError(t, err, "no image set for canvas to draw on")
 		}
 	})
 	t.Run("get height", func(t *testing.T) {
@@ -69,7 +69,7 @@ func TestBlankCanvas(t *testing.T) {
 		assert.Equal(t, blankCanvas, modifiedCanvas)
 		assert.NotNil(t, err)
 		if err != nil {
-			assert.Equal(t, "No image set for canvas to draw on", err.Error())
+			assert.EqualError(t, err, "no image set for canvas to draw on")
 		}
 	})
 	t.Run("text", func(t *testing.T) {
@@ -77,7 +77,7 @@ func TestBlankCanvas(t *testing.T) {
 		assert.Equal(t, blankCanvas, modifiedCanvas)
 		assert.NotNil(t, err)
 		if err != nil {
-			assert.Equal(t, "No image set for canvas to draw on", err.Error())
+			assert.EqualError(t, err, "no image set for canvas to draw on")
 		}
 	})
 	t.Run("get image", func(t *testing.T) {
@@ -99,7 +99,7 @@ func TestNewCanvas(t *testing.T) {
 				t.Run(fmt.Sprintf("x=%d,y=%d", x, y), func(t *testing.T) {
 					newCanvas, err := NewCanvas(x, y)
 					assert.Nil(t, newCanvas.Image)
-					assert.Equal(t, err.Error(), "Invalid width and height")
+					assert.EqualError(t, err, "invalid width and height")
 				})
 			}
 		}
@@ -111,7 +111,7 @@ func TestNewCanvas(t *testing.T) {
 			t.Run(fmt.Sprintf("x=%d,y=%d", x, y), func(t *testing.T) {
 				newCanvas, err := NewCanvas(x, y)
 				assert.Nil(t, newCanvas.Image)
-				assert.Equal(t, err.Error(), "Invalid width")
+				assert.EqualError(t, err, "invalid width")
 			})
 		}
 	})
@@ -122,7 +122,7 @@ func TestNewCanvas(t *testing.T) {
 			t.Run(fmt.Sprintf("x=%d,y=%d", x, y), func(t *testing.T) {
 				newCanvas, err := NewCanvas(x, y)
 				assert.Nil(t, newCanvas.Image)
-				assert.Equal(t, err.Error(), "Invalid height")
+				assert.EqualError(t, err, "invalid height")
 			})
 		}
 	})
@@ -249,7 +249,7 @@ func TestRectangle(t *testing.T) {
 				t.Run(fmt.Sprintf("x=%d,y=%d", x, y), func(t *testing.T) {
 					modifiedCanvas, err := newCanvas.Rectangle(image.ZP, x, y, color.Black)
 					assert.Equal(t, newCanvas, modifiedCanvas)
-					assert.Equal(t, err.Error(), "Invalid width and height")
+					assert.EqualError(t, err, "invalid width and height")
 				})
 			}
 		}
@@ -261,7 +261,7 @@ func TestRectangle(t *testing.T) {
 			t.Run(fmt.Sprintf("x=%d,y=%d", x, y), func(t *testing.T) {
 				modifiedCanvas, err := newCanvas.Rectangle(image.ZP, x, y, color.Black)
 				assert.Equal(t, newCanvas, modifiedCanvas)
-				assert.Equal(t, err.Error(), "Invalid width")
+				assert.EqualError(t, err, "invalid width")
 			})
 		}
 	})
@@ -272,7 +272,7 @@ func TestRectangle(t *testing.T) {
 			t.Run(fmt.Sprintf("x=%d,y=%d", x, y), func(t *testing.T) {
 				modifiedCanvas, err := newCanvas.Rectangle(image.ZP, x, y, color.Black)
 				assert.Equal(t, newCanvas, modifiedCanvas)
-				assert.Equal(t, err.Error(), "Invalid height")
+				assert.EqualError(t, err, "invalid height")
 			})
 		}
 	})
@@ -359,11 +359,11 @@ func TestCircle(t *testing.T) {
 		modifiedCanvas, err := newCanvas.Circle(image.Pt(3, 3), -1, color.NRGBA{G: 255, A: 255})
 		assert.Equal(t, newCanvas, modifiedCanvas)
 		assert.NotNil(t, err)
-		assert.Equal(t, err.Error(), "Invalid radius")
+		assert.EqualError(t, err, "invalid radius")
 		modifiedCanvas, err = newCanvas.Circle(image.Pt(3, 3), 0, color.NRGBA{G: 255, A: 255})
 		assert.Equal(t, newCanvas, modifiedCanvas)
 		assert.NotNil(t, err)
-		assert.Equal(t, err.Error(), "Invalid radius")
+		assert.EqualError(t, err, "invalid radius")
 	})
 	t.Run("valid circle", func(t *testing.T) {
 		modifiedCanvas, err := newCanvas.Circle(image.Pt(3, 3), 2, color.NRGBA{G: 255, A: 255})
@@ -402,7 +402,7 @@ func TestText(t *testing.T) {
 		assert.Equal(t, newCanvas, modifiedCanvas)
 		assert.NotNil(t, err)
 		if err != nil {
-			assert.Equal(t, "Invalid maxWidth", err.Error())
+			assert.EqualError(t, err, "invalid maxWidth")
 		}
 	})
 	t.Run("valid text", func(t *testing.T) {
@@ -420,7 +420,7 @@ func TestText(t *testing.T) {
 		_, err := newCanvas.Text("test this much longer string which definitely won't fit", image.Pt(2, 15), regFont, purple, 28)
 		assert.NotNil(t, err)
 		if err != nil {
-			assert.Equal(t, "Resultant drawn text was longer than maxWidth", err.Error())
+			assert.EqualError(t, err, "resultant drawn text was longer than maxWidth")
 		}
 	})
 }
