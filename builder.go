@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/disintegration/imaging"
 	"golang.org/x/image/bmp"
+	_ "golang.org/x/image/tiff" // tiff imported for image decoding
 	"image"
 	"image/color"
 	"image/draw"
@@ -98,7 +99,7 @@ func NewBuilder(canvas Canvas, startingColour color.Color) (ImageBuilder, error)
 func (builder ImageBuilder) WriteToBMP() ([]byte, error) {
 	var buf bytes.Buffer
 	if builder.Canvas == nil {
-		return nil, fmt.Errorf("Error: no canvas, cannot write output")
+		return nil, fmt.Errorf("no canvas, cannot write output")
 	}
 	err := bmp.Encode(&buf, builder.Canvas.GetUnderlyingImage())
 	if err != nil {
@@ -149,7 +150,7 @@ func (builder ImageBuilder) setBackgroundImage(canvas Canvas, template Template)
 	fileSet := template.BaseImage.FileName != ""
 	baseColourSet := template.BaseImage.BaseColour.Red != ""
 	if (dataSet && fileSet) || (dataSet && baseColourSet) || fileSet && baseColourSet {
-		return canvas, fmt.Errorf("Cannot load base image from file and load from data string and generate from base colour, specify only data or fileName or base colour")
+		return canvas, fmt.Errorf("cannot load base image from file and load from data string and generate from base colour, specify only data or fileName or base colour")
 	}
 	if !dataSet && !fileSet && !baseColourSet {
 		return c, nil
@@ -263,10 +264,10 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, Name
 		}
 		var typeRange []string
 		switch template.Type {
-		case "circle", "Circle", "rectangle", "Rectangle", "rect", "Rect", "image", "Image", "photo", "Photo", "text", "Text", "words", "Words":
+		case "circle", "Circle", "rectangle", "Rectangle", "rect", "Rect", "image", "Image", "photo", "Photo", "text", "Text", "words", "Words", "barcode", "Barcode":
 			typeRange = []string{template.Type}
 		default:
-			typeRange = []string{"circle", "Circle", "rectange", "Rectangle", "rect", "Rect", "image", "Image", "photo", "Photo", "text", "Text", "words", "Words"}
+			typeRange = []string{"circle", "Circle", "rectange", "Rectangle", "rect", "Rect", "image", "Image", "photo", "Photo", "text", "Text", "words", "Words", "barcode", "Barcode"}
 		}
 		for _, compType := range typeRange {
 			var newComponent Component
@@ -279,6 +280,8 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, Name
 				newComponent = ImageComponent{}
 			case "text", "Text", "words", "Words":
 				newComponent = TextComponent{}
+			case "barcode", "Barcode":
+				newComponent = BarcodeComponent{}
 			}
 			// Get JSON struct to parse into
 			shape := newComponent.GetJSONFormat()
@@ -302,7 +305,7 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, Name
 		}
 		if len(results) <= tCount {
 			// Failed to find a matching type
-			return results, namedProperties, fmt.Errorf("Failed to find type matching component with user-specified type %v", template.Type)
+			return results, namedProperties, fmt.Errorf("failed to find type matching component with user-specified type %v", template.Type)
 		}
 	}
 	return results, namedProperties, nil

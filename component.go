@@ -52,10 +52,11 @@ func isSingleProp(d DeconstructedDataValue) bool {
 type propType string
 
 const (
-	intType    propType = "int"
-	stringType propType = "string"
-	boolType   propType = "bool"
-	uint8Type  propType = "uint8"
+	intType     propType = "int"
+	stringType  propType = "string"
+	boolType    propType = "bool"
+	uint8Type   propType = "uint8"
+	float64Type propType = "float64"
 )
 
 func extractSingleProp(inputVal, propName string, typeName propType, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, extractedValue interface{}, err error) {
@@ -66,7 +67,7 @@ func extractSingleProp(inputVal, propName string, typeName propType, namedPropsM
 	}
 	if hasNamedProps {
 		if !isSingleProp(deconstructed) {
-			return namedPropsMap, nil, fmt.Errorf("Composite properties are not yet supported: %v", inputVal)
+			return namedPropsMap, nil, fmt.Errorf("composite properties are not yet supported: %v", inputVal)
 		}
 		propName := deconstructed.PropNames[0]
 		npm[propName] = append(npm[propName], propName)
@@ -76,7 +77,7 @@ func extractSingleProp(inputVal, propName string, typeName propType, namedPropsM
 	case intType:
 		intVal, err := strconv.Atoi(inputVal)
 		if err != nil {
-			return namedPropsMap, nil, fmt.Errorf("Failed to convert property %v to integer: %v", propName, err)
+			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to integer: %v", propName, err)
 		}
 		return npm, intVal, nil
 	case stringType:
@@ -84,7 +85,7 @@ func extractSingleProp(inputVal, propName string, typeName propType, namedPropsM
 	case boolType:
 		boolVal, err := strconv.ParseBool(inputVal)
 		if err != nil {
-			return namedPropsMap, nil, fmt.Errorf("Failed to convert property %v to bool: %v", propName, err)
+			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to bool: %v", propName, err)
 		}
 		return npm, boolVal, nil
 	case uint8Type:
@@ -94,8 +95,44 @@ func extractSingleProp(inputVal, propName string, typeName propType, namedPropsM
 		}
 		uint8Val := uint8(uintVal)
 		return npm, uint8Val, nil
+	case float64Type:
+		float64Val, err := strconv.ParseFloat(inputVal, 64)
+		if err != nil {
+			return namedPropsMap, nil, err
+		}
+		return npm, float64Val, nil
 	}
-	return namedPropsMap, nil, fmt.Errorf("Cannot convert property %v to unsupported type %v", propName, typeName)
+	return namedPropsMap, nil, fmt.Errorf("cannot convert property %v to unsupported type %v", propName, typeName)
+}
+
+func extractExclusiveProp(inputVals, propNames []string, typeNames []propType, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, extractedValue interface{}, validIndex int, err error) {
+	listSize := len(inputVals)
+	if len(propNames) != listSize || len(typeNames) != listSize {
+		return namedPropsMap, nil, -1, fmt.Errorf("input arrays are misaligned: %d : %d : %d", listSize, len(propNames), len(typeNames))
+	}
+	propsArray := make([]map[string][]string, listSize)
+	errArray := make([]error, listSize)
+	allVals := make([]interface{}, listSize)
+	setCount := 0
+	validIndex = -1
+	for i := 0; i < listSize; i++ {
+		propsArray[i] = make(map[string][]string)
+		propsArray[i], allVals[i], errArray[i] = extractSingleProp(inputVals[i], propNames[i], typeNames[i], propsArray[i])
+		if len(propsArray[i]) != 0 || errArray[i] == nil {
+			setCount++
+			validIndex = i
+		}
+	}
+	if setCount != 1 {
+		return namedPropsMap, nil, -1, fmt.Errorf("exactly one of (%v) must be set", strings.Join(propNames, ", "))
+	}
+	returnedPropsMap = namedPropsMap
+	for key, value := range propsArray[validIndex] {
+		returnedPropsMap[key] = append(returnedPropsMap[key], value...)
+	}
+	extractedValue = allVals[validIndex]
+	err = nil
+	return
 }
 
 // ParseDataValue determines whether a string represents raw data or a named variable and returns this information as well as the data cleaned of any variable definitions
@@ -103,7 +140,7 @@ func ParseDataValue(value string) (hasNamedProperties bool, deconstructed Decons
 	deconstructed = DeconstructedDataValue{}
 	cleanString := ""
 	if len(value) == 0 {
-		err = fmt.Errorf("Could not parse empty property")
+		err = fmt.Errorf("could not parse empty property")
 		return
 	}
 	for i := 0; i < len(value); i++ {
@@ -204,7 +241,7 @@ func (c ComponentConditional) SetValue(name string, value interface{}) (Componen
 			// Handle string operators
 			stringVal, ok := value.(string)
 			if !ok {
-				return c, fmt.Errorf("Invalid value for string operator: %v", value)
+				return c, fmt.Errorf("invalid value for string operator: %v", value)
 			}
 			conVal := conditional.Value
 			switch conditional.Operator {
@@ -247,13 +284,13 @@ func (c ComponentConditional) SetValue(name string, value interface{}) (Componen
 			if !ok {
 				intVal, ok := value.(int)
 				if !ok {
-					return c, fmt.Errorf("Invalid value for float operator: %v", value)
+					return c, fmt.Errorf("invalid value for float operator: %v", value)
 				}
 				floatVal = float64(intVal)
 			}
 			conVal, err := strconv.ParseFloat(conditional.Value, 64)
 			if err != nil {
-				return c, fmt.Errorf("Failed to convert conditional value to float: %v", conditional.Value)
+				return c, fmt.Errorf("failed to convert conditional value to float: %v", conditional.Value)
 			}
 			switch conditional.Operator {
 			case numequals:
@@ -268,7 +305,7 @@ func (c ComponentConditional) SetValue(name string, value interface{}) (Componen
 				conditional.validated = floatVal >= conVal
 			}
 		default:
-			return c, fmt.Errorf("Invalid conditional operator %v", conditional.Operator)
+			return c, fmt.Errorf("invalid conditional operator %v", conditional.Operator)
 		}
 		if conditional.Not {
 			conditional.validated = !conditional.validated
@@ -281,7 +318,7 @@ func (c ComponentConditional) SetValue(name string, value interface{}) (Componen
 // Validate validates this conditional chain, erroring if a value down the line has not been set and evaluated
 func (c ComponentConditional) Validate() (bool, error) {
 	if !c.valueSet {
-		return false, fmt.Errorf("Attempted to validate conditional %v %v %v without setting %v", c.Name, c.Operator, c.Value, c.Name)
+		return false, fmt.Errorf("attempted to validate conditional %v %v %v without setting %v", c.Name, c.Operator, c.Value, c.Name)
 	}
 	group := c.Group.Conditionals
 	if len(group) == 0 {
@@ -328,7 +365,7 @@ func (c ComponentConditional) Validate() (bool, error) {
 		}
 		return result, nil
 	}
-	return false, fmt.Errorf("Invalid group operator %v", op)
+	return false, fmt.Errorf("invalid group operator %v", op)
 }
 
 // GetNamedPropertiesList returns a list of all named props found in the conditional
