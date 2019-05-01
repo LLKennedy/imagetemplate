@@ -61,6 +61,9 @@ const (
 
 func extractSingleProp(inputVal, propName string, typeName propType, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, extractedValue interface{}, err error) {
 	npm := namedPropsMap
+	if npm == nil {
+		npm = make(map[string][]string)
+	}
 	hasNamedProps, deconstructed, err := ParseDataValue(inputVal)
 	if err != nil {
 		return namedPropsMap, nil, err

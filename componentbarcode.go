@@ -180,6 +180,13 @@ func (component BarcodeComponent) VerifyAndSetJSONData(data interface{}) (Compon
 	// Get named properties and assign each real property
 	var newVal interface{}
 	var err error
+	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Type, "barcodeType", stringType, c.NamedPropertiesMap)
+	if err != nil {
+		return component, props, err
+	}
+	if newVal != nil {
+		c.Type = BarcodeType(newVal.(string))
+	}
 	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Content, "content", stringType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
