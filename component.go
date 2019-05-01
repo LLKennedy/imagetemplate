@@ -61,6 +61,9 @@ const (
 
 func extractSingleProp(inputVal, propName string, typeName propType, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, extractedValue interface{}, err error) {
 	npm := namedPropsMap
+	if npm == nil {
+		npm = make(map[string][]string)
+	}
 	hasNamedProps, deconstructed, err := ParseDataValue(inputVal)
 	if err != nil {
 		return namedPropsMap, nil, err
@@ -69,8 +72,8 @@ func extractSingleProp(inputVal, propName string, typeName propType, namedPropsM
 		if !isSingleProp(deconstructed) {
 			return namedPropsMap, nil, fmt.Errorf("composite properties are not yet supported: %v", inputVal)
 		}
-		propName := deconstructed.PropNames[0]
-		npm[propName] = append(npm[propName], propName)
+		customPropName := deconstructed.PropNames[0]
+		npm[customPropName] = append(npm[propName], propName)
 		return npm, nil, nil
 	}
 	switch typeName {

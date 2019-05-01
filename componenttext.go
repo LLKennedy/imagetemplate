@@ -5,6 +5,7 @@ import (
 	"github.com/LLKennedy/gosysfonts"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
+	"golang.org/x/image/font/gofont/goregular"
 	"image"
 	"image/color"
 	"strings"
@@ -100,11 +101,11 @@ func (component TextComponent) SetNamedProperties(properties NamedProperties) (C
 			if component.reader == nil {
 				component.reader = ioutilFileReader{}
 			}
-			ttfBytes, err := component.reader.ReadFile(stringVal)
+			_, err := component.reader.ReadFile(stringVal) //set this variable again once it's working
 			if err != nil {
 				return err
 			}
-			rawFont, err := truetype.Parse(ttfBytes)
+			rawFont, err := truetype.Parse(goregular.TTF)
 			if err != nil {
 				return err
 			}
@@ -233,11 +234,11 @@ func (component TextComponent) VerifyAndSetJSONData(data interface{}) (Component
 		if c.reader == nil {
 			c.reader = ioutilFileReader{}
 		}
-		ttfBytes, err := c.reader.ReadFile(stringVal)
+		_, err := c.reader.ReadFile(stringVal) //set this back once it works
 		if err != nil {
 			return component, props, err
 		}
-		rawFont, err := truetype.Parse(ttfBytes)
+		rawFont, err := truetype.Parse(goregular.TTF)
 		if err != nil {
 			return component, props, err
 		}
