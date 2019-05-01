@@ -56,6 +56,7 @@ const (
 	stringType propType = "string"
 	boolType   propType = "bool"
 	uint8Type  propType = "uint8"
+	float64Type propType = "float64"
 )
 
 func extractSingleProp(inputVal, propName string, typeName propType, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, extractedValue interface{}, err error) {
@@ -94,6 +95,12 @@ func extractSingleProp(inputVal, propName string, typeName propType, namedPropsM
 		}
 		uint8Val := uint8(uintVal)
 		return npm, uint8Val, nil
+	case float64Type:
+		float64Val, err := strconv.ParseFloat(inputVal, 64)
+		if err != nil {
+			return namedPropsMap, nil, err
+		}
+		return npm, float64Val, nil
 	}
 	return namedPropsMap, nil, fmt.Errorf("Cannot convert property %v to unsupported type %v", propName, typeName)
 }

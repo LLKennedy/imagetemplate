@@ -29,6 +29,7 @@ type Canvas interface {
 	Rectangle(topLeft image.Point, width, height int, colour color.Color) (Canvas, error)
 	Circle(centre image.Point, radius int, colour color.Color) (Canvas, error)
 	Text(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (Canvas, error)
+	TryText(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (bool, int)
 	DrawImage(start image.Point, subImage image.Image) (Canvas, error)
 	Barcode(codeType BarcodeType, content []byte, extra BarcodeExtraData, start image.Point, width, height int, dataColour color.Color, bgColour color.Color) (Canvas, error)
 }
@@ -141,6 +142,25 @@ func (canvas ImageCanvas) Text(text string, start image.Point, typeFace font.Fac
 	}
 	drawer.DrawString(text)
 	return c, nil
+}
+
+// TryText draws text on the canvas
+func (canvas ImageCanvas) TryText(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (bool, int) {
+	if maxWidth <= 0 {
+		return false, -1
+	}
+	if canvas.Image == nil {
+		return false, -2
+	}
+	//FIXME: how to use start?
+	drawer := &font.Drawer{
+		Dot:  fixed.Point26_6{X: fixed.I(start.X), Y: fixed.I(start.Y)},
+		Dst:  canvas.Image,
+		Face: typeFace,
+		Src:  image.NewUniform(colour),
+	}
+	width := drawer.MeasureString(text).Ceil()
+	return width <= maxWidth, width
 }
 
 // DrawImage draws another image on the canvas
