@@ -29,29 +29,32 @@ type Canvas interface {
 	Rectangle(topLeft image.Point, width, height int, colour color.Color) (Canvas, error)
 	Circle(centre image.Point, radius int, colour color.Color) (Canvas, error)
 	Text(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (Canvas, error)
-	DrawImage(start image.Point, subImage image.Image) Canvas
+	TryText(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (bool, int)
+	DrawImage(start image.Point, subImage image.Image) (Canvas, error)
 	Barcode(codeType BarcodeType, content []byte, extra BarcodeExtraData, start image.Point, width, height int, dataColour color.Color, bgColour color.Color) (Canvas, error)
 }
 
 // ImageCanvas uses golang's native Image package to implement the Canvas interface
 type ImageCanvas struct {
-	Image draw.Image
+	Image  draw.Image
+	reader fileReader
 }
 
 // NewCanvas generates a new canvas of the given width and height
 func NewCanvas(width, height int) (ImageCanvas, error) {
 	if width <= 0 && height <= 0 {
-		return ImageCanvas{}, errors.New("Invalid width and height")
+		return ImageCanvas{}, errors.New("invalid width and height")
 	} else if width <= 0 {
-		return ImageCanvas{}, errors.New("Invalid width")
+		return ImageCanvas{}, errors.New("invalid width")
 	} else if height <= 0 {
-		return ImageCanvas{}, errors.New("Invalid height")
+		return ImageCanvas{}, errors.New("invalid height")
 	}
 	return ImageCanvas{
 		Image: image.NewNRGBA(image.Rectangle{
 			Min: image.Point{X: 0, Y: 0},
 			Max: image.Point{X: width, Y: height},
 		}),
+		reader: ioutilFileReader{},
 	}, nil
 }
 
@@ -72,13 +75,19 @@ func (canvas ImageCanvas) GetUnderlyingImage() image.Image {
 	return canvas.Image
 }
 
-// GetWidth returns the width of the underlying Image
+// GetWidth returns the width of the underlying Image. Returns -1 if no canvas is set.
 func (canvas ImageCanvas) GetWidth() int {
+	if canvas.Image == nil {
+		return -1
+	}
 	return canvas.Image.Bounds().Size().X
 }
 
-// GetWidth returns the width of the underlying Image
+// GetHeight returns the geight of the underlying Image. Returns -1 if no canvas is set.
 func (canvas ImageCanvas) GetHeight() int {
+	if canvas.Image == nil {
+		return -1
+	}
 	return canvas.Image.Bounds().Size().Y
 }
 
@@ -86,11 +95,14 @@ func (canvas ImageCanvas) GetHeight() int {
 func (canvas ImageCanvas) Rectangle(topLeft image.Point, width, height int, colour color.Color) (Canvas, error) {
 	c := canvas
 	if width <= 0 && height <= 0 {
-		return canvas, errors.New("Invalid width and height")
+		return canvas, errors.New("invalid width and height")
 	} else if width <= 0 {
-		return canvas, errors.New("Invalid width")
+		return canvas, errors.New("invalid width")
 	} else if height <= 0 {
-		return canvas, errors.New("Invalid height")
+		return canvas, errors.New("invalid height")
+	}
+	if c.Image == nil {
+		return canvas, errors.New("no image set for canvas to draw on")
 	}
 	draw.Draw(c.Image, image.Rect(topLeft.X, topLeft.Y, topLeft.X+width, topLeft.Y+height), image.NewUniform(colour), topLeft, draw.Over)
 	return c, nil
@@ -100,7 +112,10 @@ func (canvas ImageCanvas) Rectangle(topLeft image.Point, width, height int, colo
 func (canvas ImageCanvas) Circle(centre image.Point, radius int, colour color.Color) (Canvas, error) {
 	c := canvas
 	if radius <= 0 {
-		return canvas, errors.New("Invalid radius")
+		return canvas, errors.New("invalid radius")
+	}
+	if c.Image == nil {
+		return canvas, errors.New("no image set for canvas to draw on")
 	}
 	mask := &circle{p: centre, r: radius}
 	draw.DrawMask(c.Image, mask.Bounds(), image.NewUniform(colour), image.ZP, mask, mask.Bounds().Min, draw.Over)
@@ -110,7 +125,10 @@ func (canvas ImageCanvas) Circle(centre image.Point, radius int, colour color.Co
 // Text draws text on the canvas
 func (canvas ImageCanvas) Text(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (Canvas, error) {
 	if maxWidth <= 0 {
-		return canvas, errors.New("Invalid maxWidth")
+		return canvas, errors.New("invalid maxWidth")
+	}
+	if canvas.Image == nil {
+		return canvas, errors.New("no image set for canvas to draw on")
 	}
 	c := canvas
 	//FIXME: how to use start?
@@ -122,20 +140,42 @@ func (canvas ImageCanvas) Text(text string, start image.Point, typeFace font.Fac
 	}
 	width := drawer.MeasureString(text).Ceil()
 	if width > maxWidth {
-		return canvas, errors.New("Resultant drawn text was longer than maxWidth")
+		return canvas, errors.New("resultant drawn text was longer than maxWidth")
 	}
 	drawer.DrawString(text)
 	return c, nil
 }
 
+// TryText returns whether the text would fit on the canvas, and the width the text would currently use up
+func (canvas ImageCanvas) TryText(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (bool, int) {
+	if maxWidth <= 0 {
+		return false, -1
+	}
+	if canvas.Image == nil {
+		return false, -2
+	}
+	//FIXME: how to use start?
+	drawer := &font.Drawer{
+		Dot:  fixed.Point26_6{X: fixed.I(start.X), Y: fixed.I(start.Y)},
+		Dst:  canvas.Image,
+		Face: typeFace,
+		Src:  image.NewUniform(colour),
+	}
+	width := drawer.MeasureString(text).Ceil()
+	return width <= maxWidth, width
+}
+
 // DrawImage draws another image on the canvas
-func (canvas ImageCanvas) DrawImage(start image.Point, subImage image.Image) Canvas {
+func (canvas ImageCanvas) DrawImage(start image.Point, subImage image.Image) (Canvas, error) {
 	c := canvas
+	if c.Image == nil {
+		return canvas, errors.New("no image set for canvas to draw on")
+	}
 	subBounds := subImage.Bounds()
 	width := subBounds.Max.X - subBounds.Min.X
 	height := subBounds.Max.Y - subBounds.Min.Y
 	draw.Draw(c.Image, image.Rect(start.X, start.Y, start.X+width, start.Y+height), subImage, image.ZP, draw.Over)
-	return c
+	return c, nil
 }
 
 // BarcodeType wraps the barcode types into a single enum
@@ -176,12 +216,12 @@ type BarcodeExtraData struct {
 	AztecUserSpecifiedLayers int
 	// Code39IncludeChecksum    is required for code39 barcodes
 	Code39IncludeChecksum bool
-	// Code39FullAsciiMode      is required for code39 barcodes
-	Code39FullAsciiMode bool
+	// Code39FullASCIIMode      is required for code39 barcodes
+	Code39FullASCIIMode bool
 	// Code93IncludeChecksum    is required for code93 barcodes
 	Code93IncludeChecksum bool
-	// Code93FullAsciiMode      is required for code93 barcodes
-	Code93FullAsciiMode bool
+	// Code93FullASCIIMode      is required for code93 barcodes
+	Code93FullASCIIMode bool
 	// PDFSecurityLevel         is required for pdf417 barcodes
 	PDFSecurityLevel byte
 	// QRLevel                  is required for qr barcodes
@@ -193,6 +233,9 @@ type BarcodeExtraData struct {
 // Barcode draws a barcode on the canvas
 func (canvas ImageCanvas) Barcode(codeType BarcodeType, content []byte, extra BarcodeExtraData, start image.Point, width, height int, dataColour color.Color, backgroundColour color.Color) (Canvas, error) {
 	c := canvas
+	if c.Image == nil {
+		return canvas, errors.New("no image set for canvas to draw on")
+	}
 	var encodedBarcode barcode.Barcode
 	var err error
 	switch codeType {
@@ -212,12 +255,12 @@ func (canvas ImageCanvas) Barcode(codeType BarcodeType, content []byte, extra Ba
 			return canvas, err
 		}
 	case BarcodeTypeCode39:
-		encodedBarcode, err = code39.Encode(string(content), extra.Code39IncludeChecksum, extra.Code39FullAsciiMode)
+		encodedBarcode, err = code39.Encode(string(content), extra.Code39IncludeChecksum, extra.Code39FullASCIIMode)
 		if err != nil {
 			return canvas, err
 		}
 	case BarcodeTypeCode93:
-		encodedBarcode, err = code93.Encode(string(content), extra.Code93IncludeChecksum, extra.Code93FullAsciiMode)
+		encodedBarcode, err = code93.Encode(string(content), extra.Code93IncludeChecksum, extra.Code93FullASCIIMode)
 		if err != nil {
 			return canvas, err
 		}

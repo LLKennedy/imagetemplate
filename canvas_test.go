@@ -3,6 +3,18 @@ package imagetemplate
 import (
 	"bytes"
 	"fmt"
+	// "github.com/boombuler/barcode"
+	// "github.com/boombuler/barcode/aztec"
+	// "github.com/boombuler/barcode/codabar"
+	// "github.com/boombuler/barcode/code128"
+	// "github.com/boombuler/barcode/code39"
+	// "github.com/boombuler/barcode/code93"
+	// "github.com/boombuler/barcode/datamatrix"
+	// "github.com/boombuler/barcode/ean"
+	// "github.com/boombuler/barcode/pdf417"
+	// "github.com/boombuler/barcode/qr"
+	// "math/rand"
+	// "github.com/boombuler/barcode/twooffive"
 	"github.com/golang/freetype/truetype"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/image/bmp"
@@ -14,6 +26,71 @@ import (
 	"testing"
 )
 
+func TestBlankCanvas(t *testing.T) {
+	blankCanvas := ImageCanvas{}
+	t.Run("circle", func(t *testing.T) {
+		modifiedCanvas, err := blankCanvas.Circle(image.ZP, 10, color.White)
+		assert.Equal(t, blankCanvas, modifiedCanvas)
+		assert.NotNil(t, err)
+		if err != nil {
+			assert.EqualError(t, err, "no image set for canvas to draw on")
+		}
+	})
+	t.Run("barcode", func(t *testing.T) {
+		modifiedCanvas, err := blankCanvas.Barcode(BarcodeTypeAztec, []byte{}, BarcodeExtraData{}, image.ZP, 0, 0, color.White, color.Black)
+		assert.Equal(t, blankCanvas, modifiedCanvas)
+		assert.NotNil(t, err)
+		if err != nil {
+			assert.EqualError(t, err, "no image set for canvas to draw on")
+		}
+	})
+	t.Run("draw image", func(t *testing.T) {
+		modifiedCanvas, err := blankCanvas.DrawImage(image.ZP, image.NewNRGBA(image.Rect(0, 0, 10, 10)))
+		assert.Equal(t, blankCanvas, modifiedCanvas)
+		assert.NotNil(t, err)
+		if err != nil {
+			assert.EqualError(t, err, "no image set for canvas to draw on")
+		}
+	})
+	t.Run("get height", func(t *testing.T) {
+		height := blankCanvas.GetHeight()
+		assert.Equal(t, -1, height)
+	})
+	t.Run("get image func", func(t *testing.T) {
+		img := blankCanvas.GetUnderlyingImage()
+		assert.Nil(t, img)
+	})
+	t.Run("get width", func(t *testing.T) {
+		width := blankCanvas.GetWidth()
+		assert.Equal(t, -1, width)
+	})
+	t.Run("rectangle", func(t *testing.T) {
+		modifiedCanvas, err := blankCanvas.Rectangle(image.ZP, 10, 10, color.White)
+		assert.Equal(t, blankCanvas, modifiedCanvas)
+		assert.NotNil(t, err)
+		if err != nil {
+			assert.EqualError(t, err, "no image set for canvas to draw on")
+		}
+	})
+	t.Run("text", func(t *testing.T) {
+		modifiedCanvas, err := blankCanvas.Text("hello", image.ZP, nil, color.White, 100)
+		assert.Equal(t, blankCanvas, modifiedCanvas)
+		assert.NotNil(t, err)
+		if err != nil {
+			assert.EqualError(t, err, "no image set for canvas to draw on")
+		}
+	})
+	t.Run("get image", func(t *testing.T) {
+		img := blankCanvas.Image
+		assert.Nil(t, img)
+	})
+	t.Run("set image", func(t *testing.T) {
+		modifiedCanvas := blankCanvas.SetUnderlyingImage(image.NewNRGBA(image.Rect(0, 0, 10, 10)))
+		assert.NotEqual(t, blankCanvas, modifiedCanvas)
+		assert.NotNil(t, modifiedCanvas.GetUnderlyingImage())
+	})
+}
+
 func TestNewCanvas(t *testing.T) {
 	t.Run("invalid width and height", func(t *testing.T) {
 		testVals := []int{-9999999, -100, -50, -1, 0}
@@ -22,7 +99,7 @@ func TestNewCanvas(t *testing.T) {
 				t.Run(fmt.Sprintf("x=%d,y=%d", x, y), func(t *testing.T) {
 					newCanvas, err := NewCanvas(x, y)
 					assert.Nil(t, newCanvas.Image)
-					assert.Equal(t, err.Error(), "Invalid width and height")
+					assert.EqualError(t, err, "invalid width and height")
 				})
 			}
 		}
@@ -34,7 +111,7 @@ func TestNewCanvas(t *testing.T) {
 			t.Run(fmt.Sprintf("x=%d,y=%d", x, y), func(t *testing.T) {
 				newCanvas, err := NewCanvas(x, y)
 				assert.Nil(t, newCanvas.Image)
-				assert.Equal(t, err.Error(), "Invalid width")
+				assert.EqualError(t, err, "invalid width")
 			})
 		}
 	})
@@ -45,7 +122,7 @@ func TestNewCanvas(t *testing.T) {
 			t.Run(fmt.Sprintf("x=%d,y=%d", x, y), func(t *testing.T) {
 				newCanvas, err := NewCanvas(x, y)
 				assert.Nil(t, newCanvas.Image)
-				assert.Equal(t, err.Error(), "Invalid height")
+				assert.EqualError(t, err, "invalid height")
 			})
 		}
 	})
@@ -172,7 +249,7 @@ func TestRectangle(t *testing.T) {
 				t.Run(fmt.Sprintf("x=%d,y=%d", x, y), func(t *testing.T) {
 					modifiedCanvas, err := newCanvas.Rectangle(image.ZP, x, y, color.Black)
 					assert.Equal(t, newCanvas, modifiedCanvas)
-					assert.Equal(t, err.Error(), "Invalid width and height")
+					assert.EqualError(t, err, "invalid width and height")
 				})
 			}
 		}
@@ -184,7 +261,7 @@ func TestRectangle(t *testing.T) {
 			t.Run(fmt.Sprintf("x=%d,y=%d", x, y), func(t *testing.T) {
 				modifiedCanvas, err := newCanvas.Rectangle(image.ZP, x, y, color.Black)
 				assert.Equal(t, newCanvas, modifiedCanvas)
-				assert.Equal(t, err.Error(), "Invalid width")
+				assert.EqualError(t, err, "invalid width")
 			})
 		}
 	})
@@ -195,7 +272,7 @@ func TestRectangle(t *testing.T) {
 			t.Run(fmt.Sprintf("x=%d,y=%d", x, y), func(t *testing.T) {
 				modifiedCanvas, err := newCanvas.Rectangle(image.ZP, x, y, color.Black)
 				assert.Equal(t, newCanvas, modifiedCanvas)
-				assert.Equal(t, err.Error(), "Invalid height")
+				assert.EqualError(t, err, "invalid height")
 			})
 		}
 	})
@@ -282,11 +359,11 @@ func TestCircle(t *testing.T) {
 		modifiedCanvas, err := newCanvas.Circle(image.Pt(3, 3), -1, color.NRGBA{G: 255, A: 255})
 		assert.Equal(t, newCanvas, modifiedCanvas)
 		assert.NotNil(t, err)
-		assert.Equal(t, err.Error(), "Invalid radius")
+		assert.EqualError(t, err, "invalid radius")
 		modifiedCanvas, err = newCanvas.Circle(image.Pt(3, 3), 0, color.NRGBA{G: 255, A: 255})
 		assert.Equal(t, newCanvas, modifiedCanvas)
 		assert.NotNil(t, err)
-		assert.Equal(t, err.Error(), "Invalid radius")
+		assert.EqualError(t, err, "invalid radius")
 	})
 	t.Run("valid circle", func(t *testing.T) {
 		modifiedCanvas, err := newCanvas.Circle(image.Pt(3, 3), 2, color.NRGBA{G: 255, A: 255})
@@ -325,7 +402,7 @@ func TestText(t *testing.T) {
 		assert.Equal(t, newCanvas, modifiedCanvas)
 		assert.NotNil(t, err)
 		if err != nil {
-			assert.Equal(t, "Invalid maxWidth", err.Error())
+			assert.EqualError(t, err, "invalid maxWidth")
 		}
 	})
 	t.Run("valid text", func(t *testing.T) {
@@ -343,7 +420,7 @@ func TestText(t *testing.T) {
 		_, err := newCanvas.Text("test this much longer string which definitely won't fit", image.Pt(2, 15), regFont, purple, 28)
 		assert.NotNil(t, err)
 		if err != nil {
-			assert.Equal(t, "Resultant drawn text was longer than maxWidth", err.Error())
+			assert.EqualError(t, err, "resultant drawn text was longer than maxWidth")
 		}
 	})
 }
@@ -358,7 +435,8 @@ func TestDrawImage(t *testing.T) {
 	newCanvas, _ = newCanvas.Rectangle(image.ZP, 100, 100, color.NRGBA{B: 255, A: 255})
 	otherCanvas, _ = NewCanvas(20, 20)
 	otherCanvas, _ = otherCanvas.Rectangle(image.ZP, w, h, color.NRGBA{G: 255, A: 255})
-	modifiedCanvas := newCanvas.DrawImage(image.Pt(sx, sy), otherCanvas.GetUnderlyingImage())
+	modifiedCanvas, err := newCanvas.DrawImage(image.Pt(sx, sy), otherCanvas.GetUnderlyingImage())
+	assert.Nil(t, err)
 	result := modifiedCanvas.GetUnderlyingImage()
 	for x := 0; x < 100; x++ {
 		for y := 0; y < 100; y++ {
@@ -372,3 +450,243 @@ func TestDrawImage(t *testing.T) {
 		}
 	}
 }
+
+/*
+func TestBarcode(t *testing.T) {
+	for i := 0; i < 1; i++ {
+		t.Run(fmt.Sprintf("random colours, run number %d", i), func(t *testing.T) {
+			var grandCanvas Canvas
+			grandWidth := 520
+			grandHeight := grandWidth / 2
+			squareSize := grandWidth / 4
+			flatHeight := grandWidth / 8
+			grandCanvas, err := NewCanvas(grandWidth, grandHeight)
+			assert.NoError(t, err)
+			colours := make([]color.Color, 24)
+			for c := range colours {
+				newBytes := make([]byte, 4)
+				rand.Read(newBytes)
+				colours[c] = color.NRGBA{R: uint8(newBytes[0]), G: uint8(newBytes[1]), B: uint8(newBytes[2]), A: uint8(newBytes[3])}
+			}
+			colourNum := -1
+			nextColour := func() color.Color {
+				colourNum++
+				return colours[colourNum]
+			}
+			type bEncoder func([]byte, BarcodeExtraData) (barcode.Barcode, error)
+			type testBarcode struct {
+				name             string
+				encodeFunc       bEncoder
+				codeType         BarcodeType
+				content          []byte
+				extra            BarcodeExtraData
+				start            image.Point
+				width, height    int
+				dataColour       color.Color
+				backgroundColour color.Color
+			}
+			tests := []testBarcode{
+				testBarcode{
+					name: "qr",
+					encodeFunc: func(content []byte, extra BarcodeExtraData) (barcode.Barcode, error) {
+						return qr.Encode(string(content), extra.QRLevel, extra.QRMode)
+					},
+					codeType:         BarcodeTypeQR,
+					content:          []byte("www.github.com/LLKennedy/imagetemplate"),
+					extra:            BarcodeExtraData{QRLevel: qr.Q, QRMode: qr.Unicode},
+					start:            image.ZP,
+					width:            squareSize,
+					height:           squareSize,
+					dataColour:       nextColour(),
+					backgroundColour: nextColour(),
+				},
+				testBarcode{
+					name: "aztec",
+					encodeFunc: func(content []byte, extra BarcodeExtraData) (barcode.Barcode, error) {
+						return aztec.Encode(content, extra.AztecMinECCPercent, extra.AztecUserSpecifiedLayers)
+					},
+					codeType:         BarcodeTypeAztec,
+					content:          []byte("www.github.com/LLKennedy/imagetemplate"),
+					extra:            BarcodeExtraData{AztecMinECCPercent: 50, AztecUserSpecifiedLayers: 4},
+					start:            image.Point{X: squareSize, Y: 0},
+					width:            squareSize,
+					height:           squareSize,
+					dataColour:       nextColour(),
+					backgroundColour: nextColour(),
+				},
+				testBarcode{
+					name: "pdf",
+					encodeFunc: func(content []byte, extra BarcodeExtraData) (barcode.Barcode, error) {
+						return pdf417.Encode(string(content), extra.PDFSecurityLevel)
+					},
+					codeType:         BarcodeTypePDF,
+					content:          []byte("Luke"),
+					extra:            BarcodeExtraData{PDFSecurityLevel: 4},
+					start:            image.Point{X: squareSize * 2, Y: 0},
+					width:            squareSize,
+					height:           squareSize,
+					dataColour:       nextColour(),
+					backgroundColour: nextColour(),
+				},
+				testBarcode{
+					name: "datamatrix",
+					encodeFunc: func(content []byte, extra BarcodeExtraData) (barcode.Barcode, error) {
+						return datamatrix.Encode(string(content))
+					},
+					codeType:         BarcodeTypeDataMatrix,
+					content:          []byte("https://www.github.com/LLKennedy/imagetemplate"),
+					extra:            BarcodeExtraData{},
+					start:            image.Point{X: squareSize * 3, Y: 0},
+					width:            squareSize,
+					height:           squareSize,
+					dataColour:       nextColour(),
+					backgroundColour: nextColour(),
+				},
+				testBarcode{
+					name: "nine of three",
+					encodeFunc: func(content []byte, extra BarcodeExtraData) (barcode.Barcode, error) {
+						return code93.Encode(string(content), extra.Code93IncludeChecksum, extra.Code93FullAsciiMode)
+					},
+					codeType:         BarcodeTypeCode93,
+					content:          []byte("Luke"),
+					extra:            BarcodeExtraData{Code93IncludeChecksum: true, Code93FullAsciiMode: true},
+					start:            image.Point{X: 0, Y: squareSize},
+					width:            squareSize,
+					height:           flatHeight,
+					dataColour:       nextColour(),
+					backgroundColour: nextColour(),
+				},
+				// testBarcode{
+				// 	name: "two of five",
+				// 	encodeFunc: func(content []byte, extra BarcodeExtraData) (barcode.Barcode, error) {
+				// 		return twooffive.Encode(string(content), false)
+				// 	},
+				// 	codeType:         BarcodeType2of5,
+				// 	content:          []byte("12345678"),
+				// 	extra:            BarcodeExtraData{},
+				// 	start:            image.Point{X: squareSize, Y: squareSize},
+				// 	width:            squareSize,
+				// 	height:           flatHeight,
+				// 	dataColour:       nextColour(),
+				// 	backgroundColour: nextColour(),
+				// },
+				// testBarcode{
+				// 	name: "two of five interleaved",
+				// 	encodeFunc: func(content []byte, extra BarcodeExtraData) (barcode.Barcode, error) {
+				// 		return twooffive.Encode(string(content), true)
+				// 	},
+				// 	codeType:         BarcodeType2of5,
+				// 	content:          []byte("12345678"),
+				// 	extra:            BarcodeExtraData{},
+				// 	start:            image.Point{X: squareSize*2, Y: squareSize},
+				// 	width:            squareSize,
+				// 	height:           flatHeight,
+				// 	dataColour:       nextColour(),
+				// 	backgroundColour: nextColour(),
+				// },
+				testBarcode{
+					name: "codabar",
+					encodeFunc: func(content []byte, extra BarcodeExtraData) (barcode.Barcode, error) {
+						return codabar.Encode(string(content))
+					},
+					codeType:         BarcodeTypeCodabar,
+					content:          []byte("B123456D"),
+					extra:            BarcodeExtraData{},
+					start:            image.Point{X: squareSize * 3, Y: squareSize},
+					width:            squareSize,
+					height:           flatHeight,
+					dataColour:       nextColour(),
+					backgroundColour: nextColour(),
+				},
+				testBarcode{
+					name: "code128",
+					encodeFunc: func(content []byte, extra BarcodeExtraData) (barcode.Barcode, error) {
+						return code128.Encode(string(content))
+					},
+					codeType:         BarcodeTypeCode128,
+					content:          []byte("Luke"),
+					extra:            BarcodeExtraData{},
+					start:            image.Point{X: 0, Y: flatHeight * 3},
+					width:            squareSize,
+					height:           flatHeight,
+					dataColour:       nextColour(),
+					backgroundColour: nextColour(),
+				},
+				testBarcode{
+					name: "ean13",
+					encodeFunc: func(content []byte, extra BarcodeExtraData) (barcode.Barcode, error) {
+						return ean.Encode(string(content))
+					},
+					codeType:         BarcodeTypeEAN13,
+					content:          []byte("5901234123457"),
+					extra:            BarcodeExtraData{},
+					start:            image.Point{X: squareSize, Y: flatHeight * 3},
+					width:            squareSize,
+					height:           flatHeight,
+					dataColour:       nextColour(),
+					backgroundColour: nextColour(),
+				},
+				testBarcode{
+					name: "ean8",
+					encodeFunc: func(content []byte, extra BarcodeExtraData) (barcode.Barcode, error) {
+						return ean.Encode(string(content))
+					},
+					codeType:         BarcodeTypeEAN8,
+					content:          []byte("11223344"),
+					extra:            BarcodeExtraData{},
+					start:            image.Point{X: squareSize * 2, Y: flatHeight * 3},
+					width:            squareSize,
+					height:           flatHeight,
+					dataColour:       nextColour(),
+					backgroundColour: nextColour(),
+				},
+				testBarcode{
+					name: "three of nine",
+					encodeFunc: func(content []byte, extra BarcodeExtraData) (barcode.Barcode, error) {
+						return code39.Encode(string(content), extra.Code39IncludeChecksum, extra.Code39FullAsciiMode)
+					},
+					codeType:         BarcodeTypeCode39,
+					content:          []byte("Luke"),
+					extra:            BarcodeExtraData{Code39IncludeChecksum: true, Code39FullAsciiMode: true},
+					start:            image.Point{X: squareSize * 3, Y: flatHeight * 3},
+					width:            squareSize,
+					height:           flatHeight,
+					dataColour:       nextColour(),
+					backgroundColour: nextColour(),
+				},
+			}
+			for _, test := range tests {
+				t.Run(test.name, func(t *testing.T) {
+					grandCanvas, err = NewCanvas(grandWidth, grandHeight)
+					rawBarcode, err := test.encodeFunc(test.content, test.extra)
+					assert.NoError(t, err)
+					if err != nil {
+						t.Fatal(err)
+					}
+					rawBarcode, err = barcode.Scale(rawBarcode, test.width, test.height)
+					assert.NoError(t, err)
+					if err != nil {
+						t.Fatal(err)
+					}
+					grandCanvas, err = grandCanvas.Barcode(test.codeType, test.content, test.extra, test.start, test.width, test.height, test.dataColour, test.backgroundColour)
+					assert.NoError(t, err)
+					underlyingImage := grandCanvas.GetUnderlyingImage()
+					for x := 0; x < test.width; x++ {
+						for y := 0; y < test.height; y++ {
+							t.Run(fmt.Sprintf("x=%d,y=%d", x+test.start.X, y+test.start.Y), func(t *testing.T) {
+								refPixel := rawBarcode.At(x, y)
+								realPixel := underlyingImage.At(x+test.start.X, y+test.start.Y)
+								if refPixel == color.White {
+									assert.Equal(t, test.backgroundColour, realPixel)
+								} else if refPixel == color.Black {
+									assert.Equal(t, test.dataColour, realPixel)
+								}
+							})
+						}
+					}
+				})
+			}
+		})
+	}
+}
+*/

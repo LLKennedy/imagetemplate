@@ -16,17 +16,17 @@ func TestNewBuilder(t *testing.T) {
 				newCanvas, err := NewCanvas(x, y)
 				if x <= 0 && y <= 0 && err != nil {
 					assert.Nil(t, newBuilder)
-					assert.Equal(t, "Invalid width and height", err.Error())
+					assert.EqualError(t, err, "invalid width and height")
 					return
 				}
 				if x <= 0 && err != nil {
 					assert.Nil(t, newBuilder)
-					assert.Equal(t, "Invalid width", err.Error())
+					assert.EqualError(t, err, "invalid width")
 					return
 				}
 				if y <= 0 && err != nil {
 					assert.Nil(t, newBuilder)
-					assert.Equal(t, "Invalid height", err.Error())
+					assert.EqualError(t, err, "invalid height")
 					return
 				}
 				if err != nil {

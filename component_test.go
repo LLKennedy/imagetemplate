@@ -19,7 +19,7 @@ func TestStandardSetNamedProperties(t *testing.T) {
 		return nil
 	}
 	errorSetFunc := func(string, interface{}) error {
-		return errors.New("Failed to set property")
+		return errors.New("failed to set property")
 	}
 	testArray := []setPropTest{
 		setPropTest{
@@ -46,7 +46,7 @@ func TestStandardSetNamedProperties(t *testing.T) {
 			resultLeftovers: map[string][]string{
 				"username": []string{"innerPropUsername"},
 			},
-			resultErr: errors.New("Failed to set property"),
+			resultErr: errors.New("failed to set property"),
 		},
 		setPropTest{
 			name: "many properties success",
@@ -189,7 +189,7 @@ func TestParseDataValue(t *testing.T) {
 			hasNamedProperties: true,
 			cleanValues:        []string{"Hello there, "},
 			propNames:          []string{"title"},
-			err:                errors.New("Unclosed named property in Hello there, $title$. $username!"),
+			err:                errors.New("unclosed named property in 'Hello there, $title$. $username!'"),
 		},
 		parseTest{
 			name:               "empty value",
@@ -197,7 +197,7 @@ func TestParseDataValue(t *testing.T) {
 			hasNamedProperties: false,
 			cleanValues:        []string(nil),
 			propNames:          []string(nil),
-			err:                errors.New("Could not parse empty property"),
+			err:                errors.New("could not parse empty property"),
 		},
 	}
 	for _, test := range testArray {
@@ -216,10 +216,6 @@ func TestConditionals(t *testing.T) {
 		name   string
 		value  interface{}
 		setErr error
-	}
-	type testGroup struct {
-		Operator     groupOperator
-		Conditionals []ComponentConditional
 	}
 	type testSet struct {
 		name            string
@@ -273,11 +269,11 @@ func TestConditionals(t *testing.T) {
 				testProperty{
 					name:   "username",
 					value:  18,
-					setErr: errors.New("Invalid value for string operator: 18"),
+					setErr: errors.New("invalid value for string operator: 18"),
 				},
 			},
 			validateResult: false,
-			validateError:  errors.New("Attempted to validate conditional username equals john smith without setting username"),
+			validateError:  errors.New("attempted to validate conditional username equals john smith without setting username"),
 		},
 		testSet{
 			name: "string condition, mismatched value name",
@@ -295,7 +291,7 @@ func TestConditionals(t *testing.T) {
 				},
 			},
 			validateResult: false,
-			validateError:  errors.New("Attempted to validate conditional username equals john smith without setting username"),
+			validateError:  errors.New("attempted to validate conditional username equals john smith without setting username"),
 		},
 		testSet{
 			name: "string equals, fails on case sensitivity",
@@ -363,11 +359,11 @@ func TestConditionals(t *testing.T) {
 				testProperty{
 					name:   "age",
 					value:  "john smith",
-					setErr: errors.New("Invalid value for float operator: john smith"),
+					setErr: errors.New("invalid value for float operator: john smith"),
 				},
 			},
 			validateResult: false,
-			validateError:  errors.New("Attempted to validate conditional age >= 18 without setting age"),
+			validateError:  errors.New("attempted to validate conditional age >= 18 without setting age"),
 		},
 		testSet{
 			name: "int condition, mismatched value name",
@@ -381,11 +377,11 @@ func TestConditionals(t *testing.T) {
 				testProperty{
 					name:   "age",
 					value:  "john smith",
-					setErr: errors.New("Invalid value for float operator: john smith"),
+					setErr: errors.New("invalid value for float operator: john smith"),
 				},
 			},
 			validateResult: false,
-			validateError:  errors.New("Attempted to validate conditional age >= 18 without setting age"),
+			validateError:  errors.New("attempted to validate conditional age >= 18 without setting age"),
 		},
 		testSet{
 			name: "failing xor",
@@ -394,10 +390,7 @@ func TestConditionals(t *testing.T) {
 				Not:      false,
 				Operator: ">=",
 				Value:    "18",
-				Group: struct {
-					Operator     groupOperator          `json:"groupOperator"`
-					Conditionals []ComponentConditional `json:"conditionals"`
-				}(testGroup{
+				Group: conditionalGroup{
 					Operator: xor,
 					Conditionals: []ComponentConditional{
 						ComponentConditional{
@@ -407,7 +400,7 @@ func TestConditionals(t *testing.T) {
 							Value:    "180",
 						},
 					},
-				}),
+				},
 			},
 			namedProperties: []testProperty{
 				testProperty{
@@ -449,10 +442,7 @@ func TestConditionals(t *testing.T) {
 				Not:      false,
 				Operator: ">=",
 				Value:    "18",
-				Group: struct {
-					Operator     groupOperator          `json:"groupOperator"`
-					Conditionals []ComponentConditional `json:"conditionals"`
-				}(testGroup{
+				Group: conditionalGroup{
 					Operator: and,
 					Conditionals: []ComponentConditional{
 						ComponentConditional{
@@ -462,7 +452,7 @@ func TestConditionals(t *testing.T) {
 							Value:    "smith",
 						},
 					},
-				}),
+				},
 			},
 			namedProperties: []testProperty{
 				testProperty{
@@ -473,11 +463,11 @@ func TestConditionals(t *testing.T) {
 				testProperty{
 					name:   "age2",
 					value:  20,
-					setErr: errors.New("Failed to convert conditional value to float: smith"),
+					setErr: errors.New("failed to convert conditional value to float: smith"),
 				},
 			},
 			validateResult: false,
-			validateError:  errors.New("Attempted to validate conditional age2 > smith without setting age2"),
+			validateError:  errors.New("attempted to validate conditional age2 > smith without setting age2"),
 		},
 		testSet{
 			name: "invalid operator",
@@ -486,10 +476,7 @@ func TestConditionals(t *testing.T) {
 				Not:      false,
 				Operator: ">=",
 				Value:    "18",
-				Group: struct {
-					Operator     groupOperator          `json:"groupOperator"`
-					Conditionals []ComponentConditional `json:"conditionals"`
-				}(testGroup{
+				Group: conditionalGroup{
 					Operator: and,
 					Conditionals: []ComponentConditional{
 						ComponentConditional{
@@ -499,7 +486,7 @@ func TestConditionals(t *testing.T) {
 							Value:    "john smith",
 						},
 					},
-				}),
+				},
 			},
 			namedProperties: []testProperty{
 				testProperty{
@@ -510,11 +497,11 @@ func TestConditionals(t *testing.T) {
 				testProperty{
 					name:   "username",
 					value:  "john smith",
-					setErr: errors.New("Invalid conditional operator is exactly"),
+					setErr: errors.New("invalid conditional operator is exactly"),
 				},
 			},
 			validateResult: false,
-			validateError:  errors.New("Attempted to validate conditional username is exactly john smith without setting username"),
+			validateError:  errors.New("attempted to validate conditional username is exactly john smith without setting username"),
 		},
 		testSet{
 			name: "unset inner conditional",
@@ -523,10 +510,7 @@ func TestConditionals(t *testing.T) {
 				Not:      false,
 				Operator: ">=",
 				Value:    "18",
-				Group: struct {
-					Operator     groupOperator          `json:"groupOperator"`
-					Conditionals []ComponentConditional `json:"conditionals"`
-				}(testGroup{
+				Group: conditionalGroup{
 					Operator: xor,
 					Conditionals: []ComponentConditional{
 						ComponentConditional{
@@ -536,7 +520,7 @@ func TestConditionals(t *testing.T) {
 							Value:    "john smith",
 						},
 					},
-				}),
+				},
 			},
 			namedProperties: []testProperty{
 				testProperty{
@@ -546,7 +530,7 @@ func TestConditionals(t *testing.T) {
 				},
 			},
 			validateResult: false,
-			validateError:  errors.New("Attempted to validate conditional username equals john smith without setting username"),
+			validateError:  errors.New("attempted to validate conditional username equals john smith without setting username"),
 		},
 		testSet{
 			name: "unset inner conditional",
@@ -555,10 +539,7 @@ func TestConditionals(t *testing.T) {
 				Not:      false,
 				Operator: ">=",
 				Value:    "18",
-				Group: struct {
-					Operator     groupOperator          `json:"groupOperator"`
-					Conditionals []ComponentConditional `json:"conditionals"`
-				}(testGroup{
+				Group: conditionalGroup{
 					Operator: "some other operator",
 					Conditionals: []ComponentConditional{
 						ComponentConditional{
@@ -568,7 +549,7 @@ func TestConditionals(t *testing.T) {
 							Value:    "john smith",
 						},
 					},
-				}),
+				},
 			},
 			namedProperties: []testProperty{
 				testProperty{
@@ -583,7 +564,7 @@ func TestConditionals(t *testing.T) {
 				},
 			},
 			validateResult: false,
-			validateError:  errors.New("Invalid group operator some other operator"),
+			validateError:  errors.New("invalid group operator some other operator"),
 		},
 		testSet{
 			name: "one of everything, all passing",
@@ -592,10 +573,7 @@ func TestConditionals(t *testing.T) {
 				Not:      false,
 				Operator: "ci_equals",
 				Value:    "vAlUe1!",
-				Group: struct {
-					Operator     groupOperator          `json:"groupOperator"`
-					Conditionals []ComponentConditional `json:"conditionals"`
-				}(testGroup{
+				Group: conditionalGroup{
 					Operator: and,
 					Conditionals: []ComponentConditional{
 						ComponentConditional{
@@ -609,10 +587,7 @@ func TestConditionals(t *testing.T) {
 							Not:      false,
 							Operator: "ci_contains",
 							Value:    "al",
-							Group: struct {
-								Operator     groupOperator          `json:"groupOperator"`
-								Conditionals []ComponentConditional `json:"conditionals"`
-							}(testGroup{
+							Group: conditionalGroup{
 								Operator: or,
 								Conditionals: []ComponentConditional{
 									ComponentConditional{
@@ -640,17 +615,14 @@ func TestConditionals(t *testing.T) {
 										Value:    "vaasoidfgha;sodigkfhasldkfhjas",
 									},
 								},
-							}),
+							},
 						},
 						ComponentConditional{
 							Name:     "prop8",
 							Not:      false,
 							Operator: "ci_endswith",
 							Value:    "E8!",
-							Group: struct {
-								Operator     groupOperator          `json:"groupOperator"`
-								Conditionals []ComponentConditional `json:"conditionals"`
-							}(testGroup{
+							Group: conditionalGroup{
 								Operator: nand,
 								Conditionals: []ComponentConditional{
 									ComponentConditional{
@@ -658,10 +630,7 @@ func TestConditionals(t *testing.T) {
 										Not:      true,
 										Operator: "endswith",
 										Value:    "E9!",
-										Group: struct {
-											Operator     groupOperator          `json:"groupOperator"`
-											Conditionals []ComponentConditional `json:"conditionals"`
-										}(testGroup{
+										Group: conditionalGroup{
 											Operator: nor,
 											Conditionals: []ComponentConditional{
 												ComponentConditional{
@@ -671,20 +640,17 @@ func TestConditionals(t *testing.T) {
 													Value:    "100",
 												},
 											},
-										}),
+										},
 									},
 								},
-							}),
+							},
 						},
 						ComponentConditional{
 							Name:     "prop11",
 							Not:      false,
 							Operator: ">",
 							Value:    "50",
-							Group: struct {
-								Operator     groupOperator          `json:"groupOperator"`
-								Conditionals []ComponentConditional `json:"conditionals"`
-							}(testGroup{
+							Group: conditionalGroup{
 								Operator: xor,
 								Conditionals: []ComponentConditional{
 									ComponentConditional{
@@ -700,7 +666,7 @@ func TestConditionals(t *testing.T) {
 										Value:    "9",
 									},
 								},
-							}),
+							},
 						},
 						ComponentConditional{
 							Name:     "prop14",
@@ -727,7 +693,7 @@ func TestConditionals(t *testing.T) {
 							Value:    "52",
 						},
 					},
-				}),
+				},
 			},
 			namedProperties: []testProperty{
 				testProperty{
