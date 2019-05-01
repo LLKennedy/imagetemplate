@@ -264,10 +264,10 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, Name
 		}
 		var typeRange []string
 		switch template.Type {
-		case "circle", "Circle", "rectangle", "Rectangle", "rect", "Rect", "image", "Image", "photo", "Photo", "text", "Text", "words", "Words":
+		case "circle", "Circle", "rectangle", "Rectangle", "rect", "Rect", "image", "Image", "photo", "Photo", "text", "Text", "words", "Words", "barcode", "Barcode":
 			typeRange = []string{template.Type}
 		default:
-			typeRange = []string{"circle", "Circle", "rectange", "Rectangle", "rect", "Rect", "image", "Image", "photo", "Photo", "text", "Text", "words", "Words"}
+			typeRange = []string{"circle", "Circle", "rectange", "Rectangle", "rect", "Rect", "image", "Image", "photo", "Photo", "text", "Text", "words", "Words", "barcode", "Barcode"}
 		}
 		for _, compType := range typeRange {
 			var newComponent Component
@@ -280,6 +280,8 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, Name
 				newComponent = ImageComponent{}
 			case "text", "Text", "words", "Words":
 				newComponent = TextComponent{}
+			case "barcode", "Barcode":
+				newComponent = BarcodeComponent{}
 			}
 			// Get JSON struct to parse into
 			shape := newComponent.GetJSONFormat()
