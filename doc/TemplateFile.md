@@ -3,6 +3,36 @@ An Image Template is a JSON-formatted file, comprised of a individual components
 
 Please note the standard below is the intended file format and implementation for the 1.0.0 release, features which may not yet be fully functional have been *italicised*.
 
+## Sample
+The following is a stripped-down sample showing only the most basic elements of a template file. For specific components/conditionals please refer to the individual component references, and for full examples of files and the rendered output, please refer to the [Examples](Examples.md) page.
+
+```
+{
+	"baseImage": {
+		"data": "$appPhoto$",
+		"width": "1920",
+		"height": "1080"
+	}
+	"components": [
+		{
+			"type": "circle",
+			"properties": {
+				
+			}
+		},
+		{
+			"type": "barcode",
+			"properties" {
+
+			},
+			conditional: {
+				
+			}
+		}
+	]
+}
+```
+
 ## <a name="terminology"></a>Terminology
 ### <a name="templatefile"></a>Template File
 The JSON file created to render images for a specific application
@@ -63,7 +93,7 @@ The NRGBA colour value of the base image rectangle.
 
 The non-premultiplied RGBA values of the colour.
 
-### <a name="components"></a>Components
+### <a name="components"></a>2. Components
 - `component`: Ordered array of JSON structures
 
 Each component object has the mandatory components `type` and `properties`, and the optional component `conditional`
@@ -71,7 +101,7 @@ Each component object has the mandatory components `type` and `properties`, and 
 #### <a name="type"></a>Type
 - `type`: String matching the a known component type.
 
-Valid options are [`circle`](https://github.com/LLKennedy/blob/master/doc/Circle.md), [`rectangle`](https://github.com/LLKennedy/blob/master/doc/Rectangle.md), [`text`](https://github.com/LLKennedy/blob/master/doc/Text.md), [`image`](https://github.com/LLKennedy/blob/master/doc/Image.md), [`barcode`](https://github.com/LLKennedy/blob/master/doc/Barcode.md), and [*`dateTime`*](https://github.com/LLKennedy/blob/master/doc/DateTime.md). See each relevant page for further detail.
+Valid options are [`circle`](Rectangle.md), [`text`](Text.md), [`image`](Image.md), [`barcode`](Barcode.md), and [*`dateTime`*](DateTime.md). See each relevant page for further detail.
 
 #### <a name="properties"></a>Properties
 - `properties`: JSON structure
@@ -83,4 +113,4 @@ The contents of `properties` varies wildly with component types, see each compon
 #### <a name="conditional"></a>Conditional
 - `conditional`: JSON structure
 
-The conditions under which the component will render. See the main [Conditional](https://github.com/LLKennedy/blob/master/doc/Conditional.md) page for more information.
+The conditions under which the component will render. See the main [Conditional](Conditional.md) page for more information.
