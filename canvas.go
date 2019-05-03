@@ -131,7 +131,6 @@ func (canvas ImageCanvas) Text(text string, start image.Point, typeFace font.Fac
 		return canvas, errors.New("no image set for canvas to draw on")
 	}
 	c := canvas
-	//FIXME: how to use start?
 	drawer := &font.Drawer{
 		Dot:  fixed.Point26_6{X: fixed.I(start.X), Y: fixed.I(start.Y)},
 		Dst:  c.Image,
@@ -154,7 +153,6 @@ func (canvas ImageCanvas) TryText(text string, start image.Point, typeFace font.
 	if canvas.Image == nil {
 		return false, -2
 	}
-	//FIXME: how to use start?
 	drawer := &font.Drawer{
 		Dot:  fixed.Point26_6{X: fixed.I(start.X), Y: fixed.I(start.Y)},
 		Dst:  canvas.Image,
