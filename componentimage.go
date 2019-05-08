@@ -11,6 +11,7 @@ import (
 	_ "image/jpeg" // jpeg imported for image decoding
 	_ "image/png"  // png imported for image decoding
 	"strings"
+	"io"
 )
 
 // ImageComponent implements the Component interface for images
@@ -50,12 +51,22 @@ func (component ImageComponent) SetNamedProperties(properties NamedProperties) (
 	setFunc := func(name string, value interface{}) error {
 		switch name {
 		case "data":
-			bytesVal, ok := value.([]byte)
-			if !ok {
-				return fmt.Errorf("error converting %v to []byte", value)
+			bytesVal, isBytes := value.([]byte)
+			stringVal, isString := value.(string)
+			readerVal, isReader := value.(io.Reader)
+			if !isBytes && !isString && !isReader {
+				return fmt.Errorf("error converting %v to []byte, string or io.Reader", value)
 			}
-			buf := bytes.NewBuffer(bytesVal)
-			img, _, err := image.Decode(buf)
+			var reader io.Reader
+			if isBytes {
+				reader = bytes.NewBuffer(bytesVal)
+			} else if isString {
+				stringReader := strings.NewReader(stringVal)
+				reader = base64.NewDecoder(base64.RawStdEncoding, stringReader)
+			} else if isReader {
+				reader = readerVal
+			}
+			img, _, err := image.Decode(reader)
 			if err != nil {
 				return err
 			}
