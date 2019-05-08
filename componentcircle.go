@@ -158,7 +158,7 @@ func (component CircleComponent) VerifyAndSetJSONData(data interface{}) (Compone
 		Message string
 	}
 	for key := range c.NamedPropertiesMap {
-		props[key] = invalidStruct{Message:"Please replace me with real data"}
+		props[key] = invalidStruct{Message: "Please replace me with real data"}
 	}
 	return c, props, nil
 }
