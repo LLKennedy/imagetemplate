@@ -9,7 +9,6 @@ import (
 	"github.com/LLKennedy/gosysfonts"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
-	"golang.org/x/image/font/gofont/goregular"
 )
 
 // TextComponent implements the Component interface for text
@@ -131,11 +130,11 @@ func (component TextComponent) SetNamedProperties(properties NamedProperties) (C
 			if component.reader == nil {
 				component.reader = ioutilFileReader{}
 			}
-			_, err := component.reader.ReadFile(stringVal) //set this variable again once it's working
+			fontData, err := component.reader.ReadFile(stringVal)
 			if err != nil {
 				return err
 			}
-			rawFont, err := truetype.Parse(goregular.TTF)
+			rawFont, err := truetype.Parse(fontData)
 			if err != nil {
 				return err
 			}
@@ -290,11 +289,11 @@ func (component TextComponent) VerifyAndSetJSONData(data interface{}) (Component
 		if c.reader == nil {
 			c.reader = ioutilFileReader{}
 		}
-		_, err := c.reader.ReadFile(stringVal) //set this back once it works
+		fontData, err := c.reader.ReadFile(stringVal)
 		if err != nil {
 			return component, props, err
 		}
-		rawFont, err := truetype.Parse(goregular.TTF)
+		rawFont, err := truetype.Parse(fontData)
 		if err != nil {
 			return component, props, err
 		}
