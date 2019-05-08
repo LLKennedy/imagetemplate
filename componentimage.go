@@ -10,8 +10,8 @@ import (
 	"image"
 	_ "image/jpeg" // jpeg imported for image decoding
 	_ "image/png"  // png imported for image decoding
-	"strings"
 	"io"
+	"strings"
 )
 
 // ImageComponent implements the Component interface for images
@@ -224,7 +224,7 @@ func (component ImageComponent) VerifyAndSetJSONData(data interface{}) (Componen
 		Message string
 	}
 	for key := range c.NamedPropertiesMap {
-		props[key] = invalidStruct{Message:"Please replace me with real data"}
+		props[key] = invalidStruct{Message: "Please replace me with real data"}
 	}
 	return c, props, nil
 }
