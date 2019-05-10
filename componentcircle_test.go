@@ -5,7 +5,32 @@ import (
 	"github.com/stretchr/testify/assert"
 	"image/color"
 	"image"
+	"errors"
 )
+
+func TestWrite(t *testing.T) {
+	t.Run("not all props set", func(t *testing.T) {
+		canvas := mockCanvas{}
+		c := CircleComponent{NamedPropertiesMap: map[string][]string{"not set":[]string{"something"}}}
+		modifiedCanvas, err := c.Write(canvas)
+		assert.Equal(t, canvas, modifiedCanvas)
+		assert.EqualError(t, err, "cannot draw circle, not all named properties are set: map[not set:[something]]")
+	})
+	t.Run("circle error", func(t *testing.T) {
+		canvas := mockCanvas{FixedCircleError: errors.New("some error")}
+		c := CircleComponent{}
+		modifiedCanvas, err := c.Write(canvas)
+		assert.Equal(t, canvas, modifiedCanvas)
+		assert.EqualError(t, err, "some error")
+	})
+	t.Run("passing", func(t *testing.T) {
+		canvas := mockCanvas{FixedCircleError: nil}
+		c := CircleComponent{}
+		modifiedCanvas, err := c.Write(canvas)
+		assert.Equal(t, canvas, modifiedCanvas)
+		assert.NoError(t, err)
+	})
+}
 
 func TestSetNamedProperties(t *testing.T) {
 	type testSet struct{
@@ -171,6 +196,46 @@ func TestSetNamedProperties(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			res, err := test.start.SetNamedProperties(test.input)
 			assert.Equal(t, test.res, res)
+			if test.err == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.EqualError(t, err, test.err)
+			}
+		})
+	}
+}
+
+func TestGetJSONFormat(t *testing.T) {
+	c := CircleComponent{}
+	expectedFormat := &circleFormat{}
+	format := c.GetJSONFormat()
+	assert.Equal(t, expectedFormat, format)
+}
+
+func TestVerifyAndTestJSONData(t *testing.T) {
+	type testSet struct{
+		name string
+		start CircleComponent
+		input interface{}
+		res CircleComponent
+		props NamedProperties
+		err string
+	}
+	tests := []testSet{
+		testSet{
+			name: "incorrect format data",
+			start: CircleComponent{},
+			input: "hello",
+			res: CircleComponent{},
+			props: NamedProperties{},
+			err: "failed to convert returned data to component properties",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			res, props, err := test.start.VerifyAndSetJSONData(test.input)
+			assert.Equal(t, test.res, res)
+			assert.Equal(t, test.props, props)
 			if test.err == "" {
 				assert.NoError(t, err)
 			} else {
