@@ -5,6 +5,10 @@ os:
   - osx
   - windows
 
+
+before_install:
+  - go get github.com/mattn/goveralls
+
 jobs:
   include:
     - stage: "Quick Build"
@@ -33,10 +37,3 @@ jobs:
         - "1.11.x"
         - "1.12.x"
       script: go test -race -cover
-
-before_install:
-  - go get github.com/mattn/goveralls
-
-script:
-  - go test -race -cover
-  - $GOPATH/bin/goveralls -service=travis-ci
