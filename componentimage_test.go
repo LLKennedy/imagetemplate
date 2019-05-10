@@ -156,6 +156,62 @@ func TestImageSetNamedProperties(t *testing.T) {
 			err: "error converting 3 to string",
 		},
 		testSet{
+			name: "file load error",
+			start: ImageComponent{
+				NamedPropertiesMap: map[string][]string{
+					"aProp":[]string{"fileName"},
+				},
+				reader: mockReader{files: map[string]mockFile{"somefile.jpg":mockFile{data: sampleTinyImageData, err:errors.New("file not found")}}},
+			},
+			input: NamedProperties{
+				"aProp": "somefile.jpg",
+			},
+			res: ImageComponent{
+				NamedPropertiesMap: map[string][]string{
+					"aProp":[]string{"fileName"},
+				},
+				reader: mockReader{files: map[string]mockFile{"somefile.jpg":mockFile{data: sampleTinyImageData, err:errors.New("file not found")}}},
+			},
+			err: "file not found",
+		},
+		testSet{
+			name: "image file data invalid",
+			start: ImageComponent{
+				NamedPropertiesMap: map[string][]string{
+					"aProp":[]string{"fileName"},
+				},
+				reader: mockReader{files: map[string]mockFile{"somefile.jpg":mockFile{data: []byte{0x00,0x00,0x00,0x00}, err:nil}}},
+			},
+			input: NamedProperties{
+				"aProp": "somefile.jpg",
+			},
+			res: ImageComponent{
+				NamedPropertiesMap: map[string][]string{
+					"aProp":[]string{"fileName"},
+				},
+				reader: mockReader{files: map[string]mockFile{"somefile.jpg":mockFile{data: []byte{0x00,0x00,0x00,0x00}, err:nil}}},
+			},
+			err: "image: unknown format",
+		},
+		testSet{
+			name: "filename valid",
+			start: ImageComponent{
+				NamedPropertiesMap: map[string][]string{
+					"aProp":[]string{"fileName"},
+				},
+				reader: mockReader{files: map[string]mockFile{"somefile.jpg":mockFile{data: sampleTinyImageData, err:nil}}},
+			},
+			input: NamedProperties{
+				"aProp": "somefile.jpg",
+			},
+			res: ImageComponent{
+				NamedPropertiesMap: map[string][]string{},
+				Image: sampleTinyImage,
+				reader: mockReader{files: map[string]mockFile{"somefile.jpg":mockFile{data: sampleTinyImageData, err:nil}}},
+			},
+			err: "",
+		},
+		testSet{
 			name: "other invalid type",
 			start: ImageComponent{
 				NamedPropertiesMap: map[string][]string{
