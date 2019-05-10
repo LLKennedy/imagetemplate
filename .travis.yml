@@ -29,3 +29,18 @@ jobs:
       go: master
       before_install: go get github.com/mattn/goveralls
       script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+
+matrix:
+  include:
+    - go: 1.7.x
+      if: branch = master OR branch = develop OR branch =~ /release\/.*/
+    - go: 1.8.x
+      if: branch = master OR branch = develop OR branch =~ /release\/.*/
+    - go: 1.9.x
+      if: branch = master OR branch = develop OR branch =~ /release\/.*/
+    - go: 1.10.x
+      if: branch = master OR branch = develop OR branch =~ /release\/.*/
+    - go: 1.11.x
+      if: branch = master OR branch = develop OR branch =~ /release\/.*/
+    - go: 1.12.x
+      if: branch = master OR branch = develop OR branch =~ /release\/.*/
