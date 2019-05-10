@@ -6,10 +6,7 @@ before_install:
 jobs:
   include:
     - stage: "Quick Build"
-      os:
-        - linux
-        - osx
-        - windows
+      os: linux, osx, windows
       go: master
       script: go build
     - stage: "Quick Test"
