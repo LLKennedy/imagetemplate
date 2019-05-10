@@ -18,6 +18,7 @@ type mockCanvas struct {
 	FixedTryTextInt int
 	FixedDrawImageError error
 	FixedBarcodeError error
+	FixedPixelsPerInch int
 }
 
 func (m mockCanvas) SetUnderlyingImage(newImage image.Image) Canvas {
@@ -31,6 +32,9 @@ func (m mockCanvas) GetWidth() int {
 }
 func (m mockCanvas) GetHeight() int {
 	return m.FixedGetHeight
+}
+func (m mockCanvas) GetPPI() int {
+	return m.FixedPixelsPerInch
 }
 func (m mockCanvas) Rectangle(topLeft image.Point, width, height int, colour color.Color) (Canvas, error) {
 	return m, m.FixedRectangleError
