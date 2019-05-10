@@ -1,45 +1,26 @@
 language: go
 
+os:
+  - linux
+  - osx
+  - windows
+ 
+go:
+  - master
+#  - "1.7.x"
+#  - "1.8.x"
+#  - "1.9.x"
+#  - "1.10.x"
+#  - "1.11.x"
+#  - "1.12.x"
+
+
 before_install:
   - go get github.com/mattn/goveralls
 
 jobs:
   include:
-    - stage: "Quick Build"
-      os: linux
-      os: windows
-      os: osx
-      go: master
+    - stage: "Build"
       script: go build
-    - stage: "Quick Test"
-      os: linux
-      go: master
-      script: go test -race -cover
-    - stage: "Full Build"
-      if: branch = master OR branch = develop OR branch =~ /release\/.*/
-      os:
-        - linux
-        - osx
-        - windows
-      go:
-        - "1.7.x"
-        - "1.8.x"
-        - "1.9.x"
-        - "1.10.x"
-        - "1.11.x"
-        - "1.12.x"
-      script: go build
-    - stage: "Full Test"
-      if: branch = master OR branch = develop OR branch =~ /release\/.*/
-      os:
-        - linux
-        - osx
-        - windows
-      go:
-        - "1.7.x"
-        - "1.8.x"
-        - "1.9.x"
-        - "1.10.x"
-        - "1.11.x"
-        - "1.12.x"
-      script: go test -race -cover
+    - stage: "Test"
+      script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
