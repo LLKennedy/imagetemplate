@@ -7,13 +7,7 @@ jobs:
   include:
     - stage: "Quick Build"
       os: linux
-      go: master
-      script: go build
-    - stage: "Quick Build"
       os: windows
-      go: master
-      script: go build
-    - stage: "Quick Build"
       os: osx
       go: master
       script: go build
