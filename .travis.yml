@@ -1,24 +1,30 @@
 language: go
 
-os:
-  - linux
-  - osx
-  - windows
-
-
 before_install:
   - go get github.com/mattn/goveralls
 
 jobs:
   include:
     - stage: "Quick Build"
+      os:
+        - linux
+        - osx
+        - windows
       go: master
       script: go build
     - stage: "Quick Test"
+      os:
+        - linux
+        - osx
+        - windows
       go: master
       script: go test -race -cover
     - stage: "Full Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
+      os:
+        - linux
+        - osx
+        - windows
       go:
         - "1.7.x"
         - "1.8.x"
@@ -29,6 +35,10 @@ jobs:
       script: go build
     - stage: "Full Test"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
+      os:
+        - linux
+        - osx
+        - windows
       go:
         - "1.7.x"
         - "1.8.x"
