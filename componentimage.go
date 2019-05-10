@@ -35,6 +35,9 @@ type imageFormat struct {
 
 // Write draws an image on the canvas
 func (component ImageComponent) Write(canvas Canvas) (Canvas, error) {
+	if len(component.NamedPropertiesMap) != 0 {
+		return canvas, fmt.Errorf("cannot draw image, not all named properties are set: %v", component.NamedPropertiesMap)
+	}
 	c := canvas
 	var err error
 	scaledImage := imaging.Resize(component.Image, component.Width, component.Height, imaging.Lanczos)
