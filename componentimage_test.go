@@ -5,6 +5,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"image"
 	"errors"
+	"encoding/base64"
+	"bytes"
+	_ "golang.org/x/image/bmp"  // bmp imported for image decoding
 )
 
 func TestImageWrite(t *testing.T) {
@@ -39,6 +42,12 @@ func TestImageSetNamedProperties(t *testing.T) {
 		res ImageComponent
 		err string
 	}
+	//Pure white 2x2 image
+	sampleTinyImageData := []byte{0x42,0x4d,0x46,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x36,0x00,0x00,0x00,0x28,0x00,0x00,0x00,0x02,0x00,0x00,0x00,0x02,0x00,0x00,0x00,0x01,0x00,0x18,0x00,0x00,0x00,0x00,0x00,0x10,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0x00,0x00}
+	sampleTinyImageString := base64.RawStdEncoding.EncodeToString(sampleTinyImageData)
+	sampleTinyImageBuffer := bytes.NewBuffer(sampleTinyImageData)
+	sampleTinyImage, _, err := image.Decode(bytes.NewBuffer(sampleTinyImageData))
+	assert.NoError(t, err, "failed to import sample image")
 	tests := []testSet{
 		testSet{
 			name: "no props",
@@ -63,6 +72,71 @@ func TestImageSetNamedProperties(t *testing.T) {
 				},
 			},
 			err: "error converting 3 to []byte, string or io.Reader",
+		},
+		testSet{
+			name: "data bytes",
+			start: ImageComponent{
+				NamedPropertiesMap: map[string][]string{
+					"aProp":[]string{"data"},
+				},
+			},
+			input: NamedProperties{
+				"aProp": sampleTinyImageData,
+			},
+			res: ImageComponent{
+				NamedPropertiesMap: map[string][]string{},
+				Image: sampleTinyImage,
+			},
+			err: "",
+		},
+		testSet{
+			name: "data string",
+			start: ImageComponent{
+				NamedPropertiesMap: map[string][]string{
+					"aProp":[]string{"data"},
+				},
+			},
+			input: NamedProperties{
+				"aProp": sampleTinyImageString,
+			},
+			res: ImageComponent{
+				NamedPropertiesMap: map[string][]string{},
+				Image: sampleTinyImage,
+			},
+			err: "",
+		},
+		testSet{
+			name: "data reader",
+			start: ImageComponent{
+				NamedPropertiesMap: map[string][]string{
+					"aProp":[]string{"data"},
+				},
+			},
+			input: NamedProperties{
+				"aProp": sampleTinyImageBuffer,
+			},
+			res: ImageComponent{
+				NamedPropertiesMap: map[string][]string{},
+				Image: sampleTinyImage,
+			},
+			err: "",
+		},
+		testSet{
+			name: "data image error",
+			start: ImageComponent{
+				NamedPropertiesMap: map[string][]string{
+					"aProp":[]string{"data"},
+				},
+			},
+			input: NamedProperties{
+				"aProp": []byte{0x00,0x00,0x00,0x00},
+			},
+			res: ImageComponent{
+				NamedPropertiesMap: map[string][]string{
+					"aProp":[]string{"data"},
+				},
+			},
+			err: "image: unknown format",
 		},
 		testSet{
 			name: "filename invalid",
