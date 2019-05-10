@@ -15,12 +15,12 @@ go:
 #  - "1.12.x"
 
 
-before_install:
-  - go get github.com/mattn/goveralls
+
 
 jobs:
   include:
     - stage: "Build"
       script: go build
     - stage: "Test"
+      before_install: go get github.com/mattn/goveralls
       script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
