@@ -20,7 +20,7 @@ func TestImageSetNamedPropertiesLoadRealFile(t *testing.T) {
 		},
 		reader: ioutilFileReader{},
 	}
-	expectedErr := "open !!!\\!!!!!!//\\//\\//\\/\\/!!!!//\\!!!\\\\\\////: File not found."
+	expectedErr := "open !!!\\!!!!!!//\\//\\//\\/\\/!!!!//\\!!!\\\\\\////: no such file or directory"
 	res, err := c.SetNamedProperties(input)
 	assert.Equal(t, expected, res)
 	assert.EqualError(t, err, expectedErr)
