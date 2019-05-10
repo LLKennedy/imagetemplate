@@ -1,26 +1,31 @@
 language: go
 
-os:
-  - linux
-  - osx
-  - windows
- 
-go:
-  - master
-#  - "1.7.x"
-#  - "1.8.x"
-#  - "1.9.x"
-#  - "1.10.x"
-#  - "1.11.x"
-#  - "1.12.x"
-
-
-
-
 jobs:
   include:
     - stage: "Build"
+      os: linux
+      go: master
       script: go build
     - stage: "Test"
+      os: linux
+      go: master
+      before_install: go get github.com/mattn/goveralls
+      script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+    - stage: "Build"
+      os: windows
+      go: master
+      script: go build
+    - stage: "Test"
+      os: windows
+      go: master
+      before_install: go get github.com/mattn/goveralls
+      script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+    - stage: "Build"
+      os: osx
+      go: master
+      script: go build
+    - stage: "Test"
+      os: osx
+      go: master
       before_install: go get github.com/mattn/goveralls
       script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
