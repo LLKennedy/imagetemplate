@@ -2,13 +2,13 @@ package imagetemplate
 
 import (
 	"fmt"
-	"github.com/LLKennedy/gosysfonts"
-	"github.com/golang/freetype/truetype"
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/gofont/goregular"
 	"image"
 	"image/color"
 	"strings"
+
+	"github.com/LLKennedy/gosysfonts"
+	"github.com/golang/freetype/truetype"
+	"golang.org/x/image/font"
 )
 
 // TextComponent implements the Component interface for text
@@ -18,18 +18,22 @@ type TextComponent struct {
 	Start              image.Point
 	Size               float64
 	MaxWidth           int
+	Alignment          TextAlignment
+	PixelsPerInch      int //Should default to 72
 	Font               *truetype.Font
 	Colour             color.NRGBA
 	reader             fileReader
 }
 
 type textFormat struct {
-	Content  string `json:"content"`
-	StartX   string `json:"startX"`
-	StartY   string `json:"startY"`
-	Size     string `json:"size"`
-	MaxWidth string `json:"maxWidth"`
-	Font     struct {
+	Content       string `json:"content"`
+	StartX        string `json:"startX"`
+	StartY        string `json:"startY"`
+	Size          string `json:"size"`
+	MaxWidth      string `json:"maxWidth"`
+	Alignment     string `json:"alignment"`
+	PixelsPerInch string `json:"ppi"`
+	Font          struct {
 		FontName string `json:"fontName"`
 		FontFile string `json:"fontFile"`
 		FontURL  string `json:"fontURL"`
@@ -42,13 +46,26 @@ type textFormat struct {
 	} `json:"colour"`
 }
 
+// TextAlignment is a text alignment
+type TextAlignment int
+
+const (
+	// TextAlignmentLeft aligns text left
+	TextAlignmentLeft TextAlignment = iota
+	// TextAlignmentRight aligns text right
+	TextAlignmentRight
+	// TextAlignmentCentre aligns text centrally
+	TextAlignmentCentre
+)
+
 // Write draws text on the canvas
 func (component TextComponent) Write(canvas Canvas) (Canvas, error) {
 	c := canvas
-	fontSize := component.Size
+	fontSize := (component.Size / 72) * float64(component.PixelsPerInch) // one point in fonts is almost exactly 1/72nd of one inch
 	fits := false
 	tries := 0
 	var face font.Face
+	var alignmentOffset int
 	for !fits && tries < 10 {
 		tries++
 		face = truetype.NewFace(component.Font, &truetype.Options{Size: fontSize, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64})
@@ -57,12 +74,24 @@ func (component TextComponent) Write(canvas Canvas) (Canvas, error) {
 		if realWidth > component.MaxWidth {
 			ratio := float64(component.MaxWidth) / float64(realWidth)
 			fontSize = ratio * fontSize
+		} else if realWidth < component.MaxWidth {
+			remainingWidth := float64(component.MaxWidth) - float64(realWidth)
+			switch component.Alignment {
+			case TextAlignmentLeft:
+				alignmentOffset = 0
+			case TextAlignmentRight:
+				alignmentOffset = int(remainingWidth)
+			case TextAlignmentCentre:
+				alignmentOffset = int(remainingWidth / 2)
+			default:
+				alignmentOffset = 0
+			}
 		}
 	}
 	if !fits {
 		return canvas, fmt.Errorf("unable to fit text %v into maxWidth %d after %d tries", component.Content, component.MaxWidth, tries)
 	}
-	c, err := c.Text(component.Content, component.Start, face, component.Colour, component.MaxWidth)
+	c, err := c.Text(component.Content, image.Pt(component.Start.X+alignmentOffset, component.Start.Y), face, component.Colour, component.MaxWidth)
 	if err != nil {
 		return canvas, err
 	}
@@ -101,11 +130,11 @@ func (component TextComponent) SetNamedProperties(properties NamedProperties) (C
 			if component.reader == nil {
 				component.reader = ioutilFileReader{}
 			}
-			_, err := component.reader.ReadFile(stringVal) //set this variable again once it's working
+			fontData, err := component.reader.ReadFile(stringVal)
 			if err != nil {
 				return err
 			}
-			rawFont, err := truetype.Parse(goregular.TTF)
+			rawFont, err := truetype.Parse(fontData)
 			if err != nil {
 				return err
 			}
@@ -120,6 +149,26 @@ func (component TextComponent) SetNamedProperties(properties NamedProperties) (C
 			}
 			c.Size = float64Val
 			return nil
+		case "alignment":
+			alignmentVal, isAlignment := value.(TextAlignment)
+			stringVal, isString := value.(string)
+			if !isAlignment && !isString {
+				return fmt.Errorf("could not convert %v to text alignment or string", value)
+			}
+			if isAlignment {
+				c.Alignment = alignmentVal
+			} else {
+				switch stringVal {
+				case "left":
+					c.Alignment = TextAlignmentLeft
+				case "right":
+					c.Alignment = TextAlignmentRight
+				case "centre":
+					c.Alignment = TextAlignmentCentre
+				default:
+					c.Alignment = TextAlignmentLeft
+				}
+			}
 		}
 		if strings.Contains("RGBA", name) && len(name) == 1 {
 			//Process colours
@@ -158,6 +207,12 @@ func (component TextComponent) SetNamedProperties(properties NamedProperties) (C
 			return nil
 		case "maxWidth":
 			c.MaxWidth = numberVal
+			return nil
+		case "ppi":
+			c.PixelsPerInch = numberVal
+			if c.PixelsPerInch <= 0 {
+				c.PixelsPerInch = 72
+			}
 			return nil
 		default:
 			return fmt.Errorf("invalid component property in named property map: %v", name)
@@ -234,11 +289,11 @@ func (component TextComponent) VerifyAndSetJSONData(data interface{}) (Component
 		if c.reader == nil {
 			c.reader = ioutilFileReader{}
 		}
-		_, err := c.reader.ReadFile(stringVal) //set this back once it works
+		fontData, err := c.reader.ReadFile(stringVal)
 		if err != nil {
 			return component, props, err
 		}
-		rawFont, err := truetype.Parse(goregular.TTF)
+		rawFont, err := truetype.Parse(fontData)
 		if err != nil {
 			return component, props, err
 		}
@@ -284,6 +339,30 @@ func (component TextComponent) VerifyAndSetJSONData(data interface{}) (Component
 	if newVal != nil {
 		c.Size = newVal.(float64)
 	}
+	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Alignment, "alignment", stringType, c.NamedPropertiesMap)
+	if err != nil {
+		return component, props, err
+	}
+	if newVal != nil {
+		alignmentString := newVal.(string)
+		switch alignmentString {
+		case "left":
+			c.Alignment = TextAlignmentLeft
+		case "right":
+			c.Alignment = TextAlignmentRight
+		case "centre":
+			c.Alignment = TextAlignmentCentre
+		default:
+			c.Alignment = TextAlignmentLeft
+		}
+	}
+	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.PixelsPerInch, "ppi", intType, c.NamedPropertiesMap)
+	if err != nil {
+		return component, props, err
+	}
+	if newVal != nil {
+		c.PixelsPerInch = newVal.(int)
+	}
 	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Colour.Red, "R", uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
@@ -316,7 +395,7 @@ func (component TextComponent) VerifyAndSetJSONData(data interface{}) (Component
 		Message string
 	}
 	for key := range c.NamedPropertiesMap {
-		props[key] = invalidStruct{Message:"Please replace me with real data"}
+		props[key] = invalidStruct{Message: "Please replace me with real data"}
 	}
 	return c, props, nil
 }

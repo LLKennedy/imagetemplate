@@ -3,6 +3,7 @@ package imagetemplate
 import (
 	"bytes"
 	"fmt"
+
 	// "github.com/boombuler/barcode"
 	// "github.com/boombuler/barcode/aztec"
 	// "github.com/boombuler/barcode/codabar"
@@ -15,15 +16,16 @@ import (
 	// "github.com/boombuler/barcode/qr"
 	// "math/rand"
 	// "github.com/boombuler/barcode/twooffive"
+	"image"
+	"image/color"
+	"image/draw"
+	"testing"
+
 	"github.com/golang/freetype/truetype"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/image/bmp"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
-	"image"
-	"image/color"
-	"image/draw"
-	"testing"
 )
 
 func TestBlankCanvas(t *testing.T) {
@@ -45,7 +47,7 @@ func TestBlankCanvas(t *testing.T) {
 	})
 	t.Run("get height", func(t *testing.T) {
 		height := blankCanvas.GetHeight()
-		assert.Equal(t, -1, height)
+		assert.Equal(t, 0, height)
 	})
 	t.Run("get image func", func(t *testing.T) {
 		img := blankCanvas.GetUnderlyingImage()
@@ -53,7 +55,7 @@ func TestBlankCanvas(t *testing.T) {
 	})
 	t.Run("get width", func(t *testing.T) {
 		width := blankCanvas.GetWidth()
-		assert.Equal(t, -1, width)
+		assert.Equal(t, 0, width)
 	})
 	t.Run("rectangle", func(t *testing.T) {
 		modifiedCanvas, err := blankCanvas.Rectangle(image.ZP, 10, 10, color.White)

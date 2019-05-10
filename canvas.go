@@ -2,6 +2,10 @@ package imagetemplate
 
 import (
 	"errors"
+	"image"
+	"image/color"
+	"image/draw"
+
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/aztec"
 	"github.com/boombuler/barcode/codabar"
@@ -15,9 +19,6 @@ import (
 	"github.com/boombuler/barcode/twooffive"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
-	"image"
-	"image/color"
-	"image/draw"
 )
 
 // Canvas holds the image struct and associated properties
@@ -26,6 +27,7 @@ type Canvas interface {
 	GetUnderlyingImage() image.Image
 	GetWidth() int
 	GetHeight() int
+	GetPPI() int
 	Rectangle(topLeft image.Point, width, height int, colour color.Color) (Canvas, error)
 	Circle(centre image.Point, radius int, colour color.Color) (Canvas, error)
 	Text(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (Canvas, error)
@@ -36,8 +38,9 @@ type Canvas interface {
 
 // ImageCanvas uses golang's native Image package to implement the Canvas interface
 type ImageCanvas struct {
-	Image  draw.Image
-	reader fileReader
+	Image         draw.Image
+	reader        fileReader
+	pixelsPerInch int
 }
 
 // NewCanvas generates a new canvas of the given width and height
@@ -75,20 +78,30 @@ func (canvas ImageCanvas) GetUnderlyingImage() image.Image {
 	return canvas.Image
 }
 
-// GetWidth returns the width of the underlying Image. Returns -1 if no canvas is set.
+// GetWidth returns the width of the underlying Image. Returns 0 if no canvas is set.
 func (canvas ImageCanvas) GetWidth() int {
 	if canvas.Image == nil {
-		return -1
+		return 0
 	}
 	return canvas.Image.Bounds().Size().X
 }
 
-// GetHeight returns the geight of the underlying Image. Returns -1 if no canvas is set.
+// GetHeight returns the height of the underlying Image. Returns 0 if no canvas is set.
 func (canvas ImageCanvas) GetHeight() int {
 	if canvas.Image == nil {
-		return -1
+		return 0
 	}
 	return canvas.Image.Bounds().Size().Y
+}
+
+// SetPPI sets the pixels per inch of the canvas
+func (canvas ImageCanvas) SetPPI(ppi int) {
+	canvas.pixelsPerInch = ppi
+}
+
+// GetPPI returns the pixels per inch of the canvas
+func (canvas ImageCanvas) GetPPI() int {
+	return canvas.pixelsPerInch
 }
 
 // Rectangle draws a rectangle of a specific colour on the canvas
