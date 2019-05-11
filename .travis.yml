@@ -10,7 +10,7 @@ jobs:
       os: linux
       go: master
       before_install: go get github.com/mattn/goveralls
-      script: go test ./... -v -race -coverprofile=coverage.out; $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci
+      script: go test ./... -race -coverprofile=coverage.out; $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci
     # - stage: "Build"
     #   os: windows
     #   go: master
