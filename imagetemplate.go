@@ -1,9 +1,10 @@
 package imagetemplate
 
 import (
-	github.com/LLKennedy/imagetemplate/core
+	"github.com/LLKennedy/imagetemplate/core"
 )
 
-// func LoadTemplate(path string) (core.Builder, err) {
+// LoadTemplate takes a file path and returns a Builder constructed from the template file
+func LoadTemplate(path string) (core.Builder, err) {
 	
-// }
+}

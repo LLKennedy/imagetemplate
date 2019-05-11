@@ -1,4 +1,4 @@
-package imagetemplate
+package barcode
 
 import (
 	"fmt"
@@ -6,19 +6,20 @@ import (
 	"image"
 	"image/color"
 	"strings"
+	"github.com/LLKennedy/imagetemplate/render"
 )
 
-// BarcodeComponent implements the Component interface for images
-type BarcodeComponent struct {
+// Component implements the Component interface for images
+type Component struct {
 	NamedPropertiesMap map[string][]string
 	Content            string
-	Type               BarcodeType
+	Type               render.BarcodeType
 	TopLeft            image.Point
 	Width              int
 	Height             int
 	DataColour         color.NRGBA
 	BackgroundColour   color.NRGBA
-	Extra              BarcodeExtraData
+	Extra              render.BarcodeExtraData
 }
 
 type barcodeFormat struct {
@@ -43,7 +44,7 @@ type barcodeFormat struct {
 }
 
 // Write draws a barcode on the canvas
-func (component BarcodeComponent) Write(canvas Canvas) (Canvas, error) {
+func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 	c := canvas
 	var err error
 	c, err = c.Barcode(component.Type, []byte(component.Content), component.Extra, component.TopLeft, component.Width, component.Height, component.DataColour, component.BackgroundColour)
@@ -54,7 +55,7 @@ func (component BarcodeComponent) Write(canvas Canvas) (Canvas, error) {
 }
 
 // SetNamedProperties proceses the named properties and sets them into the barcode properties
-func (component BarcodeComponent) SetNamedProperties(properties NamedProperties) (Component, error) {
+func (component Component) SetNamedProperties(properties render.NamedProperties) (Component, error) {
 	c := component
 	setFunc := func(name string, value interface{}) error {
 		switch name {
@@ -165,12 +166,12 @@ func (component BarcodeComponent) SetNamedProperties(properties NamedProperties)
 }
 
 // GetJSONFormat returns the JSON structure of a barcode component
-func (component BarcodeComponent) GetJSONFormat() interface{} {
+func (component Component) GetJSONFormat() interface{} {
 	return &barcodeFormat{}
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set barcode properties and fill the named properties map
-func (component BarcodeComponent) VerifyAndSetJSONData(data interface{}) (Component, NamedProperties, error) {
+func (component Component) VerifyAndSetJSONData(data interface{}) (Component, NamedProperties, error) {
 	c := component
 	props := make(NamedProperties)
 	stringStruct, ok := data.(*barcodeFormat)

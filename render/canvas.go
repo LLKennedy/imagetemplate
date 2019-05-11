@@ -1,4 +1,5 @@
-package imagetemplate
+// Package render renders images onto a canvas.
+package render
 
 import (
 	"errors"
@@ -19,6 +20,7 @@ import (
 	"github.com/boombuler/barcode/twooffive"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
+	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
 )
 
 // Canvas holds the image struct and associated properties
@@ -39,7 +41,7 @@ type Canvas interface {
 // ImageCanvas uses golang's native Image package to implement the Canvas interface
 type ImageCanvas struct {
 	Image         draw.Image
-	reader        fileReader
+	reader        fs.FileReader
 	pixelsPerInch int
 }
 
@@ -57,7 +59,7 @@ func NewCanvas(width, height int) (ImageCanvas, error) {
 			Min: image.Point{X: 0, Y: 0},
 			Max: image.Point{X: width, Y: height},
 		}),
-		reader: ioutilFileReader{},
+		reader: fs.IoutilFileReader{},
 	}, nil
 }
 

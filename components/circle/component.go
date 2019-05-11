@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"strings"
+	"github.com/LLKennedy/imagetemplate/render"
 )
 
 // CircleComponent implements the Component interface for circles
@@ -28,7 +29,7 @@ type circleFormat struct {
 }
 
 // Write draws a circle on the canvas
-func (component CircleComponent) Write(canvas Canvas) (Canvas, error) {
+func (component CircleComponent) Write(canvas render.Canvas) (Canvas, error) {
 	if len(component.NamedPropertiesMap) != 0 {
 		return canvas, fmt.Errorf("cannot draw circle, not all named properties are set: %v", component.NamedPropertiesMap)
 	}

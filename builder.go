@@ -1,22 +1,30 @@
-// Package imagetemplate defines a template for drawing custom images from pre-defined components, and provides to tools to load and implement that template.
-package imagetemplate
+// Package core defines a template for drawing custom images from pre-defined components, and provides to tools to load and implement that template.
+package core
 
 import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/disintegration/imaging"
-	"golang.org/x/image/bmp"
-	_ "golang.org/x/image/tiff" // tiff imported for image decoding
 	"image"
 	"image/color"
 	"image/draw"
 	_ "image/jpeg" // jpeg imported for image decoding
 	_ "image/png"  // png imported for image decoding
-	"io/ioutil"
 	"strconv"
 	"strings"
+
+	"github.com/LLKennedy/imagetemplate/components/barcode"
+	"github.com/LLKennedy/imagetemplate/components/circle"
+	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
+
+	//"github.com/LLKennedy/imagetemplate/components/datetime"
+	img "github.com/LLKennedy/imagetemplate/components/image"
+	"github.com/LLKennedy/imagetemplate/components/rectangle"
+	"github.com/LLKennedy/imagetemplate/components/text"
+	"github.com/disintegration/imaging"
+	"golang.org/x/image/bmp"
+	_ "golang.org/x/image/tiff" // tiff imported for image decoding
 )
 
 // Builder manipulates Canvas objects and outputs to a bitmap
@@ -63,27 +71,17 @@ type ToggleableComponent struct {
 	Component   Component
 }
 
-type fileReader interface {
-	ReadFile(string) ([]byte, error)
-}
-
-type ioutilFileReader struct{}
-
-func (r ioutilFileReader) ReadFile(filename string) ([]byte, error) {
-	return ioutil.ReadFile(filename)
-}
-
 // ImageBuilder uses golang's native Image package to implement the Builder interface
 type ImageBuilder struct {
 	Canvas          Canvas
 	Components      []ToggleableComponent
 	NamedProperties NamedProperties
-	reader          fileReader
+	reader          fs.FileReader
 }
 
 // NewBuilder generates a new ImageBuilder with an internal canvas of the specified width and height, and optionally the specified starting colour. No provided colour will result in defaults for Image.
 func NewBuilder(canvas Canvas, startingColour color.Color) (ImageBuilder, error) {
-	newBuilder := ImageBuilder{reader: ioutilFileReader{}}
+	newBuilder := ImageBuilder{reader: fs.IoutilFileReader{}}
 	if startingColour != nil {
 		var err error
 		canvas, err = canvas.Rectangle(image.Point{}, canvas.GetWidth(), canvas.GetHeight(), startingColour)
@@ -273,15 +271,15 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, Name
 			var newComponent Component
 			switch compType {
 			case "circle", "Circle":
-				newComponent = CircleComponent{}
+				newComponent = circle.Component{}
 			case "rectangle", "Rectangle", "rect", "Rect":
-				newComponent = RectangleComponent{}
+				newComponent = rectangle.Component{}
 			case "image", "Image", "photo", "Photo":
-				newComponent = ImageComponent{}
+				newComponent = img.Component{}
 			case "text", "Text", "words", "Words":
-				newComponent = TextComponent{}
+				newComponent = text.Component{}
 			case "barcode", "Barcode":
-				newComponent = BarcodeComponent{}
+				newComponent = barcode.Component{}
 			}
 			// Get JSON struct to parse into
 			shape := newComponent.GetJSONFormat()

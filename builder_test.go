@@ -1,4 +1,4 @@
-package imagetemplate
+package core
 
 import (
 	"fmt"
