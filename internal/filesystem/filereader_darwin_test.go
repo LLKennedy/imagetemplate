@@ -8,6 +8,6 @@ import (
 func TestReadFile(t *testing.T) {
 	r := IoutilFileReader{}
 	data, err := r.ReadFile("///////\\some file you can't possibly find")
-	assert.Equal(t, []byte{}, data)
+	assert.Equal(t, []byte(nil), data)
 	assert.EqualError(t, err, "open ///////\\some file you can't possibly find: no such file or directory")
 }
