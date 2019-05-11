@@ -22,6 +22,7 @@ import (
 	img "github.com/LLKennedy/imagetemplate/components/image"
 	"github.com/LLKennedy/imagetemplate/components/rectangle"
 	"github.com/LLKennedy/imagetemplate/components/text"
+	"github.com/LLKennedy/imagetemplate/render"
 	"github.com/disintegration/imaging"
 	"golang.org/x/image/bmp"
 	_ "golang.org/x/image/tiff" // tiff imported for image decoding
@@ -29,12 +30,12 @@ import (
 
 // Builder manipulates Canvas objects and outputs to a bitmap
 type Builder interface {
-	GetCanvas() Canvas
-	SetCanvas(newCanvas Canvas) Builder
-	GetComponents() []Component
+	GetCanvas() render.Canvas
+	SetCanvas(newCanvas render.Canvas) Builder
+	GetComponents() []render.Component
 	SetComponents(components []ToggleableComponent) Builder
-	GetNamedPropertiesList() NamedProperties
-	SetNamedProperties(properties NamedProperties) (Builder, error)
+	GetNamedPropertiesList() render.NamedProperties
+	SetNamedProperties(properties render.NamedProperties) (Builder, error)
 	ApplyComponents() (Builder, error)
 	LoadComponentsFile(fileName string) (Builder, error)
 	LoadComponentsData(fileData []byte) (Builder, error)
@@ -60,27 +61,27 @@ type Template struct {
 
 // ComponentTemplate is a partial unmarshalled Component, with its properties left in raw form to be handled by each known type of Component.
 type ComponentTemplate struct {
-	Type        string               `json:"type"`
-	Conditional ComponentConditional `json:"conditional"`
-	Properties  json.RawMessage      `json:"properties"`
+	Type        string                      `json:"type"`
+	Conditional render.ComponentConditional `json:"conditional"`
+	Properties  json.RawMessage             `json:"properties"`
 }
 
 // ToggleableComponent is a component with its conditional
 type ToggleableComponent struct {
-	Conditional ComponentConditional
-	Component   Component
+	Conditional render.ComponentConditional
+	Component   render.Component
 }
 
 // ImageBuilder uses golang's native Image package to implement the Builder interface
 type ImageBuilder struct {
-	Canvas          Canvas
+	Canvas          render.Canvas
 	Components      []ToggleableComponent
-	NamedProperties NamedProperties
+	NamedProperties render.NamedProperties
 	reader          fs.FileReader
 }
 
 // NewBuilder generates a new ImageBuilder with an internal canvas of the specified width and height, and optionally the specified starting colour. No provided colour will result in defaults for Image.
-func NewBuilder(canvas Canvas, startingColour color.Color) (ImageBuilder, error) {
+func NewBuilder(canvas render.Canvas, startingColour color.Color) (ImageBuilder, error) {
 	newBuilder := ImageBuilder{reader: fs.IoutilFileReader{}}
 	if startingColour != nil {
 		var err error
@@ -141,7 +142,7 @@ func (builder ImageBuilder) LoadComponentsData(fileData []byte) (Builder, error)
 	return b, nil
 }
 
-func (builder ImageBuilder) setBackgroundImage(canvas Canvas, template Template) (Canvas, error) {
+func (builder ImageBuilder) setBackgroundImage(canvas render.Canvas, template Template) (render.Canvas, error) {
 	c := canvas
 	// Check the state of the optional and required properties
 	dataSet := template.BaseImage.Data != ""
@@ -221,7 +222,7 @@ func (builder ImageBuilder) setBackgroundImage(canvas Canvas, template Template)
 		var drawImage draw.Image
 		drawImage = image.NewNRGBA(baseImage.Bounds())
 		draw.Draw(drawImage, baseImage.Bounds(), baseImage, baseImage.Bounds().Min, draw.Over)
-		c = ImageCanvas{Image: drawImage}
+		c = render.ImageCanvas{Image: drawImage}
 		return c, nil
 	}
 	// Check if resizing is necessary
@@ -249,9 +250,9 @@ func (builder ImageBuilder) setBackgroundImage(canvas Canvas, template Template)
 	return c, nil
 }
 
-func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, NamedProperties, error) {
+func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, render.NamedProperties, error) {
 	var results []ToggleableComponent
-	namedProperties := NamedProperties{}
+	namedProperties := render.NamedProperties{}
 	for tCount, template := range templates {
 		//Handle conditional first
 		result := ToggleableComponent{}
@@ -268,7 +269,7 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, Name
 			typeRange = []string{"circle", "Circle", "rectange", "Rectangle", "rect", "Rect", "image", "Image", "photo", "Photo", "text", "Text", "words", "Words", "barcode", "Barcode"}
 		}
 		for _, compType := range typeRange {
-			var newComponent Component
+			var newComponent render.Component
 			switch compType {
 			case "circle", "Circle":
 				newComponent = circle.Component{}
@@ -310,19 +311,19 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, Name
 }
 
 // GetCanvas returns the internal Canvas object
-func (builder ImageBuilder) GetCanvas() Canvas {
+func (builder ImageBuilder) GetCanvas() render.Canvas {
 	return builder.Canvas
 }
 
 // SetCanvas sets the internal Canvas object
-func (builder ImageBuilder) SetCanvas(newCanvas Canvas) Builder {
+func (builder ImageBuilder) SetCanvas(newCanvas render.Canvas) Builder {
 	builder.Canvas = newCanvas
 	return builder
 }
 
 // GetComponents gets the internal Component array
-func (builder ImageBuilder) GetComponents() []Component {
-	result := []Component{}
+func (builder ImageBuilder) GetComponents() []render.Component {
+	result := []render.Component{}
 	for _, tComponent := range builder.Components {
 		valid, err := tComponent.Conditional.Validate()
 		if err != nil {
@@ -342,12 +343,12 @@ func (builder ImageBuilder) SetComponents(components []ToggleableComponent) Buil
 }
 
 // GetNamedPropertiesList returns the list of named properties in the builder object
-func (builder ImageBuilder) GetNamedPropertiesList() NamedProperties {
+func (builder ImageBuilder) GetNamedPropertiesList() render.NamedProperties {
 	return builder.NamedProperties
 }
 
 // SetNamedProperties sets the values of names properties in all components and conditionals in the builder
-func (builder ImageBuilder) SetNamedProperties(properties NamedProperties) (Builder, error) {
+func (builder ImageBuilder) SetNamedProperties(properties render.NamedProperties) (Builder, error) {
 	b := builder
 	for tIndex, tComponent := range b.Components {
 		var err error

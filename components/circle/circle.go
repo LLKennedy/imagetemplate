@@ -37,7 +37,7 @@ func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 }
 
 // SetNamedProperties processes the named properties and sets them into the circle properties
-func (component Component) SetNamedProperties(properties render.NamedProperties) (Component, error) {
+func (component Component) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
 	c := component
 	setFunc := func(name string, value interface{}) error {
 		if strings.Contains("RGBA", name) && len(name) == 1 {
@@ -93,7 +93,7 @@ func (component Component) GetJSONFormat() interface{} {
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set circle properties and fill the named properties map
-func (component Component) VerifyAndSetJSONData(data interface{}) (Component, render.NamedProperties, error) {
+func (component Component) VerifyAndSetJSONData(data interface{}) (render.Component, render.NamedProperties, error) {
 	c := component
 	props := make(render.NamedProperties)
 	stringStruct, ok := data.(*circleFormat)
