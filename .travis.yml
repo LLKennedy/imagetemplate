@@ -10,7 +10,7 @@ jobs:
       os: linux
       go: master
       before_install: go get github.com/mattn/goveralls
-      script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+      script: go test ./... -v -race -coverprofile=coverage.out; $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci
     # - stage: "Build"
     #   os: windows
     #   go: master
@@ -18,7 +18,7 @@ jobs:
     # - stage: "Test"
     #   os: windows
     #   go: master
-    #   script: go test ./... -race -cover
+    #   script: go test ./... -race
     - stage: "Build"
       os: osx
       go: master
@@ -26,7 +26,7 @@ jobs:
     - stage: "Test"
       os: osx
       go: master
-      script: go test ./... -race -cover
+      script: go test ./... -race
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
@@ -36,7 +36,7 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
       go: 1.7.x
-      script: go test ./... -race -cover
+      script: go test ./... -race
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
@@ -46,7 +46,7 @@ jobs:
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
     #   go: 1.7.x
-    #   script: go test ./... -race -cover
+    #   script: go test ./... -race
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
@@ -56,7 +56,7 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
       go: 1.7.x
-      script: go test ./... -race -cover
+      script: go test ./... -race
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
@@ -66,7 +66,7 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
       go: 1.8.x
-      script: go test ./... -race -cover
+      script: go test ./... -race
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
@@ -76,7 +76,7 @@ jobs:
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
     #   go: 1.8.x
-    #   script: go test ./... -race -cover
+    #   script: go test ./... -race
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
@@ -86,7 +86,7 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
       go: 1.8.x
-      script: go test ./... -race -cover
+      script: go test ./... -race
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
@@ -96,7 +96,7 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
       go: 1.9.x
-      script: go test ./... -race -cover
+      script: go test ./... -race
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
@@ -106,7 +106,7 @@ jobs:
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
     #   go: 1.9.x
-    #   script: go test ./... -race -cover
+    #   script: go test ./... -race
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
@@ -116,7 +116,7 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
       go: 1.9.x
-      script: go test ./... -race -cover
+      script: go test ./... -race
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
@@ -126,7 +126,7 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
       go: 1.10.x
-      script: go test ./... -race -cover
+      script: go test ./... -race
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
@@ -136,7 +136,7 @@ jobs:
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
     #   go: 1.10.x
-    #   script: go test ./... -race -cover
+    #   script: go test ./... -race
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
@@ -146,7 +146,7 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
       go: 1.10.x
-      script: go test ./... -race -cover
+      script: go test ./... -race
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
@@ -156,7 +156,7 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
       go: 1.11.x
-      script: go test ./... -race -cover
+      script: go test ./... -race
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
@@ -166,7 +166,7 @@ jobs:
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
     #   go: 1.11.x
-    #   script: go test ./... -race -cover
+    #   script: go test ./... -race
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
@@ -176,7 +176,7 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
       go: 1.11.x
-      script: go test ./... -race -cover
+      script: go test ./... -race
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
@@ -186,7 +186,7 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
       go: 1.12.x
-      script: go test ./... -race -cover
+      script: go test ./... -race
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
@@ -196,7 +196,7 @@ jobs:
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
     #   go: 1.12.x
-    #   script: go test ./... -race -cover
+    #   script: go test ./... -race
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
@@ -206,4 +206,4 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
       go: 1.12.x
-      script: go test ./... -race -cover
+      script: go test ./... -race
