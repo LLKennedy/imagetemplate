@@ -10,7 +10,7 @@ jobs:
       os: linux
       go: master
       before_install: go get github.com/mattn/goveralls
-      script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+      script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     # - stage: "Build"
     #   os: windows
     #   go: master
@@ -19,7 +19,7 @@ jobs:
     #   os: windows
     #   go: master
     #   before_install: go get github.com/mattn/goveralls
-    #   script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+    #   script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     - stage: "Build"
       os: osx
       go: master
@@ -28,7 +28,7 @@ jobs:
       os: osx
       go: master
       before_install: go get github.com/mattn/goveralls
-      script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+      script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
@@ -39,7 +39,7 @@ jobs:
       os: linux
       go: 1.7.x
       before_install: go get github.com/mattn/goveralls
-      script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+      script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
@@ -50,7 +50,7 @@ jobs:
     #   os: windows
     #   go: 1.7.x
     #   before_install: go get github.com/mattn/goveralls
-    #   script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+    #   script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
@@ -61,7 +61,7 @@ jobs:
       os: osx
       go: 1.7.x
       before_install: go get github.com/mattn/goveralls
-      script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+      script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
@@ -72,7 +72,7 @@ jobs:
       os: linux
       go: 1.8.x
       before_install: go get github.com/mattn/goveralls
-      script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+      script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
@@ -83,7 +83,7 @@ jobs:
     #   os: windows
     #   go: 1.8.x
     #   before_install: go get github.com/mattn/goveralls
-    #   script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+    #   script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
@@ -94,7 +94,7 @@ jobs:
       os: osx
       go: 1.8.x
       before_install: go get github.com/mattn/goveralls
-      script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+      script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
@@ -105,7 +105,7 @@ jobs:
       os: linux
       go: 1.9.x
       before_install: go get github.com/mattn/goveralls
-      script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+      script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
@@ -116,7 +116,7 @@ jobs:
     #   os: windows
     #   go: 1.9.x
     #   before_install: go get github.com/mattn/goveralls
-    #   script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+    #   script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
@@ -127,7 +127,7 @@ jobs:
       os: osx
       go: 1.9.x
       before_install: go get github.com/mattn/goveralls
-      script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+      script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
@@ -138,7 +138,7 @@ jobs:
       os: linux
       go: 1.10.x
       before_install: go get github.com/mattn/goveralls
-      script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+      script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
@@ -149,7 +149,7 @@ jobs:
     #   os: windows
     #   go: 1.10.x
     #   before_install: go get github.com/mattn/goveralls
-    #   script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+    #   script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
@@ -160,7 +160,7 @@ jobs:
       os: osx
       go: 1.10.x
       before_install: go get github.com/mattn/goveralls
-      script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+      script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
@@ -171,7 +171,7 @@ jobs:
       os: linux
       go: 1.11.x
       before_install: go get github.com/mattn/goveralls
-      script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+      script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
@@ -182,7 +182,7 @@ jobs:
     #   os: windows
     #   go: 1.11.x
     #   before_install: go get github.com/mattn/goveralls
-    #   script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+    #   script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
@@ -193,7 +193,7 @@ jobs:
       os: osx
       go: 1.11.x
       before_install: go get github.com/mattn/goveralls
-      script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+      script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
@@ -204,7 +204,7 @@ jobs:
       os: linux
       go: 1.12.x
       before_install: go get github.com/mattn/goveralls
-      script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+      script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
     #   os: windows
@@ -215,7 +215,7 @@ jobs:
     #   os: windows
     #   go: 1.12.x
     #   before_install: go get github.com/mattn/goveralls
-    #   script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+    #   script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     - stage: "Build"
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: osx
@@ -226,4 +226,4 @@ jobs:
       os: osx
       go: 1.12.x
       before_install: go get github.com/mattn/goveralls
-      script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
+      script: go test ./... -race -cover; $GOPATH/bin/goveralls -service=travis-ci
