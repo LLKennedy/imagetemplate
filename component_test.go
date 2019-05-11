@@ -2,8 +2,9 @@ package imagetemplate
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestStandardSetNamedProperties(t *testing.T) {
@@ -69,7 +70,11 @@ func TestStandardSetNamedProperties(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			leftovers, err := StandardSetNamedProperties(test.properties, test.propMap, test.setFunc)
 			assert.Equal(t, test.resultLeftovers, leftovers)
-			assert.Equal(t, test.resultErr, err)
+			if test.resultErr == nil {
+				assert.NoError(t, err)
+			} else {
+				assert.EqualError(t, err, test.resultErr.Error())
+			}
 		})
 	}
 	t.Run("check all internal properties are passed through", func(t *testing.T) {
@@ -115,7 +120,11 @@ func TestStandardSetNamedProperties(t *testing.T) {
 		}
 		leftovers, err := StandardSetNamedProperties(test.properties, test.propMap, test.setFunc)
 		assert.Equal(t, test.resultLeftovers, leftovers)
-		assert.Equal(t, test.resultErr, err)
+		if test.resultErr == nil {
+			assert.NoError(t, err)
+		} else {
+			assert.EqualError(t, err, test.resultErr.Error())
+		}
 		assert.Equal(t, len(expectedValues), len(valuesSet), "valuesSet length changes, something was added or deleted improperly")
 		finalResult := true
 		for _, result := range valuesSet {
@@ -206,7 +215,11 @@ func TestParseDataValue(t *testing.T) {
 			assert.Equal(t, test.hasNamedProperties, hasNamedProperties)
 			assert.Equal(t, test.cleanValues, deconstructed.StaticValues)
 			assert.Equal(t, test.propNames, deconstructed.PropNames)
-			assert.Equal(t, test.err, err)
+			if test.err == nil {
+				assert.NoError(t, err)
+			} else {
+				assert.EqualError(t, err, test.err.Error())
+			}
 		})
 	}
 }
@@ -235,7 +248,11 @@ func TestConditionals(t *testing.T) {
 		}
 		success, err := test.conditional.Validate()
 		assert.Equal(t, test.validateResult, success)
-		assert.Equal(t, test.validateError, err)
+		if test.validateError == nil {
+			assert.NoError(t, err)
+		} else {
+			assert.EqualError(t, err, test.validateError.Error())
+		}
 	}
 
 	testArray := []testSet{

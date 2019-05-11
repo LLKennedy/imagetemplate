@@ -341,7 +341,10 @@ func TestImageSetNamedProperties(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			res, err := test.start.SetNamedProperties(test.input)
-			assert.Equal(t, test.res, res)
+			test.res.reader = nil
+			ICres := res.(ImageComponent)
+			ICres.reader = nil
+			assert.Equal(t, test.res, ICres)
 			if test.err == "" {
 				assert.NoError(t, err)
 			} else {
