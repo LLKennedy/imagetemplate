@@ -811,3 +811,14 @@ func TestConditionals(t *testing.T) {
 		t.Run(test.name, testFunc)
 	}
 }
+
+func TestGetNamedPropertiesList(t *testing.T) {
+	c := ComponentConditional{
+		Name: "$something$",
+		Value: "some value",
+		Operator: "ci_equals",
+		Group: conditionalGroup{},
+	}
+	props := c.GetNamedPropertiesList()
+	assert.Equal(t, 1, len(props))
+}
