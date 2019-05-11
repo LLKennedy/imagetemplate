@@ -1,4 +1,4 @@
-package imagetemplate
+package text
 
 import (
 	"fmt"
@@ -9,20 +9,22 @@ import (
 	"github.com/LLKennedy/gosysfonts"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
+	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
+	"github.com/LLKennedy/imagetemplate/render"
 )
 
-// TextComponent implements the Component interface for text
-type TextComponent struct {
+// Component implements the Component interface for text
+type Component struct {
 	NamedPropertiesMap map[string][]string
 	Content            string
 	Start              image.Point
 	Size               float64
 	MaxWidth           int
-	Alignment          TextAlignment
+	Alignment          Alignment
 	PixelsPerInch      int //Should default to 72
 	Font               *truetype.Font
 	Colour             color.NRGBA
-	reader             fileReader
+	reader             fs.FileReader
 }
 
 type textFormat struct {
@@ -46,20 +48,20 @@ type textFormat struct {
 	} `json:"colour"`
 }
 
-// TextAlignment is a text alignment
-type TextAlignment int
+// Alignment is a text alignment
+type Alignment int
 
 const (
-	// TextAlignmentLeft aligns text left
-	TextAlignmentLeft TextAlignment = iota
-	// TextAlignmentRight aligns text right
-	TextAlignmentRight
-	// TextAlignmentCentre aligns text centrally
-	TextAlignmentCentre
+	// AlignmentLeft aligns text left
+	AlignmentLeft Alignment = iota
+	// AlignmentRight aligns text right
+	AlignmentRight
+	// AlignmentCentre aligns text centrally
+	AlignmentCentre
 )
 
 // Write draws text on the canvas
-func (component TextComponent) Write(canvas Canvas) (Canvas, error) {
+func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 	c := canvas
 	fontSize := (component.Size / 72) * float64(component.PixelsPerInch) // one point in fonts is almost exactly 1/72nd of one inch
 	fits := false
@@ -77,11 +79,11 @@ func (component TextComponent) Write(canvas Canvas) (Canvas, error) {
 		} else if realWidth < component.MaxWidth {
 			remainingWidth := float64(component.MaxWidth) - float64(realWidth)
 			switch component.Alignment {
-			case TextAlignmentLeft:
+			case AlignmentLeft:
 				alignmentOffset = 0
-			case TextAlignmentRight:
+			case AlignmentRight:
 				alignmentOffset = int(remainingWidth)
-			case TextAlignmentCentre:
+			case AlignmentCentre:
 				alignmentOffset = int(remainingWidth / 2)
 			default:
 				alignmentOffset = 0
@@ -99,7 +101,7 @@ func (component TextComponent) Write(canvas Canvas) (Canvas, error) {
 }
 
 // SetNamedProperties proceses the named properties and sets them into the text properties
-func (component TextComponent) SetNamedProperties(properties NamedProperties) (Component, error) {
+func (component Component) SetNamedProperties(properties render.NamedProperties) (Component, error) {
 	c := component
 	setFunc := func(name string, value interface{}) error {
 		switch name {
@@ -128,7 +130,7 @@ func (component TextComponent) SetNamedProperties(properties NamedProperties) (C
 				return fmt.Errorf("error converting %v to string", value)
 			}
 			if component.reader == nil {
-				component.reader = ioutilFileReader{}
+				component.reader = fs.IoutilFileReader{}
 			}
 			fontData, err := component.reader.ReadFile(stringVal)
 			if err != nil {
@@ -150,7 +152,7 @@ func (component TextComponent) SetNamedProperties(properties NamedProperties) (C
 			c.Size = float64Val
 			return nil
 		case "alignment":
-			alignmentVal, isAlignment := value.(TextAlignment)
+			alignmentVal, isAlignment := value.(Alignment)
 			stringVal, isString := value.(string)
 			if !isAlignment && !isString {
 				return fmt.Errorf("could not convert %v to text alignment or string", value)
@@ -160,13 +162,13 @@ func (component TextComponent) SetNamedProperties(properties NamedProperties) (C
 			} else {
 				switch stringVal {
 				case "left":
-					c.Alignment = TextAlignmentLeft
+					c.Alignment = AlignmentLeft
 				case "right":
-					c.Alignment = TextAlignmentRight
+					c.Alignment = AlignmentRight
 				case "centre":
-					c.Alignment = TextAlignmentCentre
+					c.Alignment = AlignmentCentre
 				default:
-					c.Alignment = TextAlignmentLeft
+					c.Alignment = AlignmentLeft
 				}
 			}
 		}
@@ -219,7 +221,7 @@ func (component TextComponent) SetNamedProperties(properties NamedProperties) (C
 		}
 	}
 	var err error
-	c.NamedPropertiesMap, err = StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
+	c.NamedPropertiesMap, err = render.StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
 	if err != nil {
 		return component, err
 	}
@@ -227,14 +229,14 @@ func (component TextComponent) SetNamedProperties(properties NamedProperties) (C
 }
 
 // GetJSONFormat returns the JSON structure of a text component
-func (component TextComponent) GetJSONFormat() interface{} {
+func (component Component) GetJSONFormat() interface{} {
 	return &textFormat{}
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set text properties and fill the named properties map
-func (component TextComponent) VerifyAndSetJSONData(data interface{}) (Component, NamedProperties, error) {
+func (component Component) VerifyAndSetJSONData(data interface{}) (Component, render.NamedProperties, error) {
 	c := component
-	props := make(NamedProperties)
+	props := make(render.NamedProperties)
 	stringStruct, ok := data.(*textFormat)
 	if !ok {
 		return component, props, fmt.Errorf("failed to convert returned data to component properties")
@@ -253,14 +255,14 @@ func (component TextComponent) VerifyAndSetJSONData(data interface{}) (Component
 		"fontFile",
 		"fontURL",
 	}
-	types := []propType{
-		stringType,
-		stringType,
-		stringType,
+	types := []render.PropType{
+		render.StringType,
+		render.StringType,
+		render.StringType,
 	}
 	var extractedVal interface{}
 	validIndex := -1
-	c.NamedPropertiesMap, extractedVal, validIndex, err = extractExclusiveProp(inputs, propNames, types, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, extractedVal, validIndex, err = render.ExtractExclusiveProp(inputs, propNames, types, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
@@ -287,7 +289,7 @@ func (component TextComponent) VerifyAndSetJSONData(data interface{}) (Component
 	if fFile != nil {
 		stringVal := fFile.(string)
 		if c.reader == nil {
-			c.reader = ioutilFileReader{}
+			c.reader = fs.IoutilFileReader{}
 		}
 		fontData, err := c.reader.ReadFile(stringVal)
 		if err != nil {
@@ -304,42 +306,42 @@ func (component TextComponent) VerifyAndSetJSONData(data interface{}) (Component
 	}
 
 	// All other props
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Content, "content", stringType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Content, "content", render.StringType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Content = newVal.(string)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.StartX, "startX", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.StartX, "startX", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Start.X = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.StartY, "startY", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.StartY, "startY", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Start.Y = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.MaxWidth, "maxWidth", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.MaxWidth, "maxWidth", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.MaxWidth = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Size, "size", float64Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Size, "size", render.Float64Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Size = newVal.(float64)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Alignment, "alignment", stringType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Alignment, "alignment", render.StringType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
@@ -347,44 +349,44 @@ func (component TextComponent) VerifyAndSetJSONData(data interface{}) (Component
 		alignmentString := newVal.(string)
 		switch alignmentString {
 		case "left":
-			c.Alignment = TextAlignmentLeft
+			c.Alignment = AlignmentLeft
 		case "right":
-			c.Alignment = TextAlignmentRight
+			c.Alignment = AlignmentRight
 		case "centre":
-			c.Alignment = TextAlignmentCentre
+			c.Alignment = AlignmentCentre
 		default:
-			c.Alignment = TextAlignmentLeft
+			c.Alignment = AlignmentLeft
 		}
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.PixelsPerInch, "ppi", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.PixelsPerInch, "ppi", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.PixelsPerInch = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Colour.Red, "R", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Red, "R", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Colour.R = newVal.(uint8)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Colour.Green, "G", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Green, "G", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Colour.G = newVal.(uint8)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Colour.Blue, "B", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Blue, "B", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Colour.B = newVal.(uint8)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Colour.Alpha, "A", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Alpha, "A", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}

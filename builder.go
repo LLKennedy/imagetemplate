@@ -1,5 +1,5 @@
-// Package core defines a template for drawing custom images from pre-defined components, and provides to tools to load and implement that template.
-package core
+// Package imagetemplate defines a template for drawing custom images from pre-defined components, and provides to tools to load and implement that template.
+package imagetemplate
 
 import (
 	"bytes"

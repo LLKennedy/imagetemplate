@@ -1,24 +1,26 @@
-package imagetemplate
+package image
 
 import (
 	"testing"
 	"github.com/stretchr/testify/assert"
+	"github.com/LLKennedy/imagetemplate/render"
+	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
 )
 
 func TestImageSetNamedPropertiesLoadRealFile(t *testing.T) {
-	c := ImageComponent{
+	c := Component{
 		NamedPropertiesMap: map[string][]string{
 			"aProp":[]string{"fileName"},
 		},
 	}
-	input := NamedProperties{
+	input := render.NamedProperties{
 		"aProp": "!!!\\!!!!!!//\\//\\//\\/\\/!!!!//\\!!!\\\\\\////",
 	}
-	expected := ImageComponent{
+	expected := Component{
 		NamedPropertiesMap: map[string][]string{
 			"aProp":[]string{"fileName"},
 		},
-		reader: ioutilFileReader{},
+		reader: fs.IoutilFileReader{},
 	}
 	expectedErr := "open !!!\\!!!!!!//\\//\\//\\/\\/!!!!//\\!!!\\\\\\////: The system cannot find the path specified."
 	res, err := c.SetNamedProperties(input)

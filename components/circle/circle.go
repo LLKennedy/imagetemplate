@@ -1,4 +1,4 @@
-package imagetemplate
+package circle
 
 import (
 	"fmt"
@@ -8,8 +8,8 @@ import (
 	"github.com/LLKennedy/imagetemplate/render"
 )
 
-// CircleComponent implements the Component interface for circles
-type CircleComponent struct {
+// Component implements the Component interface for circles
+type Component struct {
 	NamedPropertiesMap map[string][]string
 	Centre             image.Point
 	Radius             int
@@ -29,7 +29,7 @@ type circleFormat struct {
 }
 
 // Write draws a circle on the canvas
-func (component CircleComponent) Write(canvas render.Canvas) (Canvas, error) {
+func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 	if len(component.NamedPropertiesMap) != 0 {
 		return canvas, fmt.Errorf("cannot draw circle, not all named properties are set: %v", component.NamedPropertiesMap)
 	}
@@ -37,7 +37,7 @@ func (component CircleComponent) Write(canvas render.Canvas) (Canvas, error) {
 }
 
 // SetNamedProperties processes the named properties and sets them into the circle properties
-func (component CircleComponent) SetNamedProperties(properties NamedProperties) (Component, error) {
+func (component Component) SetNamedProperties(properties render.NamedProperties) (Component, error) {
 	c := component
 	setFunc := func(name string, value interface{}) error {
 		if strings.Contains("RGBA", name) && len(name) == 1 {
@@ -80,7 +80,7 @@ func (component CircleComponent) SetNamedProperties(properties NamedProperties) 
 		}
 	}
 	var err error
-	c.NamedPropertiesMap, err = StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
+	c.NamedPropertiesMap, err = render.StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
 	if err != nil {
 		return component, err
 	}
@@ -88,14 +88,14 @@ func (component CircleComponent) SetNamedProperties(properties NamedProperties) 
 }
 
 // GetJSONFormat returns the JSON structure of a circle component
-func (component CircleComponent) GetJSONFormat() interface{} {
+func (component Component) GetJSONFormat() interface{} {
 	return &circleFormat{}
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set circle properties and fill the named properties map
-func (component CircleComponent) VerifyAndSetJSONData(data interface{}) (Component, NamedProperties, error) {
+func (component Component) VerifyAndSetJSONData(data interface{}) (Component, render.NamedProperties, error) {
 	c := component
-	props := make(NamedProperties)
+	props := make(render.NamedProperties)
 	stringStruct, ok := data.(*circleFormat)
 	if !ok {
 		return component, props, fmt.Errorf("failed to convert returned data to component properties")
@@ -103,49 +103,49 @@ func (component CircleComponent) VerifyAndSetJSONData(data interface{}) (Compone
 	// Get named properties and assign each real property
 	var newVal interface{}
 	var err error
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.CentreX, "centreX", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.CentreX, "centreX", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Centre.X = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.CentreY, "centreY", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.CentreY, "centreY", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Centre.Y = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Radius, "radius", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Radius, "radius", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Radius = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Colour.Red, "R", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Red, "R", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Colour.R = newVal.(uint8)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Colour.Green, "G", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Green, "G", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Colour.G = newVal.(uint8)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Colour.Blue, "B", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Blue, "B", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Colour.B = newVal.(uint8)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Colour.Alpha, "A", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Alpha, "A", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}

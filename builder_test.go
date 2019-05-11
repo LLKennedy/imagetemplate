@@ -1,4 +1,4 @@
-package core
+package imagetemplate
 
 import (
 	"fmt"
@@ -63,19 +63,6 @@ func TestNewBuilder(t *testing.T) {
 			})
 		}
 	}
-}
-
-type mockFile struct {
-	data []byte
-	err  error
-}
-
-type mockReader struct {
-	files map[string]mockFile
-}
-
-func (m mockReader) ReadFile(filename string) ([]byte, error) {
-	return m.files[filename].data, m.files[filename].err
 }
 
 func TestLoadComponentsData(t *testing.T) {

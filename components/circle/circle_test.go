@@ -1,4 +1,4 @@
-package imagetemplate
+package circle
 
 import (
 	"testing"
@@ -6,26 +6,27 @@ import (
 	"image/color"
 	"image"
 	"errors"
+	"github.com/LLKennedy/imagetemplate/render"
 )
 
 func TestCircleWrite(t *testing.T) {
 	t.Run("not all props set", func(t *testing.T) {
-		canvas := mockCanvas{}
-		c := CircleComponent{NamedPropertiesMap: map[string][]string{"not set":[]string{"something"}}}
+		canvas := render.MockCanvas{}
+		c := Component{NamedPropertiesMap: map[string][]string{"not set":[]string{"something"}}}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.EqualError(t, err, "cannot draw circle, not all named properties are set: map[not set:[something]]")
 	})
 	t.Run("circle error", func(t *testing.T) {
-		canvas := mockCanvas{FixedCircleError: errors.New("some error")}
-		c := CircleComponent{}
+		canvas := render.MockCanvas{FixedCircleError: errors.New("some error")}
+		c := Component{}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.EqualError(t, err, "some error")
 	})
 	t.Run("passing", func(t *testing.T) {
-		canvas := mockCanvas{FixedCircleError: nil}
-		c := CircleComponent{}
+		canvas := render.MockCanvas{FixedCircleError: nil}
+		c := Component{}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.NoError(t, err)
@@ -35,30 +36,30 @@ func TestCircleWrite(t *testing.T) {
 func TestCircleSetNamedProperties(t *testing.T) {
 	type testSet struct{
 		name string
-		start CircleComponent
-		input NamedProperties
-		res CircleComponent
+		start Component
+		input render.NamedProperties
+		res Component
 		err string
 	}
 	tests := []testSet{
 		testSet{
 			name: "no props",
-			start: CircleComponent{},
-			input: NamedProperties{},
-			res: CircleComponent{},
+			start: Component{},
+			input: render.NamedProperties{},
+			res: Component{},
 			err: "",
 		},
 		testSet{
 			name: "RGBA invalid",
-			start: CircleComponent{
+			start: Component{
 				NamedPropertiesMap: map[string][]string{
 					"aProp":[]string{"R"},
 				},
 			},
-			input: NamedProperties{
+			input: render.NamedProperties{
 				"aProp": "not a number",
 			},
-			res: CircleComponent{
+			res: Component{
 				NamedPropertiesMap: map[string][]string{
 					"aProp":[]string{"R"},
 				},
@@ -67,15 +68,15 @@ func TestCircleSetNamedProperties(t *testing.T) {
 		},
 		testSet{
 			name: "RGBA valid",
-			start: CircleComponent{
+			start: Component{
 				NamedPropertiesMap: map[string][]string{
 					"aProp":[]string{"R","G","B","A"},
 				},
 			},
-			input: NamedProperties{
+			input: render.NamedProperties{
 				"aProp": uint8(1),
 			},
-			res: CircleComponent{
+			res: Component{
 				NamedPropertiesMap: map[string][]string{},
 				Colour: color.NRGBA{R:uint8(1),G:uint8(1),B:uint8(1),A:uint8(1)},
 			},
@@ -83,15 +84,15 @@ func TestCircleSetNamedProperties(t *testing.T) {
 		},
 		testSet{
 			name: "non-RGBA invalid type",
-			start: CircleComponent{
+			start: Component{
 				NamedPropertiesMap: map[string][]string{
 					"aProp":[]string{"not a prop"},
 				},
 			},
-			input: NamedProperties{
+			input: render.NamedProperties{
 				"aProp": "not a number",
 			},
-			res: CircleComponent{
+			res: Component{
 				NamedPropertiesMap: map[string][]string{
 					"aProp":[]string{"not a prop"},
 				},
@@ -100,15 +101,15 @@ func TestCircleSetNamedProperties(t *testing.T) {
 		},
 		testSet{
 			name: "non-RGBA invalid name",
-			start: CircleComponent{
+			start: Component{
 				NamedPropertiesMap: map[string][]string{
 					"aProp":[]string{"not a prop"},
 				},
 			},
-			input: NamedProperties{
+			input: render.NamedProperties{
 				"aProp": 12,
 			},
-			res: CircleComponent{
+			res: Component{
 				NamedPropertiesMap: map[string][]string{
 					"aProp":[]string{"not a prop"},
 				},
@@ -117,15 +118,15 @@ func TestCircleSetNamedProperties(t *testing.T) {
 		},
 		testSet{
 			name: "centreX",
-			start: CircleComponent{
+			start: Component{
 				NamedPropertiesMap: map[string][]string{
 					"aProp":[]string{"centreX"},
 				},
 			},
-			input: NamedProperties{
+			input: render.NamedProperties{
 				"aProp": 15,
 			},
-			res: CircleComponent{
+			res: Component{
 				NamedPropertiesMap: map[string][]string{},
 				Centre: image.Pt(15, 0),
 			},
@@ -133,15 +134,15 @@ func TestCircleSetNamedProperties(t *testing.T) {
 		},
 		testSet{
 			name: "centreY",
-			start: CircleComponent{
+			start: Component{
 				NamedPropertiesMap: map[string][]string{
 					"aProp":[]string{"centreY"},
 				},
 			},
-			input: NamedProperties{
+			input: render.NamedProperties{
 				"aProp": 15,
 			},
-			res: CircleComponent{
+			res: Component{
 				NamedPropertiesMap: map[string][]string{},
 				Centre: image.Pt(0, 15),
 			},
@@ -149,15 +150,15 @@ func TestCircleSetNamedProperties(t *testing.T) {
 		},
 		testSet{
 			name: "radius",
-			start: CircleComponent{
+			start: Component{
 				NamedPropertiesMap: map[string][]string{
 					"aProp":[]string{"radius"},
 				},
 			},
-			input: NamedProperties{
+			input: render.NamedProperties{
 				"aProp": 15,
 			},
-			res: CircleComponent{
+			res: Component{
 				NamedPropertiesMap: map[string][]string{},
 				Radius: 15,
 			},
@@ -165,7 +166,7 @@ func TestCircleSetNamedProperties(t *testing.T) {
 		},
 		testSet{
 			name: "full prop set, multiple sources, unused props",
-			start: CircleComponent{
+			start: Component{
 				NamedPropertiesMap: map[string][]string{
 					"col1": []string{"R","G","A"},
 					"left": []string{"centreX"},
@@ -174,7 +175,7 @@ func TestCircleSetNamedProperties(t *testing.T) {
 					"what": []string{"R", "G", "B", "A", "centreX"},
 				},
 			},
-			input: NamedProperties{
+			input: render.NamedProperties{
 				"col1": uint8(15),
 				"col2": uint8(6),
 				"up": 50,
@@ -183,7 +184,7 @@ func TestCircleSetNamedProperties(t *testing.T) {
 				"wide": 80,
 				"left": 3,
 			},
-			res: CircleComponent{
+			res: Component{
 				NamedPropertiesMap: map[string][]string{"what": []string{"R", "G", "B", "A", "centreX"}},
 				Centre: image.Pt(3, 80),
 				Radius: 80,
@@ -206,7 +207,7 @@ func TestCircleSetNamedProperties(t *testing.T) {
 }
 
 func TestCircleGetJSONFormat(t *testing.T) {
-	c := CircleComponent{}
+	c := Component{}
 	expectedFormat := &circleFormat{}
 	format := c.GetJSONFormat()
 	assert.Equal(t, expectedFormat, format)
@@ -215,19 +216,19 @@ func TestCircleGetJSONFormat(t *testing.T) {
 func TestCircleVerifyAndTestCircleJSONData(t *testing.T) {
 	type testSet struct{
 		name string
-		start CircleComponent
+		start Component
 		input interface{}
-		res CircleComponent
-		props NamedProperties
+		res Component
+		props render.NamedProperties
 		err string
 	}
 	tests := []testSet{
 		testSet{
 			name: "incorrect format data",
-			start: CircleComponent{},
+			start: Component{},
 			input: "hello",
-			res: CircleComponent{},
-			props: NamedProperties{},
+			res: Component{},
+			props: render.NamedProperties{},
 			err: "failed to convert returned data to component properties",
 		},
 	}

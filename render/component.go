@@ -49,17 +49,24 @@ func isSingleProp(d DeconstructedDataValue) bool {
 	return len(d.PropNames) == 1 && len(d.StaticValues) == 2 && d.StaticValues[0] == "" && d.StaticValues[1] == ""
 }
 
-type propType string
+// PropType represents the types of properties which can be parsed
+type PropType string
 
 const (
-	intType     propType = "int"
-	stringType  propType = "string"
-	boolType    propType = "bool"
-	uint8Type   propType = "uint8"
-	float64Type propType = "float64"
+	// IntType is an int
+	IntType PropType = "int"
+	// StringType is a string
+	StringType PropType = "string"
+	// BoolType is a bool
+	BoolType PropType = "bool"
+	// Uint8Type is a uint8
+	Uint8Type PropType = "uint8"
+	// Float64Type is a float64
+	Float64Type PropType = "float64"
 )
 
-func extractSingleProp(inputVal, propName string, typeName propType, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, extractedValue interface{}, err error) {
+// ExtractSingleProp parses the loaded property configuration and application inputs and returns the desired property if it exists
+func ExtractSingleProp(inputVal, propName string, typeName PropType, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, ExtractedValue interface{}, err error) {
 	npm := namedPropsMap
 	if npm == nil {
 		npm = make(map[string][]string)
@@ -77,28 +84,28 @@ func extractSingleProp(inputVal, propName string, typeName propType, namedPropsM
 		return npm, nil, nil
 	}
 	switch typeName {
-	case intType:
+	case IntType:
 		intVal, err := strconv.Atoi(inputVal)
 		if err != nil {
 			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to integer: %v", propName, err)
 		}
 		return npm, intVal, nil
-	case stringType:
+	case StringType:
 		return npm, inputVal, nil
-	case boolType:
+	case BoolType:
 		boolVal, err := strconv.ParseBool(inputVal)
 		if err != nil {
 			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to bool: %v", propName, err)
 		}
 		return npm, boolVal, nil
-	case uint8Type:
+	case Uint8Type:
 		uintVal, err := strconv.ParseUint(inputVal, 0, 8)
 		if err != nil {
 			return namedPropsMap, nil, err
 		}
 		uint8Val := uint8(uintVal)
 		return npm, uint8Val, nil
-	case float64Type:
+	case Float64Type:
 		float64Val, err := strconv.ParseFloat(inputVal, 64)
 		if err != nil {
 			return namedPropsMap, nil, err
@@ -108,7 +115,8 @@ func extractSingleProp(inputVal, propName string, typeName propType, namedPropsM
 	return namedPropsMap, nil, fmt.Errorf("cannot convert property %v to unsupported type %v", propName, typeName)
 }
 
-func extractExclusiveProp(inputVals, propNames []string, typeNames []propType, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, extractedValue interface{}, validIndex int, err error) {
+// ExtractExclusiveProp parses the loaded property configuration and application inputs and returns the desired property if it exists and if only one of the desired options exists
+func ExtractExclusiveProp(inputVals, propNames []string, typeNames []PropType, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, ExtractedValue interface{}, validIndex int, err error) {
 	listSize := len(inputVals)
 	if len(propNames) != listSize || len(typeNames) != listSize {
 		return namedPropsMap, nil, -1, fmt.Errorf("input arrays are misaligned: %d : %d : %d", listSize, len(propNames), len(typeNames))
@@ -120,7 +128,7 @@ func extractExclusiveProp(inputVals, propNames []string, typeNames []propType, n
 	validIndex = -1
 	for i := 0; i < listSize; i++ {
 		propsArray[i] = make(map[string][]string)
-		propsArray[i], allVals[i], errArray[i] = extractSingleProp(inputVals[i], propNames[i], typeNames[i], propsArray[i])
+		propsArray[i], allVals[i], errArray[i] = ExtractSingleProp(inputVals[i], propNames[i], typeNames[i], propsArray[i])
 		if len(propsArray[i]) != 0 || errArray[i] == nil {
 			setCount++
 			validIndex = i
@@ -136,7 +144,7 @@ func extractExclusiveProp(inputVals, propNames []string, typeNames []propType, n
 		}
 		returnedPropsMap[key] = append(returnedPropsMap[key], value...)
 	}
-	extractedValue = allVals[validIndex]
+	ExtractedValue = allVals[validIndex]
 	err = nil
 	return
 }

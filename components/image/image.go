@@ -1,4 +1,4 @@
-package imagetemplate
+package image
 
 import (
 	"bytes"
@@ -12,16 +12,18 @@ import (
 	_ "image/png"  // png imported for image decoding
 	"io"
 	"strings"
+	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
+	"github.com/LLKennedy/imagetemplate/render"
 )
 
-// ImageComponent implements the Component interface for images
-type ImageComponent struct {
+// Component implements the Component interface for images
+type Component struct {
 	NamedPropertiesMap map[string][]string
 	Image              image.Image
 	TopLeft            image.Point
 	Width              int
 	Height             int
-	reader             fileReader
+	reader             fs.FileReader
 }
 
 type imageFormat struct {
@@ -34,7 +36,7 @@ type imageFormat struct {
 }
 
 // Write draws an image on the canvas
-func (component ImageComponent) Write(canvas Canvas) (Canvas, error) {
+func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 	if len(component.NamedPropertiesMap) != 0 {
 		return canvas, fmt.Errorf("cannot draw image, not all named properties are set: %v", component.NamedPropertiesMap)
 	}
@@ -49,7 +51,7 @@ func (component ImageComponent) Write(canvas Canvas) (Canvas, error) {
 }
 
 // SetNamedProperties proceses the named properties and sets them into the image properties
-func (component ImageComponent) SetNamedProperties(properties NamedProperties) (Component, error) {
+func (component Component) SetNamedProperties(properties render.NamedProperties) (Component, error) {
 	c := component
 	setFunc := func(name string, value interface{}) error {
 		switch name {
@@ -81,7 +83,7 @@ func (component ImageComponent) SetNamedProperties(properties NamedProperties) (
 				return fmt.Errorf("error converting %v to string", value)
 			}
 			if component.reader == nil {
-				component.reader = ioutilFileReader{}
+				component.reader = fs.IoutilFileReader{}
 			}
 			bytesVal, err := component.reader.ReadFile(stringVal)
 			if err != nil {
@@ -117,7 +119,7 @@ func (component ImageComponent) SetNamedProperties(properties NamedProperties) (
 		}
 	}
 	var err error
-	c.NamedPropertiesMap, err = StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
+	c.NamedPropertiesMap, err = render.StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
 	if err != nil {
 		return component, err
 	}
@@ -125,14 +127,14 @@ func (component ImageComponent) SetNamedProperties(properties NamedProperties) (
 }
 
 // GetJSONFormat returns the JSON structure of a image component
-func (component ImageComponent) GetJSONFormat() interface{} {
+func (component Component) GetJSONFormat() interface{} {
 	return &imageFormat{}
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set image properties and fill the named properties map
-func (component ImageComponent) VerifyAndSetJSONData(data interface{}) (Component, NamedProperties, error) {
+func (component Component) VerifyAndSetJSONData(data interface{}) (Component, render.NamedProperties, error) {
 	c := component
-	props := make(NamedProperties)
+	props := make(render.NamedProperties)
 	stringStruct, ok := data.(*imageFormat)
 	if !ok {
 		return component, props, fmt.Errorf("failed to convert returned data to component properties")
@@ -149,13 +151,13 @@ func (component ImageComponent) VerifyAndSetJSONData(data interface{}) (Componen
 		"fileName",
 		"data",
 	}
-	types := []propType{
-		stringType,
-		stringType,
+	types := []render.PropType{
+		render.StringType,
+		render.StringType,
 	}
 	var extractedVal interface{}
 	validIndex := -1
-	c.NamedPropertiesMap, extractedVal, validIndex, err = extractExclusiveProp(inputs, propNames, types, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, extractedVal, validIndex, err = render.ExtractExclusiveProp(inputs, propNames, types, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
@@ -180,7 +182,7 @@ func (component ImageComponent) VerifyAndSetJSONData(data interface{}) (Componen
 	if file != nil {
 		stringVal := file.(string)
 		if component.reader == nil {
-			component.reader = ioutilFileReader{}
+			component.reader = fs.IoutilFileReader{}
 		}
 		bytesVal, err := component.reader.ReadFile(stringVal)
 		if err != nil {
@@ -195,28 +197,28 @@ func (component ImageComponent) VerifyAndSetJSONData(data interface{}) (Componen
 	}
 
 	// All other props
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.TopLeftX, "topLeftX", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TopLeftX, "topLeftX", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.TopLeft.X = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.TopLeftY, "topLeftY", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TopLeftY, "topLeftY", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.TopLeft.Y = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Width, "width", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Width, "width", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Width = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Height, "height", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Height, "height", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
