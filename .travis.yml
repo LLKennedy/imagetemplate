@@ -9,6 +9,7 @@ jobs:
     - stage: "Test"
       os: linux
       go: master
+      before_install: go get github.com/mattn/goveralls
       script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     # - stage: "Build"
     #   os: windows
@@ -37,6 +38,7 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
       go: 1.7.x
+      before_install: go get github.com/mattn/goveralls
       script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
@@ -69,6 +71,7 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
       go: 1.8.x
+      before_install: go get github.com/mattn/goveralls
       script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
@@ -101,6 +104,7 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
       go: 1.9.x
+      before_install: go get github.com/mattn/goveralls
       script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
@@ -133,6 +137,7 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
       go: 1.10.x
+      before_install: go get github.com/mattn/goveralls
       script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
@@ -165,6 +170,7 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
       go: 1.11.x
+      before_install: go get github.com/mattn/goveralls
       script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
@@ -197,6 +203,7 @@ jobs:
       if: branch = master OR branch = develop OR branch =~ /release\/.*/
       os: linux
       go: 1.12.x
+      before_install: go get github.com/mattn/goveralls
       script: go test -race -cover; $GOPATH/bin/goveralls -service=travis-ci
     # - stage: "Build"
     #   if: branch = master OR branch = develop OR branch =~ /release\/.*/
