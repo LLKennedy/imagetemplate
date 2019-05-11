@@ -243,7 +243,11 @@ func TestConditionals(t *testing.T) {
 			t.Run(prop.name, func(t *testing.T) {
 				var err error
 				test.conditional, err = test.conditional.SetValue(prop.name, prop.value)
-				assert.Equal(t, prop.setErr, err)
+				if prop.setErr == nil {
+					assert.NoError(t, err)
+				} else {
+					assert.EqualError(t, err, prop.setErr.Error())
+				}
 			})
 		}
 		success, err := test.conditional.Validate()
