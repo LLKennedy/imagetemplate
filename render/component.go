@@ -101,14 +101,14 @@ func ExtractSingleProp(inputVal, propName string, typeName PropType, namedPropsM
 	case Uint8Type:
 		uintVal, err := strconv.ParseUint(inputVal, 0, 8)
 		if err != nil {
-			return namedPropsMap, nil, err
+			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to uint8: %v", propName, err)
 		}
 		uint8Val := uint8(uintVal)
 		return npm, uint8Val, nil
 	case Float64Type:
 		float64Val, err := strconv.ParseFloat(inputVal, 64)
 		if err != nil {
-			return namedPropsMap, nil, err
+			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to float64: %v", propName, err)
 		}
 		return npm, float64Val, nil
 	}
