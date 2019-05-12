@@ -134,6 +134,99 @@ func TestStandardSetNamedProperties(t *testing.T) {
 	})
 }
 
+func TestIsSingleProp(t *testing.T) {
+	t.Run("failing on nil props", func(t *testing.T) {
+		val := DeconstructedDataValue{PropNames: nil}
+		assert.False(t, isSingleProp(val))
+	})
+	t.Run("failing on prop length", func(t *testing.T) {
+		val := DeconstructedDataValue{PropNames: []string{}}
+		assert.False(t, isSingleProp(val))
+	})
+	t.Run("failing on nil static values", func(t *testing.T) {
+		val := DeconstructedDataValue{PropNames: []string{"someProp"}, StaticValues: nil}
+		assert.False(t, isSingleProp(val))
+	})
+	t.Run("failing on static values length (0)", func(t *testing.T) {
+		val := DeconstructedDataValue{PropNames: []string{"someProp"}, StaticValues: []string{}}
+		assert.False(t, isSingleProp(val))
+	})
+	t.Run("failing on static values length (1)", func(t *testing.T) {
+		val := DeconstructedDataValue{PropNames: []string{"someProp"}, StaticValues: []string{"a"}}
+		assert.False(t, isSingleProp(val))
+	})
+	t.Run("failing on static values length (3)", func(t *testing.T) {
+		val := DeconstructedDataValue{PropNames: []string{"someProp"}, StaticValues: []string{"a", "b", "c"}}
+		assert.False(t, isSingleProp(val))
+	})
+	t.Run("failing on first static value", func(t *testing.T) {
+		val := DeconstructedDataValue{PropNames: []string{"someProp"}, StaticValues: []string{"not empty", ""}}
+		assert.False(t, isSingleProp(val))
+	})
+	t.Run("failing on second static value", func(t *testing.T) {
+		val := DeconstructedDataValue{PropNames: []string{"someProp"}, StaticValues: []string{"", "not empty"}}
+		assert.False(t, isSingleProp(val))
+	})
+	t.Run("passing", func(t *testing.T) {
+		val := DeconstructedDataValue{PropNames: []string{"someProp"}, StaticValues: []string{"", ""}}
+		assert.True(t, isSingleProp(val))
+	})
+}
+
+func TestExtractSingleProp(t *testing.T) {
+	type testSet struct {
+		name string
+		inputVal string
+		propName string
+		typeName PropType
+		namedPropsMap map[string][]string
+		returnedPropsMap map[string][]string
+		extractedValue interface{}
+		err error
+	}
+	testFunc := func(t *testing.T, test testSet) {
+		returnedPropsMap, extractedValue, err := ExtractSingleProp(test.inputVal, test.propName, test.typeName, test.namedPropsMap)
+		assert.Equal(t, test.returnedPropsMap, returnedPropsMap)
+		assert.Equal(t, test.extractedValue, extractedValue)
+		if test.err == nil {
+			assert.NoError(t, err)
+		} else {
+			assert.EqualError(t, err, test.err.Error())
+		}
+	}
+	tests := []testSet{
+		testSet{
+			name: "error in input",
+			inputVal: "$",
+			err: errors.New("unclosed named property in '$'"),
+		},
+		testSet{
+			name: "multiple properties",
+			inputVal: "$a$$b$",
+			err: errors.New("composite properties are not yet supported: $a$$b$"),
+		},
+		testSet{
+			name: "valid single prop",
+			inputVal: "$a$",
+			propName: "myInternalProp",
+			returnedPropsMap: map[string][]string{"a":[]string{"myInternalProp"}},
+			err: nil,
+		},
+		testSet{
+			name: "invalid type",
+			inputVal: "laskdjf;alsdf",
+			propName: "bad data",
+			typeName: PropType("something else"),
+			err: errors.New("cannot convert property bad data to unsupported type something else"),
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			testFunc(t, test)
+		})
+	}
+}
+
 func TestParseDataValue(t *testing.T) {
 	type parseTest struct {
 		name               string
