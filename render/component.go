@@ -115,36 +115,51 @@ func ExtractSingleProp(inputVal, propName string, typeName PropType, namedPropsM
 	return namedPropsMap, nil, fmt.Errorf("cannot convert property %v to unsupported type %v", propName, typeName)
 }
 
+// PropData is a matched triplet of input property data for use with extraction of exclusive properties
+type PropData struct{
+	InputValue string
+	PropName string
+	Type PropType
+}
+
 // ExtractExclusiveProp parses the loaded property configuration and application inputs and returns the desired property if it exists and if only one of the desired options exists
-func ExtractExclusiveProp(inputVals, propNames []string, typeNames []PropType, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, ExtractedValue interface{}, validIndex int, err error) {
-	listSize := len(inputVals)
-	if len(propNames) != listSize || len(typeNames) != listSize {
-		return namedPropsMap, nil, -1, fmt.Errorf("input arrays are misaligned: %d : %d : %d", listSize, len(propNames), len(typeNames))
+func ExtractExclusiveProp(data []PropData, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, ExtractedValue interface{}, validIndex int, err error) {
+	listSize := len(data)
+	type result struct {
+		props map[string][]string
+		err error
+		value interface{}
 	}
-	propsArray := make([]map[string][]string, listSize)
-	errArray := make([]error, listSize)
-	allVals := make([]interface{}, listSize)
+	resultArray := make([]result, listSize)
 	setCount := 0
 	validIndex = -1
-	for i := 0; i < listSize; i++ {
-		propsArray[i] = make(map[string][]string)
-		propsArray[i], allVals[i], errArray[i] = ExtractSingleProp(inputVals[i], propNames[i], typeNames[i], propsArray[i])
-		if len(propsArray[i]) != 0 || errArray[i] == nil {
+	for i, datum := range data {
+		aResult := resultArray[i]
+		aResult.props = make(map[string][]string)
+		aResult.props, aResult.value, aResult.err = ExtractSingleProp(datum.InputValue, datum.PropName, datum.Type, aResult.props)
+		if len(aResult.props) != 0 || aResult.err == nil {
 			setCount++
 			validIndex = i
 		}
 	}
 	if setCount != 1 {
-		return namedPropsMap, nil, -1, fmt.Errorf("exactly one of (%v) must be set", strings.Join(propNames, ", "))
+		concatString := ""
+		for i, datum := range data {
+			if i != 0 {
+				concatString = concatString + ","
+			}
+			concatString = concatString + datum.PropName
+		}
+		return namedPropsMap, nil, -1, fmt.Errorf("exactly one of (%v) must be set", concatString)
 	}
 	returnedPropsMap = namedPropsMap
-	for key, value := range propsArray[validIndex] {
+	for key, value := range resultArray[validIndex].props {
 		if returnedPropsMap == nil {
 			returnedPropsMap = make(map[string][]string)
 		}
 		returnedPropsMap[key] = append(returnedPropsMap[key], value...)
 	}
-	ExtractedValue = allVals[validIndex]
+	ExtractedValue = resultArray[validIndex].value
 	err = nil
 	return
 }

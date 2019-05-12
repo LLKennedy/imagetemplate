@@ -300,6 +300,37 @@ func TestExtractSingleProp(t *testing.T) {
 	}
 }
 
+func TestExtractExclusiveProp(t *testing.T) {
+	type testSet struct {
+		name string
+		propData []PropData
+		namedPropsMap map[string][]string
+		returnedPropsMap map[string][]string
+		extractedValue interface{}
+		returnedValidIndex int
+		err error
+	}
+	testFunc := func(t *testing.T, test testSet) {
+		returnedPropsMap, extractedValue, validIndex, err := ExtractExclusiveProp(test.propData, test.namedPropsMap)
+		assert.Equal(t, test.returnedPropsMap, returnedPropsMap)
+		assert.Equal(t, test.extractedValue, extractedValue)
+		assert.Equal(t, test.returnedValidIndex, validIndex)
+		if test.err == nil {
+			assert.NoError(t, err)
+		} else {
+			assert.EqualError(t, err, test.err.Error())
+		}
+	}
+	tests := []testSet{
+
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			testFunc(t, test)
+		})
+	}
+}
+
 func TestParseDataValue(t *testing.T) {
 	type parseTest struct {
 		name               string

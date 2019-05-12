@@ -143,21 +143,21 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	var newVal interface{}
 	var err error
 	// Deal with the file/data restrictions
-	inputs := []string{
-		stringStruct.FileName,
-		stringStruct.Data,
-	}
-	propNames := []string{
-		"fileName",
-		"data",
-	}
-	types := []render.PropType{
-		render.StringType,
-		render.StringType,
+	propData := []render.PropData{
+		render.PropData{
+			InputValue: stringStruct.FileName,
+			PropName: "fileName",
+			Type: render.StringType,
+		},
+		render.PropData{
+			InputValue: stringStruct.Data,
+			PropName: "data",
+			Type: render.StringType,
+		},
 	}
 	var extractedVal interface{}
 	validIndex := -1
-	c.NamedPropertiesMap, extractedVal, validIndex, err = render.ExtractExclusiveProp(inputs, propNames, types, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, extractedVal, validIndex, err = render.ExtractExclusiveProp(propData, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}

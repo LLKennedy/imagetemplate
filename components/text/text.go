@@ -245,24 +245,26 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	var newVal interface{}
 	var err error
 	// Deal with the font restrictions
-	inputs := []string{
-		stringStruct.Font.FontName,
-		stringStruct.Font.FontFile,
-		stringStruct.Font.FontURL,
-	}
-	propNames := []string{
-		"fontName",
-		"fontFile",
-		"fontURL",
-	}
-	types := []render.PropType{
-		render.StringType,
-		render.StringType,
-		render.StringType,
+	propData := []render.PropData{
+		render.PropData{
+			InputValue: stringStruct.Font.FontName,
+			PropName: "fontName",
+			Type: render.StringType,
+		},
+		render.PropData{
+			InputValue: stringStruct.Font.FontFile,
+			PropName: "fontFile",
+			Type: render.StringType,
+		},
+		render.PropData{
+			InputValue: stringStruct.Font.FontURL,
+			PropName: "fontURL",
+			Type: render.StringType,
+		},
 	}
 	var extractedVal interface{}
 	validIndex := -1
-	c.NamedPropertiesMap, extractedVal, validIndex, err = render.ExtractExclusiveProp(inputs, propNames, types, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, extractedVal, validIndex, err = render.ExtractExclusiveProp(propData, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
