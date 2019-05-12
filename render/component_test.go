@@ -322,7 +322,11 @@ func TestExtractExclusiveProp(t *testing.T) {
 		}
 	}
 	tests := []testSet{
-
+		testSet{
+			name: "no data",
+			returnedValidIndex: -1,
+			err: errors.New("exactly one of () must be set"),
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
