@@ -327,6 +327,31 @@ func TestExtractExclusiveProp(t *testing.T) {
 			returnedValidIndex: -1,
 			err: errors.New("exactly one of () must be set"),
 		},
+		testSet{
+			name: "single invalid prop option",
+			propData: []PropData{
+				PropData{
+					InputValue: "a",
+					PropName: "myProp",
+					Type: IntType,
+				},
+			},
+			returnedValidIndex: -1,
+			err: errors.New("exactly one of (myProp) must be set"),
+		},
+		testSet{
+			name: "single valid prop option",
+			propData: []PropData{
+				PropData{
+					InputValue: "6",
+					PropName: "myProp",
+					Type: IntType,
+				},
+			},
+			returnedValidIndex: 0,
+			extractedValue: 6,
+			err: nil,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

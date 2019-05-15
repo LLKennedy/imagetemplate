@@ -131,12 +131,14 @@ func ExtractExclusiveProp(data []PropData, namedPropsMap map[string][]string) (r
 		err error
 		value interface{}
 	}
-	resultArray := make([]result, listSize)
+	resultArray := make([]*result, listSize)
+	for i := range resultArray {
+		resultArray[i] = &result{props:make(map[string][]string)}
+	}
 	setCount := 0
 	validIndex = -1
 	for i, datum := range data {
 		aResult := resultArray[i]
-		aResult.props = make(map[string][]string)
 		aResult.props, aResult.value, aResult.err = ExtractSingleProp(datum.InputValue, datum.PropName, datum.Type, aResult.props)
 		if len(aResult.props) != 0 || aResult.err == nil {
 			setCount++
