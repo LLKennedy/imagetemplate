@@ -2,11 +2,11 @@ package imagetemplate
 
 import (
 	"fmt"
+	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
+	"github.com/LLKennedy/imagetemplate/render"
 	"github.com/stretchr/testify/assert"
 	"image/color"
 	"testing"
-	"github.com/LLKennedy/imagetemplate/render"
-	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
 )
 
 func TestNewBuilder(t *testing.T) {

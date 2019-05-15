@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
+	"github.com/LLKennedy/imagetemplate/render"
 	"github.com/disintegration/imaging"
 	_ "golang.org/x/image/bmp"  // bmp imported for image decoding
 	_ "golang.org/x/image/tiff" // tiff imported for image decoding
@@ -12,8 +14,6 @@ import (
 	_ "image/png"  // png imported for image decoding
 	"io"
 	"strings"
-	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
-	"github.com/LLKennedy/imagetemplate/render"
 )
 
 // Component implements the Component interface for images
@@ -146,13 +146,13 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	propData := []render.PropData{
 		render.PropData{
 			InputValue: stringStruct.FileName,
-			PropName: "fileName",
-			Type: render.StringType,
+			PropName:   "fileName",
+			Type:       render.StringType,
 		},
 		render.PropData{
 			InputValue: stringStruct.Data,
-			PropName: "data",
-			Type: render.StringType,
+			PropName:   "data",
+			Type:       render.StringType,
 		},
 	}
 	var extractedVal interface{}

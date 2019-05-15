@@ -7,6 +7,7 @@ import (
 	"image/color"
 	"image/draw"
 
+	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/aztec"
 	"github.com/boombuler/barcode/codabar"
@@ -20,7 +21,6 @@ import (
 	"github.com/boombuler/barcode/twooffive"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
-	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
 )
 
 // Canvas holds the image struct and associated properties

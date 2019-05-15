@@ -1,17 +1,17 @@
 package filesystem
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
 	"errors"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestMockReadFile(t *testing.T) {
 	m := MockReader{
 		Files: map[string]MockFile{
 			"a file": MockFile{
-				Data: []byte("hello!"), 
-				Err: errors.New("an error"),
+				Data: []byte("hello!"),
+				Err:  errors.New("an error"),
 			},
 		},
 	}

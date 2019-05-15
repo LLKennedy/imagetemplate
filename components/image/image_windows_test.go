@@ -1,16 +1,16 @@
 package image
 
 import (
-	"testing"
-	"github.com/stretchr/testify/assert"
-	"github.com/LLKennedy/imagetemplate/render"
 	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
+	"github.com/LLKennedy/imagetemplate/render"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestImageSetNamedPropertiesLoadRealFile(t *testing.T) {
 	c := Component{
 		NamedPropertiesMap: map[string][]string{
-			"aProp":[]string{"fileName"},
+			"aProp": []string{"fileName"},
 		},
 	}
 	input := render.NamedProperties{
@@ -18,7 +18,7 @@ func TestImageSetNamedPropertiesLoadRealFile(t *testing.T) {
 	}
 	expected := Component{
 		NamedPropertiesMap: map[string][]string{
-			"aProp":[]string{"fileName"},
+			"aProp": []string{"fileName"},
 		},
 		reader: fs.IoutilFileReader{},
 	}

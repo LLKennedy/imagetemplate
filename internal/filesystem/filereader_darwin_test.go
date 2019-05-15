@@ -1,8 +1,8 @@
 package filesystem
 
 import (
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestReadFile(t *testing.T) {

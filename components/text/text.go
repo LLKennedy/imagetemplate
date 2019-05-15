@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	"github.com/LLKennedy/gosysfonts"
-	"github.com/golang/freetype/truetype"
-	"golang.org/x/image/font"
 	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
 	"github.com/LLKennedy/imagetemplate/render"
+	"github.com/golang/freetype/truetype"
+	"golang.org/x/image/font"
 )
 
 // Component implements the Component interface for text
@@ -248,18 +248,18 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	propData := []render.PropData{
 		render.PropData{
 			InputValue: stringStruct.Font.FontName,
-			PropName: "fontName",
-			Type: render.StringType,
+			PropName:   "fontName",
+			Type:       render.StringType,
 		},
 		render.PropData{
 			InputValue: stringStruct.Font.FontFile,
-			PropName: "fontFile",
-			Type: render.StringType,
+			PropName:   "fontFile",
+			Type:       render.StringType,
 		},
 		render.PropData{
 			InputValue: stringStruct.Font.FontURL,
-			PropName: "fontURL",
-			Type: render.StringType,
+			PropName:   "fontURL",
+			Type:       render.StringType,
 		},
 	}
 	var extractedVal interface{}

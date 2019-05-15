@@ -117,10 +117,10 @@ func ExtractSingleProp(inputVal, propName string, typeName PropType, namedPropsM
 }
 
 // PropData is a matched triplet of input property data for use with extraction of exclusive properties
-type PropData struct{
+type PropData struct {
 	InputValue string
-	PropName string
-	Type PropType
+	PropName   string
+	Type       PropType
 }
 
 // ExtractExclusiveProp parses the loaded property configuration and application inputs and returns the desired property if it exists and if only one of the desired options exists
@@ -128,19 +128,19 @@ func ExtractExclusiveProp(data []PropData, namedPropsMap map[string][]string) (r
 	listSize := len(data)
 	type result struct {
 		props map[string][]string
-		err error
+		err   error
 		value interface{}
 	}
 	resultArray := make([]*result, listSize)
 	for i := range resultArray {
-		resultArray[i] = &result{props:make(map[string][]string)}
+		resultArray[i] = &result{props: make(map[string][]string)}
 	}
 	setCount := 0
 	validIndex = -1
 	for i, datum := range data {
 		aResult := resultArray[i]
 		aResult.props, aResult.value, aResult.err = ExtractSingleProp(datum.InputValue, datum.PropName, datum.Type, aResult.props)
-		if len(aResult.props) != 0 || aResult.err == nil {
+		if len(aResult.props) != 0 || aResult.err == nil { //This is an || because if a property has been added to the blank array, the function succeeded
 			setCount++
 			validIndex = i
 		}
@@ -267,7 +267,7 @@ func (c ComponentConditional) SetValue(name string, value interface{}) (Componen
 			return c, err
 		}
 	}
-	if conditional.Name == name {
+	if conditional.Name == name || (conditional.Name == "" && !conditional.valueSet) {
 		switch conditional.Operator {
 		case equals, contains, startswith, endswith, ciEquals, ciContains, ciStartswith, ciEndswith:
 			// Handle string operators
@@ -349,7 +349,7 @@ func (c ComponentConditional) SetValue(name string, value interface{}) (Componen
 
 // Validate validates this conditional chain, erroring if a value down the line has not been set and evaluated
 func (c ComponentConditional) Validate() (bool, error) {
-	if !c.valueSet {
+	if !c.valueSet && c.Name != "" {
 		return false, fmt.Errorf("attempted to validate conditional %v %v %v without setting %v", c.Name, c.Operator, c.Value, c.Name)
 	}
 	group := c.Group.Conditionals

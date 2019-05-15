@@ -2,10 +2,10 @@ package circle
 
 import (
 	"fmt"
+	"github.com/LLKennedy/imagetemplate/render"
 	"image"
 	"image/color"
 	"strings"
-	"github.com/LLKennedy/imagetemplate/render"
 )
 
 // Component implements the Component interface for circles
