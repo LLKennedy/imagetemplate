@@ -352,6 +352,59 @@ func TestExtractExclusiveProp(t *testing.T) {
 			extractedValue: 6,
 			err: nil,
 		},
+		testSet{
+			name: "multiple valid prop options",
+			propData: []PropData{
+				PropData{
+					InputValue: "6",
+					PropName: "myProp",
+					Type: IntType,
+				},
+				PropData{
+					InputValue: "something",
+					PropName: "anotherProp",
+					Type: StringType,
+				},
+			},
+			returnedValidIndex: -1,
+			err: errors.New("exactly one of (myProp,anotherProp) must be set"),
+		},
+		testSet{
+			name: "single valid named prop option",
+			propData: []PropData{
+				PropData{
+					InputValue: "$setMeLater$",
+					PropName: "myProp",
+					Type: IntType,
+				},
+			},
+			returnedValidIndex: 0,
+			returnedPropsMap: map[string][]string{"setMeLater": []string{"myProp"}},
+			err: nil,
+		},
+		testSet{
+			name: "multiple props, only one valid",
+			propData: []PropData{
+				PropData{
+					InputValue: "$setMeLater$",
+					PropName: "myProp",
+					Type: IntType,
+				},
+				PropData{
+					InputValue: "a",
+					PropName: "someProp",
+					Type: IntType,
+				},
+				PropData{
+					InputValue: "-67",
+					PropName: "nothing",
+					Type: Uint8Type,
+				},
+			},
+			returnedValidIndex: 0,
+			returnedPropsMap: map[string][]string{"setMeLater": []string{"myProp"}},
+			err: nil,
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
