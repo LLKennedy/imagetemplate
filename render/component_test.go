@@ -224,7 +224,7 @@ func TestExtractSingleProp(t *testing.T) {
 			inputVal: "laskdjf;alsdf",
 			propName: "aProp",
 			typeName: IntType,
-			err: errors.New("failed to convert property aProp to integer: strconv.Atoi: parsing \"laskdjf;alsdf\": invalid syntax"),
+			err: errors.New("failed to convert property aProp to integer: strconv.ParseInt: parsing \"laskdjf;alsdf\": invalid syntax"),
 		},
 		testSet{
 			name: "invalid bool",

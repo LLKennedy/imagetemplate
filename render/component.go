@@ -85,10 +85,11 @@ func ExtractSingleProp(inputVal, propName string, typeName PropType, namedPropsM
 	}
 	switch typeName {
 	case IntType:
-		intVal, err := strconv.Atoi(inputVal)
+		int64Val, err := strconv.ParseInt(inputVal, 10, 64) //Use ParseInt instead of Atoi for compatibility with go 1.7
 		if err != nil {
 			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to integer: %v", propName, err)
 		}
+		intVal := int(int64Val)
 		return npm, intVal, nil
 	case StringType:
 		return npm, inputVal, nil
