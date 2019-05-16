@@ -66,6 +66,10 @@ func NewCanvas(width, height int) (ImageCanvas, error) {
 
 // SetUnderlyingImage sets the internal Image property to the given object
 func (canvas ImageCanvas) SetUnderlyingImage(newImage image.Image) Canvas {
+	if newImage == nil {
+		canvas.Image = nil
+		return canvas
+	}
 	drawImage, ok := newImage.(draw.Image)
 	if !ok {
 		bounds := newImage.Bounds()

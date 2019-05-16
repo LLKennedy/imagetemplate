@@ -415,6 +415,38 @@ func TestText(t *testing.T) {
 	})
 }
 
+func TestTryText(t *testing.T) {
+	var newCanvas Canvas
+	newCanvas, _ = NewCanvas(30, 30)
+	var regFont font.Face
+	ttFont, _ := truetype.Parse(goregular.TTF)
+	regFont = truetype.NewFace(ttFont, &truetype.Options{Size: 14, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64})
+	newCanvas = newCanvas.SetUnderlyingImage(image.NewNRGBA(newCanvas.GetUnderlyingImage().Bounds()))
+	t.Run("invalid maxWidth", func(t *testing.T) {
+		fits, width := newCanvas.TryText("a", image.Pt(2, 10), regFont, color.White, -1)
+		assert.False(t, fits)
+		assert.Equal(t, -1, width)
+	})
+	t.Run("invalid image", func(t *testing.T) {
+		modifiedCanvas := newCanvas.SetUnderlyingImage(nil)
+		fits, width := modifiedCanvas.TryText("a", image.Pt(2, 10), regFont, color.White, 10)
+		assert.False(t, fits)
+		assert.Equal(t, -2, width)
+	})
+	t.Run("valid text", func(t *testing.T) {
+		purple := color.NRGBA{R: 130, B: 200, A: 255}
+		fits, width := newCanvas.TryText("test", image.Pt(2, 15), regFont, purple, 28)
+		assert.True(t, fits)
+		assert.Equal(t, 23, width) //no maths to calculate this, I just ran the function
+	})
+	t.Run("oversized text", func(t *testing.T) {
+		purple := color.NRGBA{R: 130, B: 200, A: 255}
+		fits, width := newCanvas.TryText("test this much longer string which definitely won't fit", image.Pt(2, 15), regFont, purple, 28)
+		assert.False(t, fits)
+		assert.Equal(t, 325, width) //no maths to calculate this, I just ran the function
+	})
+}
+
 func TestDrawImage(t *testing.T) {
 	var newCanvas, otherCanvas Canvas
 	sx := 30
