@@ -18,7 +18,7 @@ import (
 	"github.com/boombuler/barcode/ean"
 	"github.com/boombuler/barcode/pdf417"
 	"github.com/boombuler/barcode/qr"
-	// "github.com/boombuler/barcode/twooffive"
+	"github.com/boombuler/barcode/twooffive"
 
 	"github.com/golang/freetype/truetype"
 	"github.com/stretchr/testify/assert"
@@ -486,7 +486,6 @@ func TestBarcode(t *testing.T) {
 				width, height    int
 				dataColour       color.Color
 				backgroundColour color.Color
-				err              error
 			}
 			tests := []testBarcode{
 				testBarcode{
@@ -559,34 +558,34 @@ func TestBarcode(t *testing.T) {
 					dataColour:       color.Black,
 					backgroundColour: color.White,
 				},
-				// testBarcode{
-				// 	name: "two of five",
-				// 	encodeFunc: func(content []byte, extra BarcodeExtraData) (barcode.Barcode, error) {
-				// 		return twooffive.Encode(string(content), false)
-				// 	},
-				// 	codeType:         BarcodeType2of5,
-				// 	content:          []byte("12345678"),
-				// 	extra:            BarcodeExtraData{},
-				// 	start:            image.Point{X: 130, Y: 130},
-				// 	width:            130,
-				// 	height:           65,
-				// 	dataColour: color.Black,
-				// 	backgroundColour: color.White,
-				// },
-				// testBarcode{
-				// 	name: "two of five interleaved",
-				// 	encodeFunc: func(content []byte, extra BarcodeExtraData) (barcode.Barcode, error) {
-				// 		return twooffive.Encode(string(content), true)
-				// 	},
-				// 	codeType:         BarcodeType2of5,
-				// 	content:          []byte("12345678"),
-				// 	extra:            BarcodeExtraData{},
-				// 	start:            image.Point{X: 130*2, Y: 130},
-				// 	width:            130,
-				// 	height:           65,
-				// 	dataColour: color.Black,
-				// 	backgroundColour: color.White,
-				// },
+				testBarcode{
+					name: "two of five",
+					encodeFunc: func(content []byte, extra BarcodeExtraData) (barcode.Barcode, error) {
+						return twooffive.Encode(string(content), false)
+					},
+					codeType:         BarcodeType2of5,
+					content:          []byte("12345678"),
+					extra:            BarcodeExtraData{},
+					start:            image.ZP,
+					width:            130,
+					height:           65,
+					dataColour:       color.Black,
+					backgroundColour: color.White,
+				},
+				testBarcode{
+					name: "two of five interleaved",
+					encodeFunc: func(content []byte, extra BarcodeExtraData) (barcode.Barcode, error) {
+						return twooffive.Encode(string(content), true)
+					},
+					codeType:         BarcodeType2of5Interleaved,
+					content:          []byte("12345678"),
+					extra:            BarcodeExtraData{},
+					start:            image.ZP,
+					width:            130,
+					height:           65,
+					dataColour:       color.Black,
+					backgroundColour: color.White,
+				},
 				testBarcode{
 					name: "codabar",
 					encodeFunc: func(content []byte, extra BarcodeExtraData) (barcode.Barcode, error) {
