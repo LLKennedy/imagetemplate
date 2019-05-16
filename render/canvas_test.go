@@ -3,6 +3,10 @@ package render
 import (
 	"bytes"
 	"fmt"
+	"image"
+	"image/color"
+	"image/draw"
+	"testing"
 
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/aztec"
@@ -14,12 +18,7 @@ import (
 	"github.com/boombuler/barcode/ean"
 	"github.com/boombuler/barcode/pdf417"
 	"github.com/boombuler/barcode/qr"
-	"math/rand"
 	// "github.com/boombuler/barcode/twooffive"
-	"image"
-	"image/color"
-	"image/draw"
-	"testing"
 
 	"github.com/golang/freetype/truetype"
 	"github.com/stretchr/testify/assert"
@@ -476,17 +475,6 @@ func TestDrawImage(t *testing.T) {
 func TestBarcode(t *testing.T) {
 	for i := 0; i < 1; i++ {
 		t.Run(fmt.Sprintf("random colours, run number %d", i), func(t *testing.T) {
-			colours := make([]color.Color, 24)
-			for c := range colours {
-				newBytes := make([]byte, 4)
-				rand.Read(newBytes)
-				colours[c] = color.NRGBA{R: uint8(newBytes[0]), G: uint8(newBytes[1]), B: uint8(newBytes[2]), A: uint8(newBytes[3])}
-			}
-			colourNum := -1
-			nextColour := func() color.Color {
-				colourNum++
-				return colours[colourNum]
-			}
 			type bEncoder func([]byte, BarcodeExtraData) (barcode.Barcode, error)
 			type testBarcode struct {
 				name             string
@@ -511,8 +499,8 @@ func TestBarcode(t *testing.T) {
 					start:            image.ZP,
 					width:            130,
 					height:           130,
-					dataColour:       nextColour(),
-					backgroundColour: nextColour(),
+					dataColour: color.Black,
+					backgroundColour: color.White,
 				},
 				testBarcode{
 					name: "aztec",
@@ -522,11 +510,11 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypeAztec,
 					content:          []byte("www.github.com/LLKennedy/imagetemplate"),
 					extra:            BarcodeExtraData{AztecMinECCPercent: 50, AztecUserSpecifiedLayers: 4},
-					start:            image.Point{X: 130, Y: 0},
+					start:            image.ZP,
 					width:            130,
 					height:           130,
-					dataColour:       nextColour(),
-					backgroundColour: nextColour(),
+					dataColour: color.Black,
+					backgroundColour: color.White,
 				},
 				testBarcode{
 					name: "pdf",
@@ -536,11 +524,11 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypePDF,
 					content:          []byte("Luke"),
 					extra:            BarcodeExtraData{PDFSecurityLevel: 4},
-					start:            image.Point{X: 130 * 2, Y: 0},
+					start:            image.ZP,
 					width:            130,
 					height:           130,
-					dataColour:       nextColour(),
-					backgroundColour: nextColour(),
+					dataColour: color.Black,
+					backgroundColour: color.White,
 				},
 				testBarcode{
 					name: "datamatrix",
@@ -550,11 +538,11 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypeDataMatrix,
 					content:          []byte("https://www.github.com/LLKennedy/imagetemplate"),
 					extra:            BarcodeExtraData{},
-					start:            image.Point{X: 130 * 3, Y: 0},
+					start:            image.ZP,
 					width:            130,
 					height:           130,
-					dataColour:       nextColour(),
-					backgroundColour: nextColour(),
+					dataColour: color.Black,
+					backgroundColour: color.White,
 				},
 				testBarcode{
 					name: "nine of three",
@@ -564,11 +552,11 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypeCode93,
 					content:          []byte("Luke"),
 					extra:            BarcodeExtraData{Code93IncludeChecksum: true, Code93FullASCIIMode: true},
-					start:            image.Point{X: 0, Y: 130},
+					start:            image.ZP,
 					width:            130,
 					height:           65,
-					dataColour:       nextColour(),
-					backgroundColour: nextColour(),
+					dataColour: color.Black,
+					backgroundColour: color.White,
 				},
 				// testBarcode{
 				// 	name: "two of five",
@@ -581,8 +569,8 @@ func TestBarcode(t *testing.T) {
 				// 	start:            image.Point{X: 130, Y: 130},
 				// 	width:            130,
 				// 	height:           65,
-				// 	dataColour:       nextColour(),
-				// 	backgroundColour: nextColour(),
+				// 	dataColour: color.Black,
+				// 	backgroundColour: color.White,
 				// },
 				// testBarcode{
 				// 	name: "two of five interleaved",
@@ -595,8 +583,8 @@ func TestBarcode(t *testing.T) {
 				// 	start:            image.Point{X: 130*2, Y: 130},
 				// 	width:            130,
 				// 	height:           65,
-				// 	dataColour:       nextColour(),
-				// 	backgroundColour: nextColour(),
+				// 	dataColour: color.Black,
+				// 	backgroundColour: color.White,
 				// },
 				testBarcode{
 					name: "codabar",
@@ -606,11 +594,11 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypeCodabar,
 					content:          []byte("B123456D"),
 					extra:            BarcodeExtraData{},
-					start:            image.Point{X: 130 * 3, Y: 130},
+					start:            image.ZP,
 					width:            130,
 					height:           65,
-					dataColour:       nextColour(),
-					backgroundColour: nextColour(),
+					dataColour: color.Black,
+					backgroundColour: color.White,
 				},
 				testBarcode{
 					name: "code128",
@@ -620,11 +608,11 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypeCode128,
 					content:          []byte("Luke"),
 					extra:            BarcodeExtraData{},
-					start:            image.Point{X: 0, Y: 65 * 3},
+					start:            image.ZP,
 					width:            130,
 					height:           65,
-					dataColour:       nextColour(),
-					backgroundColour: nextColour(),
+					dataColour: color.Black,
+					backgroundColour: color.White,
 				},
 				testBarcode{
 					name: "ean13",
@@ -634,11 +622,11 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypeEAN13,
 					content:          []byte("5901234123457"),
 					extra:            BarcodeExtraData{},
-					start:            image.Point{X: 130, Y: 65 * 3},
+					start:            image.ZP,
 					width:            130,
 					height:           65,
-					dataColour:       nextColour(),
-					backgroundColour: nextColour(),
+					dataColour: color.Black,
+					backgroundColour: color.White,
 				},
 				testBarcode{
 					name: "ean8",
@@ -648,11 +636,11 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypeEAN8,
 					content:          []byte("11223344"),
 					extra:            BarcodeExtraData{},
-					start:            image.Point{X: 130 * 2, Y: 65 * 3},
+					start:            image.ZP,
 					width:            130,
 					height:           65,
-					dataColour:       nextColour(),
-					backgroundColour: nextColour(),
+					dataColour: color.Black,
+					backgroundColour: color.White,
 				},
 				testBarcode{
 					name: "three of nine",
@@ -662,11 +650,11 @@ func TestBarcode(t *testing.T) {
 					codeType:         BarcodeTypeCode39,
 					content:          []byte("Luke"),
 					extra:            BarcodeExtraData{Code39IncludeChecksum: true, Code39FullASCIIMode: true},
-					start:            image.Point{X: 130 * 3, Y: 65 * 3},
+					start:            image.ZP,
 					width:            130,
 					height:           65,
-					dataColour:       nextColour(),
-					backgroundColour: nextColour(),
+					dataColour: color.Black,
+					backgroundColour: color.White,
 				},
 			}
 			for _, test := range tests {
