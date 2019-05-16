@@ -1,9 +1,10 @@
 package render
 
 import (
-	"golang.org/x/image/font"
 	"image"
 	"image/color"
+
+	"golang.org/x/image/font"
 )
 
 // MockCanvas is a mock implementation of the Canvas interface for testing purposes
@@ -19,7 +20,7 @@ type MockCanvas struct {
 	FixedTryTextInt         int
 	FixedDrawImageError     error
 	FixedBarcodeError       error
-	FixedPixelsPerInch      int
+	FixedPixelsPerInch      float64
 }
 
 // SetUnderlyingImage returns the preset value(s)
@@ -43,8 +44,13 @@ func (m MockCanvas) GetHeight() int {
 }
 
 // GetPPI returns the preset value(s)
-func (m MockCanvas) GetPPI() int {
+func (m MockCanvas) GetPPI() float64 {
 	return m.FixedPixelsPerInch
+}
+
+// SetPPI returns the preset value(s)
+func (m MockCanvas) SetPPI(ppi float64) Canvas {
+	return m
 }
 
 // Rectangle returns the preset value(s)

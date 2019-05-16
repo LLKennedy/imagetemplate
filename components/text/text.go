@@ -21,21 +21,19 @@ type Component struct {
 	Size               float64
 	MaxWidth           int
 	Alignment          Alignment
-	PixelsPerInch      int //Should default to 72
 	Font               *truetype.Font
 	Colour             color.NRGBA
 	reader             fs.FileReader
 }
 
 type textFormat struct {
-	Content       string `json:"content"`
-	StartX        string `json:"startX"`
-	StartY        string `json:"startY"`
-	Size          string `json:"size"`
-	MaxWidth      string `json:"maxWidth"`
-	Alignment     string `json:"alignment"`
-	PixelsPerInch string `json:"ppi"`
-	Font          struct {
+	Content   string `json:"content"`
+	StartX    string `json:"startX"`
+	StartY    string `json:"startY"`
+	Size      string `json:"size"`
+	MaxWidth  string `json:"maxWidth"`
+	Alignment string `json:"alignment"`
+	Font      struct {
 		FontName string `json:"fontName"`
 		FontFile string `json:"fontFile"`
 		FontURL  string `json:"fontURL"`
@@ -63,7 +61,7 @@ const (
 // Write draws text on the canvas
 func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 	c := canvas
-	fontSize := (component.Size / 72) * float64(component.PixelsPerInch) // one point in fonts is almost exactly 1/72nd of one inch
+	fontSize := (component.Size / 72) * canvas.GetPPI() // one point in fonts is almost exactly 1/72nd of one inch
 	fits := false
 	tries := 0
 	var face font.Face
@@ -210,12 +208,6 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 		case "maxWidth":
 			c.MaxWidth = numberVal
 			return nil
-		case "ppi":
-			c.PixelsPerInch = numberVal
-			if c.PixelsPerInch <= 0 {
-				c.PixelsPerInch = 72
-			}
-			return nil
 		default:
 			return fmt.Errorf("invalid component property in named property map: %v", name)
 		}
@@ -359,13 +351,6 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 		default:
 			c.Alignment = AlignmentLeft
 		}
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.PixelsPerInch, "ppi", render.IntType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.PixelsPerInch = newVal.(int)
 	}
 	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Red, "R", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {

@@ -29,7 +29,8 @@ type Canvas interface {
 	GetUnderlyingImage() image.Image
 	GetWidth() int
 	GetHeight() int
-	GetPPI() int
+	GetPPI() float64
+	SetPPI(float64) Canvas
 	Rectangle(topLeft image.Point, width, height int, colour color.Color) (Canvas, error)
 	Circle(centre image.Point, radius int, colour color.Color) (Canvas, error)
 	Text(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (Canvas, error)
@@ -42,7 +43,7 @@ type Canvas interface {
 type ImageCanvas struct {
 	Image         draw.Image
 	reader        fs.FileReader
-	pixelsPerInch int
+	pixelsPerInch float64
 }
 
 // NewCanvas generates a new canvas of the given width and height
@@ -97,12 +98,13 @@ func (canvas ImageCanvas) GetHeight() int {
 }
 
 // SetPPI sets the pixels per inch of the canvas
-func (canvas ImageCanvas) SetPPI(ppi int) {
+func (canvas ImageCanvas) SetPPI(ppi float64) Canvas {
 	canvas.pixelsPerInch = ppi
+	return canvas
 }
 
 // GetPPI returns the pixels per inch of the canvas
-func (canvas ImageCanvas) GetPPI() int {
+func (canvas ImageCanvas) GetPPI() float64 {
 	return canvas.pixelsPerInch
 }
 

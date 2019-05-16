@@ -44,6 +44,7 @@ func TestMockCanvas(t *testing.T) {
 	mm, err = m.Barcode(BarcodeTypeAztec, []byte{}, BarcodeExtraData{}, image.Pt(0,0), 50, 20, color.White, color.Black)
 	assert.Equal(t, m, mm)
 	assert.Equal(t, m.FixedBarcodeError, err)
+	assert.Equal(t, m, m.SetPPI(float64(100)))
 	ppi := m.GetPPI()
 	assert.Equal(t, m.FixedPixelsPerInch, ppi)
 }

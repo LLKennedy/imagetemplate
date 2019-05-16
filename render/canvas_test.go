@@ -57,6 +57,17 @@ func TestBlankCanvas(t *testing.T) {
 		width := blankCanvas.GetWidth()
 		assert.Equal(t, 0, width)
 	})
+	t.Run("set ppi", func(t *testing.T) {
+		ppi := float64(352)
+		modifiedCanvas := blankCanvas.SetPPI(ppi)
+		assert.Equal(t, ppi, modifiedCanvas.(ImageCanvas).pixelsPerInch)
+	})
+	t.Run("get ppi", func(t *testing.T) {
+		newPPI := float64(718)
+		blankCanvas.pixelsPerInch = newPPI
+		ppi := blankCanvas.GetPPI()
+		assert.Equal(t, newPPI, ppi)
+	})
 	t.Run("rectangle", func(t *testing.T) {
 		modifiedCanvas, err := blankCanvas.Rectangle(image.ZP, 10, 10, color.White)
 		assert.Equal(t, blankCanvas, modifiedCanvas)
