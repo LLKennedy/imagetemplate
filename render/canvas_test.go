@@ -486,6 +486,7 @@ func TestBarcode(t *testing.T) {
 				width, height    int
 				dataColour       color.Color
 				backgroundColour color.Color
+				err              error
 			}
 			tests := []testBarcode{
 				testBarcode{
@@ -499,7 +500,7 @@ func TestBarcode(t *testing.T) {
 					start:            image.ZP,
 					width:            130,
 					height:           130,
-					dataColour: color.Black,
+					dataColour:       color.Black,
 					backgroundColour: color.White,
 				},
 				testBarcode{
@@ -513,7 +514,7 @@ func TestBarcode(t *testing.T) {
 					start:            image.ZP,
 					width:            130,
 					height:           130,
-					dataColour: color.Black,
+					dataColour:       color.Black,
 					backgroundColour: color.White,
 				},
 				testBarcode{
@@ -527,7 +528,7 @@ func TestBarcode(t *testing.T) {
 					start:            image.ZP,
 					width:            130,
 					height:           130,
-					dataColour: color.Black,
+					dataColour:       color.Black,
 					backgroundColour: color.White,
 				},
 				testBarcode{
@@ -541,7 +542,7 @@ func TestBarcode(t *testing.T) {
 					start:            image.ZP,
 					width:            130,
 					height:           130,
-					dataColour: color.Black,
+					dataColour:       color.Black,
 					backgroundColour: color.White,
 				},
 				testBarcode{
@@ -555,7 +556,7 @@ func TestBarcode(t *testing.T) {
 					start:            image.ZP,
 					width:            130,
 					height:           65,
-					dataColour: color.Black,
+					dataColour:       color.Black,
 					backgroundColour: color.White,
 				},
 				// testBarcode{
@@ -597,7 +598,7 @@ func TestBarcode(t *testing.T) {
 					start:            image.ZP,
 					width:            130,
 					height:           65,
-					dataColour: color.Black,
+					dataColour:       color.Black,
 					backgroundColour: color.White,
 				},
 				testBarcode{
@@ -611,7 +612,7 @@ func TestBarcode(t *testing.T) {
 					start:            image.ZP,
 					width:            130,
 					height:           65,
-					dataColour: color.Black,
+					dataColour:       color.Black,
 					backgroundColour: color.White,
 				},
 				testBarcode{
@@ -625,7 +626,7 @@ func TestBarcode(t *testing.T) {
 					start:            image.ZP,
 					width:            130,
 					height:           65,
-					dataColour: color.Black,
+					dataColour:       color.Black,
 					backgroundColour: color.White,
 				},
 				testBarcode{
@@ -639,7 +640,7 @@ func TestBarcode(t *testing.T) {
 					start:            image.ZP,
 					width:            130,
 					height:           65,
-					dataColour: color.Black,
+					dataColour:       color.Black,
 					backgroundColour: color.White,
 				},
 				testBarcode{
@@ -653,7 +654,7 @@ func TestBarcode(t *testing.T) {
 					start:            image.ZP,
 					width:            130,
 					height:           65,
-					dataColour: color.Black,
+					dataColour:       color.Black,
 					backgroundColour: color.White,
 				},
 			}
