@@ -803,6 +803,8 @@ func TestBarcode(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			test := test
+			t.Parallel()
 			freshCanvas, _ := NewCanvas(test.width, test.height)
 			modifiedCanvas, err := freshCanvas.Barcode(test.codeType, test.content, test.extra, test.start, test.width, test.height, test.dataColour, test.backgroundColour)
 			if test.err == nil {
