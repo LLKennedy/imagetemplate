@@ -493,6 +493,18 @@ func TestBarcode(t *testing.T) {
 					refData:          barcodeQR,
 				},
 				testBarcode{
+					name:             "bad qr",
+					codeType:         BarcodeTypeQR,
+					content:          []byte("test"),
+					extra:            BarcodeExtraData{QRMode: 1},
+					start:            image.ZP,
+					width:            130,
+					height:           130,
+					dataColour:       color.Black,
+					backgroundColour: color.White,
+					err:              fmt.Errorf(`"test" can not be encoded as Numeric`),
+				},
+				testBarcode{
 					name:             "aztec",
 					codeType:         BarcodeTypeAztec,
 					content:          []byte("www.github.com/LLKennedy/imagetemplate"),
@@ -503,6 +515,18 @@ func TestBarcode(t *testing.T) {
 					dataColour:       color.Black,
 					backgroundColour: color.White,
 					refData:          barcodeAztec,
+				},
+				testBarcode{
+					name:             "bad aztec",
+					codeType:         BarcodeTypeAztec,
+					content:          []byte("www.github.com/LLKennedy/imagetemplate"),
+					extra:            BarcodeExtraData{AztecMinECCPercent: 50, AztecUserSpecifiedLayers: 150},
+					start:            image.ZP,
+					width:            130,
+					height:           130,
+					dataColour:       color.Black,
+					backgroundColour: color.White,
+					err:              fmt.Errorf("Illegal value 150 for layers"),
 				},
 				testBarcode{
 					name:             "pdf",
@@ -517,6 +541,18 @@ func TestBarcode(t *testing.T) {
 					refData:          barcodePDF,
 				},
 				testBarcode{
+					name:             "bad pdf",
+					codeType:         BarcodeTypePDF,
+					content:          []byte("Luke"),
+					extra:            BarcodeExtraData{PDFSecurityLevel: 150},
+					start:            image.ZP,
+					width:            130,
+					height:           130,
+					dataColour:       color.Black,
+					backgroundColour: color.White,
+					err:              fmt.Errorf("Invalid security level 150"),
+				},
+				testBarcode{
 					name:             "datamatrix",
 					codeType:         BarcodeTypeDataMatrix,
 					content:          []byte("https://www.github.com/LLKennedy/imagetemplate"),
@@ -527,6 +563,18 @@ func TestBarcode(t *testing.T) {
 					dataColour:       color.Black,
 					backgroundColour: color.White,
 					refData:          barcodeDataMatrix,
+				},
+				testBarcode{
+					name:             "bad datamatrix",
+					codeType:         BarcodeTypeDataMatrix,
+					content:          []byte("https://www.github.com/LLKennedy/imagetemplate"),
+					extra:            BarcodeExtraData{},
+					start:            image.ZP,
+					width:            130,
+					height:           130,
+					dataColour:       color.Black,
+					backgroundColour: color.White,
+					err:              fmt.Errorf("Invalid security level 150"),
 				},
 				testBarcode{
 					name:             "nine of three",
@@ -541,6 +589,18 @@ func TestBarcode(t *testing.T) {
 					refData:          barcode93,
 				},
 				testBarcode{
+					name:             "bad nine of three",
+					codeType:         BarcodeTypeCode93,
+					content:          []byte("Luke"),
+					extra:            BarcodeExtraData{Code93IncludeChecksum: true, Code93FullASCIIMode: true},
+					start:            image.ZP,
+					width:            130,
+					height:           65,
+					dataColour:       color.Black,
+					backgroundColour: color.White,
+					err:              fmt.Errorf("Invalid security level 150"),
+				},
+				testBarcode{
 					name:             "two of five",
 					codeType:         BarcodeType2of5,
 					content:          []byte("12345678"),
@@ -551,6 +611,18 @@ func TestBarcode(t *testing.T) {
 					dataColour:       color.Black,
 					backgroundColour: color.White,
 					refData:          barcode25,
+				},
+				testBarcode{
+					name:             "bad two of five",
+					codeType:         BarcodeType2of5,
+					content:          []byte("12345678"),
+					extra:            BarcodeExtraData{},
+					start:            image.ZP,
+					width:            130,
+					height:           65,
+					dataColour:       color.Black,
+					backgroundColour: color.White,
+					err:              fmt.Errorf("Invalid security level 150"),
 				},
 				testBarcode{
 					name:             "two of five interleaved",
@@ -565,6 +637,18 @@ func TestBarcode(t *testing.T) {
 					refData:          barcode25i,
 				},
 				testBarcode{
+					name:             "bad two of five interleaved",
+					codeType:         BarcodeType2of5Interleaved,
+					content:          []byte("12345678"),
+					extra:            BarcodeExtraData{},
+					start:            image.ZP,
+					width:            130,
+					height:           65,
+					dataColour:       color.Black,
+					backgroundColour: color.White,
+					err:              fmt.Errorf("Invalid security level 150"),
+				},
+				testBarcode{
 					name:             "codabar",
 					codeType:         BarcodeTypeCodabar,
 					content:          []byte("B123456D"),
@@ -575,6 +659,18 @@ func TestBarcode(t *testing.T) {
 					dataColour:       color.Black,
 					backgroundColour: color.White,
 					refData:          barcodeCodabar,
+				},
+				testBarcode{
+					name:             "bad codabar",
+					codeType:         BarcodeTypeCodabar,
+					content:          []byte("B123456D"),
+					extra:            BarcodeExtraData{},
+					start:            image.ZP,
+					width:            130,
+					height:           65,
+					dataColour:       color.Black,
+					backgroundColour: color.White,
+					err:              fmt.Errorf("Invalid security level 150"),
 				},
 				testBarcode{
 					name:             "code128",
@@ -589,6 +685,18 @@ func TestBarcode(t *testing.T) {
 					refData:          barcodeCode128,
 				},
 				testBarcode{
+					name:             "bad code128",
+					codeType:         BarcodeTypeCode128,
+					content:          []byte("Luke"),
+					extra:            BarcodeExtraData{},
+					start:            image.ZP,
+					width:            130,
+					height:           65,
+					dataColour:       color.Black,
+					backgroundColour: color.White,
+					err:              fmt.Errorf("Invalid security level 150"),
+				},
+				testBarcode{
 					name:             "ean13",
 					codeType:         BarcodeTypeEAN13,
 					content:          []byte("5901234123457"),
@@ -599,6 +707,18 @@ func TestBarcode(t *testing.T) {
 					dataColour:       color.Black,
 					backgroundColour: color.White,
 					refData:          barcodeEan13,
+				},
+				testBarcode{
+					name:             "bad ean13",
+					codeType:         BarcodeTypeEAN13,
+					content:          []byte("5901234123457"),
+					extra:            BarcodeExtraData{},
+					start:            image.ZP,
+					width:            130,
+					height:           65,
+					dataColour:       color.Black,
+					backgroundColour: color.White,
+					err:              fmt.Errorf("Invalid security level 150"),
 				},
 				testBarcode{
 					name:             "ean8",
@@ -613,6 +733,18 @@ func TestBarcode(t *testing.T) {
 					refData:          barcodeEan8,
 				},
 				testBarcode{
+					name:             "bad ean8",
+					codeType:         BarcodeTypeEAN8,
+					content:          []byte("11223344"),
+					extra:            BarcodeExtraData{},
+					start:            image.ZP,
+					width:            130,
+					height:           65,
+					dataColour:       color.Black,
+					backgroundColour: color.White,
+					err:              fmt.Errorf("Invalid security level 150"),
+				},
+				testBarcode{
 					name:             "three of nine",
 					codeType:         BarcodeTypeCode39,
 					content:          []byte("Luke"),
@@ -624,18 +756,22 @@ func TestBarcode(t *testing.T) {
 					backgroundColour: color.White,
 					refData:          barcode39,
 				},
+				testBarcode{
+					name:             "bad three of nine",
+					codeType:         BarcodeTypeCode39,
+					content:          []byte("Luke"),
+					extra:            BarcodeExtraData{Code39IncludeChecksum: true, Code39FullASCIIMode: true},
+					start:            image.ZP,
+					width:            130,
+					height:           65,
+					dataColour:       color.Black,
+					backgroundColour: color.White,
+					err:              fmt.Errorf("Invalid security level 150"),
+				},
 			}
 			for _, test := range tests {
 				t.Run(test.name, func(t *testing.T) {
-					freshCanvas, err := NewCanvas(test.width, test.height)
-					if test.err == nil {
-						assert.NoError(t, err)
-						if err != nil {
-							t.Fatal(err)
-						}
-					} else {
-						assert.EqualError(t, err, test.err.Error())
-					}
+					freshCanvas, _ := NewCanvas(test.width, test.height)
 					modifiedCanvas, err := freshCanvas.Barcode(test.codeType, test.content, test.extra, test.start, test.width, test.height, test.dataColour, test.backgroundColour)
 					if test.err == nil {
 						assert.NoError(t, err)
@@ -649,20 +785,6 @@ func TestBarcode(t *testing.T) {
 					} else {
 						assert.EqualError(t, err, test.err.Error())
 					}
-					// underlyingImage := grandCanvas.GetUnderlyingImage()
-					// for x := 0; x < test.width; x++ {
-					// 	for y := 0; y < test.height; y++ {
-					// 		t.Run(fmt.Sprintf("x=%d,y=%d", x+test.start.X, y+test.start.Y), func(t *testing.T) {
-					// 			refPixel := rawBarcode.At(x, y)
-					// 			realPixel := underlyingImage.At(x+test.start.X, y+test.start.Y)
-					// 			if refPixel == color.White {
-					// 				assert.Equal(t, test.backgroundColour, realPixel)
-					// 			} else if refPixel == color.Black {
-					// 				assert.Equal(t, test.dataColour, realPixel)
-					// 			}
-					// 		})
-					// 	}
-					// }
 				})
 			}
 		})
