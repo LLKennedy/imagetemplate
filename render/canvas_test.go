@@ -810,10 +810,16 @@ func TestBarcode(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				var imageBytes bytes.Buffer
-				err = bmp.Encode(&imageBytes, modifiedCanvas.GetUnderlyingImage())
+				var imageBuf bytes.Buffer
+				err = bmp.Encode(&imageBuf, modifiedCanvas.GetUnderlyingImage())
 				assert.NoError(t, err)
-				assert.Equal(t, test.refData, imageBytes.Bytes())
+				imageBytes := imageBuf.Bytes()
+				assert.Equal(t, len(test.refData), len(imageBytes))
+				if len(test.refData) == len(imageBytes) {
+					for i := range imageBytes {
+						assert.Equal(t, test.refData[i], imageBytes[i])
+					}
+				} 
 			} else {
 				assert.EqualError(t, err, test.err.Error())
 			}
