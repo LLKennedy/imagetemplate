@@ -281,6 +281,9 @@ func (canvas ImageCanvas) Barcode(codeType BarcodeType, content []byte, extra Ba
 	case BarcodeTypeCode93:
 		encodedBarcode, err = code93.Encode(string(content), extra.Code93IncludeChecksum, extra.Code93FullASCIIMode)
 		if err != nil {
+			if err.Error() == "invalid data!" {
+				err = errors.New("invalid data") //because golang won't shut up otherwise
+			}
 			return canvas, err
 		}
 	case BarcodeTypeDataMatrix:
