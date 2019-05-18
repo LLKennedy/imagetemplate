@@ -73,6 +73,76 @@ func TestLoadComponentsFile(t *testing.T) {
 	})
 }
 
+func TestSetBackgroundImageData(t *testing.T) {
+	type testSet struct {
+		name     string
+		builder  ImageBuilder
+		template Template
+		result   ImageBuilder
+		err      error
+	}
+	testFunc := func(test testSet, t *testing.T) {
+		t.Run(test.name, func(t *testing.T) {
+			result, err := test.builder.setBackgroundImage(test.template)
+			assert.Equal(t, result, test.result)
+			if test.err == nil {
+				assert.NoError(t, err)
+			} else {
+				assert.EqualError(t, err, test.err.Error())
+			}
+		})
+	}
+	tests := []testSet{
+		testSet{
+			name:   "no base image properties",
+			result: ImageBuilder{}.SetCanvas(ImageBuilder{}.GetCanvas()).(ImageBuilder),
+		},
+		testSet{
+			name:     "invalid exclusive properties",
+			template: Template{BaseImage: BaseImage{FileName: "something", Data: "something else"}},
+			err:      fmt.Errorf("cannot load base image from file and load from data string and generate from base colour, specify only data or fileName or base colour"),
+		},
+		testSet{
+			name:     "valid base colour",
+			template: Template{BaseImage: BaseImage{BaseWidth: "1", BaseHeight: "1", BaseColour: BaseColour{Red: "250", Green: "12", Blue: "80", Alpha: "190"}}},
+			result:   ImageBuilder{}.SetCanvas(render.ImageCanvas{}.SetUnderlyingImage(&image.NRGBA{Pix: []uint8{250, 12, 80, 190}, Rect: image.Rect(0, 0, 1, 1), Stride: 4})).(ImageBuilder),
+		},
+		testSet{
+			name:     "base colour invalid width",
+			template: Template{BaseImage: BaseImage{BaseWidth: "a", BaseHeight: "2", BaseColour: BaseColour{Red: "1"}}},
+			err:      fmt.Errorf("strconv.ParseInt: parsing \"a\": invalid syntax"),
+		},
+		testSet{
+			name:     "base colour invalid height",
+			template: Template{BaseImage: BaseImage{BaseWidth: "2", BaseHeight: "a", BaseColour: BaseColour{Red: "1"}}},
+			err:      fmt.Errorf("strconv.ParseInt: parsing \"a\": invalid syntax"),
+		},
+		testSet{
+			name:     "base colour invalid red",
+			template: Template{BaseImage: BaseImage{BaseWidth: "2", BaseHeight: "2", BaseColour: BaseColour{Red: "a"}}},
+			err:      fmt.Errorf("strconv.ParseUint: parsing \"a\": invalid syntax"),
+		},
+		testSet{
+			name:     "base colour invalid green",
+			template: Template{BaseImage: BaseImage{BaseWidth: "2", BaseHeight: "2", BaseColour: BaseColour{Red: "1", Green: "a"}}},
+			err:      fmt.Errorf("strconv.ParseUint: parsing \"a\": invalid syntax"),
+		},
+		testSet{
+			name:     "base colour invalid blue",
+			template: Template{BaseImage: BaseImage{BaseWidth: "2", BaseHeight: "2", BaseColour: BaseColour{Red: "1", Green: "1", Blue: "a"}}},
+			err:      fmt.Errorf("strconv.ParseUint: parsing \"a\": invalid syntax"),
+		},
+		testSet{
+			name:     "base colour invalid alpha",
+			template: Template{BaseImage: BaseImage{BaseWidth: "2", BaseHeight: "2", BaseColour: BaseColour{Red: "1", Green: "1", Blue: "1", Alpha: "a"}}},
+			err:      fmt.Errorf("strconv.ParseUint: parsing \"a\": invalid syntax"),
+		},
+	}
+	for _, test := range tests {
+		testFunc(test, t)
+	}
+}
+
 func TestLoadComponentsData(t *testing.T) {
 	t.Run("circles", func(t *testing.T) {
 		sampleData := `{

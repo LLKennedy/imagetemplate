@@ -44,19 +44,25 @@ type Builder interface {
 
 // Template is the format of the JSON file used as a template for building images. See samples.json for examples, each element in the samples array is a complete and valid template object.
 type Template struct {
-	BaseImage struct {
-		FileName   string `json:"fileName"`
-		Data       string `json:"data"`
-		BaseColour struct {
-			Red   string `json:"R"`
-			Green string `json:"G"`
-			Blue  string `json:"B"`
-			Alpha string `json:"A"`
-		} `json:"baseColour"`
-		BaseWidth  string `json:"width"`
-		BaseHeight string `json:"height"`
-	} `json:"baseImage"`
+	BaseImage  BaseImage           `json:"baseImage"`
 	Components []ComponentTemplate `json:"components"`
+}
+
+// BaseImage is the template format of the base image settings
+type BaseImage struct {
+	FileName   string     `json:"fileName"`
+	Data       string     `json:"data"`
+	BaseColour BaseColour `json:"baseColour"`
+	BaseWidth  string     `json:"width"`
+	BaseHeight string     `json:"height"`
+}
+
+// BaseColour is the template format of the base colour settings
+type BaseColour struct {
+	Red   string `json:"R"`
+	Green string `json:"G"`
+	Blue  string `json:"B"`
+	Alpha string `json:"A"`
 }
 
 // ComponentTemplate is a partial unmarshalled Component, with its properties left in raw form to be handled by each known type of Component.
@@ -117,7 +123,7 @@ func (builder ImageBuilder) LoadComponentsData(fileData []byte) (Builder, error)
 	}
 
 	// Parse background image info
-	b.Canvas, err = b.setBackgroundImage(b.Canvas, template)
+	b, err = b.setBackgroundImage(template)
 	if err != nil {
 		return builder, err
 	}
@@ -131,52 +137,58 @@ func (builder ImageBuilder) LoadComponentsData(fileData []byte) (Builder, error)
 	return b, nil
 }
 
-func (builder ImageBuilder) setBackgroundImage(canvas render.Canvas, template Template) (render.Canvas, error) {
-	c := canvas
+func (builder ImageBuilder) setBackgroundImage(template Template) (ImageBuilder, error) {
+	b := builder
 	// Check the state of the optional and required properties
 	dataSet := template.BaseImage.Data != ""
 	fileSet := template.BaseImage.FileName != ""
-	baseColourSet := template.BaseImage.BaseColour.Red != ""
-	if (dataSet && fileSet) || (dataSet && baseColourSet) || fileSet && baseColourSet {
-		return canvas, fmt.Errorf("cannot load base image from file and load from data string and generate from base colour, specify only data or fileName or base colour")
+	baseColourSet := template.BaseImage.BaseWidth != "" && template.BaseImage.BaseHeight != "" && (template.BaseImage.BaseColour.Red != "" || template.BaseImage.BaseColour.Green != "" || template.BaseImage.BaseColour.Blue != "" || template.BaseImage.BaseColour.Alpha != "")
+	if (dataSet && fileSet) || (dataSet && baseColourSet) || (fileSet && baseColourSet) {
+		return builder, fmt.Errorf("cannot load base image from file and load from data string and generate from base colour, specify only data or fileName or base colour")
 	}
 	if !dataSet && !fileSet && !baseColourSet {
-		return c, nil
+		return builder.SetCanvas(builder.GetCanvas()).(ImageBuilder), nil
 	}
 	// Get image data from string or file
 	var imageData []byte
 	var err error
 	var baseImage image.Image
 	if baseColourSet {
-		width, err := strconv.Atoi(template.BaseImage.BaseWidth)
+		width64, err := strconv.ParseInt(template.BaseImage.BaseWidth, 10, 64) //Use ParseInt instead of Atoi for compatibility with go 1.7
 		if err != nil {
-			return canvas, err
+			return builder, err
 		}
-		height, err := strconv.Atoi(template.BaseImage.BaseWidth)
+		width := int(width64)
+		height64, err := strconv.ParseInt(template.BaseImage.BaseHeight, 10, 64) //Use ParseInt instead of Atoi for compatibility with go 1.7
 		if err != nil {
-			return canvas, err
+			return builder, err
 		}
-		red, err := strconv.ParseUint(template.BaseImage.BaseColour.Red, 0, 8)
+		height := int(height64)
+		red64, err := strconv.ParseUint(template.BaseImage.BaseColour.Red, 0, 8)
 		if err != nil {
-			return canvas, err
+			return builder, err
 		}
-		green, err := strconv.ParseUint(template.BaseImage.BaseColour.Green, 0, 8)
+		red := uint8(red64)
+		green64, err := strconv.ParseUint(template.BaseImage.BaseColour.Green, 0, 8)
 		if err != nil {
-			return canvas, err
+			return builder, err
 		}
-		blue, err := strconv.ParseUint(template.BaseImage.BaseColour.Blue, 0, 8)
+		green := uint8(green64)
+		blue64, err := strconv.ParseUint(template.BaseImage.BaseColour.Blue, 0, 8)
 		if err != nil {
-			return canvas, err
+			return builder, err
 		}
-		alpha, err := strconv.ParseUint(template.BaseImage.BaseColour.Alpha, 0, 8)
+		blue := uint8(blue64)
+		alpha64, err := strconv.ParseUint(template.BaseImage.BaseColour.Alpha, 0, 8)
 		if err != nil {
-			return canvas, err
+			return builder, err
 		}
+		alpha := uint8(alpha64)
 		var rectImage image.Image
 		var colourPlane image.Image
 		rectangle := image.Rect(0, 0, width, height)
 		rectImage = image.NewNRGBA(rectangle)
-		colourPlane = image.NewUniform(color.NRGBA{R: uint8(red), G: uint8(green), B: uint8(blue), A: uint8(alpha)})
+		colourPlane = image.NewUniform(color.NRGBA{R: red, G: green, B: blue, A: alpha})
 		draw.Draw(rectImage.(draw.Image), rectangle, colourPlane, image.Point{X: 0, Y: 0}, draw.Over)
 		baseImage = rectImage
 	} else {
@@ -185,12 +197,12 @@ func (builder ImageBuilder) setBackgroundImage(canvas render.Canvas, template Te
 			decoder := base64.NewDecoder(base64.RawStdEncoding, sReader)
 			_, err = decoder.Read(imageData)
 			if err != nil {
-				return canvas, err
+				return builder, err
 			}
 		} else {
 			imageData, err = builder.reader.ReadFile(template.BaseImage.FileName)
 			if err != nil {
-				return canvas, err
+				return builder, err
 			}
 		}
 		// Decode image data
@@ -203,20 +215,20 @@ func (builder ImageBuilder) setBackgroundImage(canvas render.Canvas, template Te
 			baseImage = newImage
 		}
 		if err != nil {
-			return canvas, err
+			return builder, err
 		}
 	}
-	if c == nil {
-		// No current image, use loaded image instead
+	if b.Canvas == nil {
+		// No current canvas, uses loaded image as canvas
 		var drawImage draw.Image
 		drawImage = image.NewNRGBA(baseImage.Bounds())
 		draw.Draw(drawImage, baseImage.Bounds(), baseImage, baseImage.Bounds().Min, draw.Over)
-		c = render.ImageCanvas{Image: drawImage}
-		return c, nil
+		b = b.SetCanvas(render.ImageCanvas{Image: drawImage}).(ImageBuilder)
+		return b, nil
 	}
 	// Check if resizing is necessary
 	currentHeight, currentWidth := baseImage.Bounds().Size().Y, baseImage.Bounds().Size().X
-	targetHeight, targetWidth := c.GetHeight(), c.GetWidth()
+	targetHeight, targetWidth := b.GetCanvas().GetHeight(), b.GetCanvas().GetWidth()
 	if targetHeight != currentHeight || targetWidth != currentWidth {
 		// Compare aspect ratios
 		targetAspect := float64(targetWidth) / float64(targetHeight)
@@ -235,8 +247,12 @@ func (builder ImageBuilder) setBackgroundImage(canvas render.Canvas, template Te
 		}
 		baseImage = imaging.Resize(baseImage, resizedWidth, resizedHeight, imaging.Lanczos)
 	}
-	c.DrawImage(image.Point{X: 0, Y: 0}, baseImage)
-	return c, nil
+	canvas, err := b.GetCanvas().DrawImage(image.Point{X: 0, Y: 0}, baseImage)
+	if err != nil {
+		return builder, err
+	}
+	b = b.SetCanvas(canvas).(ImageBuilder)
+	return b, nil
 }
 
 func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, render.NamedProperties, error) {
