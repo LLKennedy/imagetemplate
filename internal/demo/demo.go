@@ -19,7 +19,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create canvas: %v", err)
 	}
-	builder, err = img.NewBuilder(canvas, color.Gray{Y: 180})
+	builder, err = img.NewBuilder()
+	builder.SetCanvas(canvas)
 	if err != nil {
 		log.Fatalf("Failed to create builder: %v", err)
 	}

@@ -41,7 +41,8 @@ func TestBlankCanvas(t *testing.T) {
 	})
 	t.Run("get image func", func(t *testing.T) {
 		img := blankCanvas.GetUnderlyingImage()
-		assert.Nil(t, img)
+		assert.Equal(t, 0, img.Bounds().Size().X)
+		assert.Equal(t, 0, img.Bounds().Size().Y)
 	})
 	t.Run("get width", func(t *testing.T) {
 		width := blankCanvas.GetWidth()

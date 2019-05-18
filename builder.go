@@ -81,16 +81,8 @@ type ImageBuilder struct {
 }
 
 // NewBuilder generates a new ImageBuilder with an internal canvas of the specified width and height, and optionally the specified starting colour. No provided colour will result in defaults for Image.
-func NewBuilder(canvas render.Canvas, startingColour color.Color) (ImageBuilder, error) {
+func NewBuilder() (ImageBuilder, error) {
 	newBuilder := ImageBuilder{reader: fs.IoutilFileReader{}}
-	if startingColour != nil {
-		var err error
-		canvas, err = canvas.Rectangle(image.Point{}, canvas.GetWidth(), canvas.GetHeight(), startingColour)
-		if err != nil {
-			return newBuilder, err
-		}
-	}
-	newBuilder.Canvas = canvas
 	return newBuilder, nil
 }
 
@@ -312,6 +304,9 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, rend
 
 // GetCanvas returns the internal Canvas object
 func (builder ImageBuilder) GetCanvas() render.Canvas {
+	if builder.Canvas == nil {
+		return render.ImageCanvas{}
+	}
 	return builder.Canvas
 }
 
