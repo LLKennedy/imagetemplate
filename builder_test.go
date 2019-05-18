@@ -84,7 +84,7 @@ func TestSetBackgroundImageData(t *testing.T) {
 	testFunc := func(test testSet, t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			result, err := test.builder.setBackgroundImage(test.template)
-			assert.Equal(t, result, test.result)
+			assert.Equal(t, test.result, result)
 			if test.err == nil {
 				assert.NoError(t, err)
 			} else {
@@ -106,6 +106,24 @@ func TestSetBackgroundImageData(t *testing.T) {
 			name:     "valid base colour",
 			template: Template{BaseImage: BaseImage{BaseWidth: "1", BaseHeight: "1", BaseColour: BaseColour{Red: "250", Green: "12", Blue: "80", Alpha: "190"}}},
 			result:   ImageBuilder{}.SetCanvas(render.ImageCanvas{}.SetUnderlyingImage(&image.NRGBA{Pix: []uint8{250, 12, 80, 190}, Rect: image.Rect(0, 0, 1, 1), Stride: 4})).(ImageBuilder),
+		},
+		testSet{
+			builder:  ImageBuilder{}.SetCanvas(render.ImageCanvas{}.SetUnderlyingImage(&image.NRGBA{Pix: []uint8{31, 63, 127, 255}, Rect: image.Rect(0, 0, 1, 1), Stride: 4})).(ImageBuilder),
+			name:     "scaled base colour (wide)",
+			template: Template{BaseImage: BaseImage{BaseWidth: "2", BaseHeight: "1", BaseColour: BaseColour{Red: "250", Green: "12", Blue: "80", Alpha: "190"}}},
+			result:   ImageBuilder{}.SetCanvas(render.ImageCanvas{}.SetUnderlyingImage(&image.NRGBA{Pix: []uint8{0xc2, 0x19, 0x5c, 0xff}, Rect: image.Rect(0, 0, 1, 1), Stride: 4})).(ImageBuilder),
+		},
+		testSet{
+			builder:  ImageBuilder{}.SetCanvas(render.ImageCanvas{}.SetUnderlyingImage(&image.NRGBA{Pix: []uint8{31, 63, 127, 255}, Rect: image.Rect(0, 0, 1, 1), Stride: 4})).(ImageBuilder),
+			name:     "scaled base colour (tall)",
+			template: Template{BaseImage: BaseImage{BaseWidth: "1", BaseHeight: "2", BaseColour: BaseColour{Red: "250", Green: "12", Blue: "80", Alpha: "190"}}},
+			result:   ImageBuilder{}.SetCanvas(render.ImageCanvas{}.SetUnderlyingImage(&image.NRGBA{Pix: []uint8{0xc2, 0x19, 0x5c, 0xff}, Rect: image.Rect(0, 0, 1, 1), Stride: 4})).(ImageBuilder),
+		},
+		testSet{
+			builder:  ImageBuilder{}.SetCanvas(render.ImageCanvas{}.SetUnderlyingImage(&image.NRGBA{Pix: []uint8{31, 63, 127, 255}, Rect: image.Rect(0, 0, 1, 1), Stride: 4})).(ImageBuilder),
+			name:     "scaled base colour (too big)",
+			template: Template{BaseImage: BaseImage{BaseWidth: "2", BaseHeight: "2", BaseColour: BaseColour{Red: "250", Green: "12", Blue: "80", Alpha: "190"}}},
+			result:   ImageBuilder{}.SetCanvas(render.ImageCanvas{}.SetUnderlyingImage(&image.NRGBA{Pix: []uint8{0xc2, 0x19, 0x5c, 0xff}, Rect: image.Rect(0, 0, 1, 1), Stride: 4})).(ImageBuilder),
 		},
 		testSet{
 			name:     "base colour invalid width",
