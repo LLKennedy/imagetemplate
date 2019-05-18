@@ -83,7 +83,7 @@ func (canvas ImageCanvas) SetUnderlyingImage(newImage image.Image) Canvas {
 // GetUnderlyingImage gets the internal Image property
 func (canvas ImageCanvas) GetUnderlyingImage() image.Image {
 	if canvas.Image == nil {
-		return image.NewNRGBA(image.Rect(0,0,0,0))
+		return image.NewNRGBA(image.Rect(0, 0, 0, 0))
 	}
 	return canvas.Image
 }

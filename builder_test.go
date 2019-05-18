@@ -1,9 +1,13 @@
 package imagetemplate
 
 import (
-	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
-	"github.com/stretchr/testify/assert"
+	"image"
+	"image/color"
 	"testing"
+
+	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
+	"github.com/LLKennedy/imagetemplate/render"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewBuilder(t *testing.T) {
@@ -12,6 +16,44 @@ func TestNewBuilder(t *testing.T) {
 	img := newBuilder.GetCanvas().GetUnderlyingImage()
 	assert.Equal(t, 0, img.Bounds().Size().X)
 	assert.Equal(t, 0, img.Bounds().Size().Y)
+}
+
+type fakeImage struct {
+	at         color.Color
+	bounds     image.Rectangle
+	colorModel color.Model
+}
+
+func (i *fakeImage) At(x, y int) color.Color {
+	return i.at
+}
+
+func (i *fakeImage) Bounds() image.Rectangle {
+	return i.bounds
+}
+
+func (i *fakeImage) ColorModel() color.Model {
+	return i.colorModel
+}
+
+func TestWriteToBMP(t *testing.T) {
+	t.Run("nil image", func(t *testing.T) {
+		newBuilder := ImageBuilder{}
+		data, err := newBuilder.WriteToBMP()
+		assert.NoError(t, err)
+		assert.Equal(t, []byte{0x42, 0x4d, 0x36, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x36, 0x0, 0x0, 0x0, 0x28, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x0, 0x18, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0}, data)
+	})
+	t.Run("bad image", func(t *testing.T) {
+		newBuilder := Builder(ImageBuilder{})
+		img := fakeImage{bounds: image.Rectangle{Min: image.Pt(0, 0), Max: image.Pt(-1, -1)}}
+		canvas := render.MockCanvas{
+			FixedGetUnderlyingImage: &img,
+		}
+		newBuilder = newBuilder.SetCanvas(canvas)
+		data, err := newBuilder.WriteToBMP()
+		assert.EqualError(t, err, "bmp: negative bounds")
+		assert.Nil(t, data)
+	})
 }
 
 func TestLoadComponentsData(t *testing.T) {

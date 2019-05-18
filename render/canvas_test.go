@@ -822,7 +822,7 @@ func TestBarcode(t *testing.T) {
 					for i := range imageBytes {
 						assert.Equal(t, test.refData[i], imageBytes[i])
 					}
-				} 
+				}
 			} else {
 				assert.EqualError(t, err, test.err.Error())
 			}
