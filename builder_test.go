@@ -1,6 +1,7 @@
 package imagetemplate
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"testing"
@@ -53,6 +54,22 @@ func TestWriteToBMP(t *testing.T) {
 		data, err := newBuilder.WriteToBMP()
 		assert.EqualError(t, err, "bmp: negative bounds")
 		assert.Nil(t, data)
+	})
+}
+
+func TestLoadComponentsFile(t *testing.T) {
+	builder := ImageBuilder{}
+	t.Run("file error", func(t *testing.T) {
+		builder.reader = fs.MockReader{Files: map[string]fs.MockFile{"myfile.json": fs.MockFile{Err: fmt.Errorf("some file error")}}}
+		newBuilder, err := builder.LoadComponentsFile("myfile.json")
+		assert.Equal(t, builder, newBuilder)
+		assert.EqualError(t, err, "some file error")
+	})
+	t.Run("no file error", func(t *testing.T) {
+		builder.reader = fs.MockReader{Files: map[string]fs.MockFile{"myfile.json": fs.MockFile{Data: []byte("hello")}}}
+		newBuilder, err := builder.LoadComponentsFile("myfile.json")
+		assert.Equal(t, builder, newBuilder)
+		assert.EqualError(t, err, "invalid character 'h' looking for beginning of value")
 	})
 }
 
