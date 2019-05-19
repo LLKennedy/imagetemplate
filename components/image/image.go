@@ -4,16 +4,17 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
-	"github.com/LLKennedy/imagetemplate/render"
-	"github.com/disintegration/imaging"
-	_ "golang.org/x/image/bmp"  // bmp imported for image decoding
-	_ "golang.org/x/image/tiff" // tiff imported for image decoding
 	"image"
 	_ "image/jpeg" // jpeg imported for image decoding
 	_ "image/png"  // png imported for image decoding
 	"io"
 	"strings"
+
+	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
+	"github.com/LLKennedy/imagetemplate/render"
+	"github.com/disintegration/imaging"
+	_ "golang.org/x/image/bmp"  // bmp imported for image decoding
+	_ "golang.org/x/image/tiff" // tiff imported for image decoding
 )
 
 // Component implements the Component interface for images
@@ -67,7 +68,7 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 				reader = bytes.NewBuffer(bytesVal)
 			} else if isString {
 				stringReader := strings.NewReader(stringVal)
-				reader = base64.NewDecoder(base64.RawStdEncoding, stringReader)
+				reader = base64.NewDecoder(base64.StdEncoding, stringReader)
 			} else if isReader {
 				reader = readerVal
 			}

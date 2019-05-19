@@ -194,7 +194,7 @@ func (builder ImageBuilder) setBackgroundImage(template Template) (ImageBuilder,
 	} else {
 		if dataSet {
 			sReader := strings.NewReader(template.BaseImage.Data)
-			decoder := base64.NewDecoder(base64.RawStdEncoding, sReader)
+			decoder := base64.NewDecoder(base64.StdEncoding, sReader)
 			_, err = decoder.Read(imageData)
 			if err != nil {
 				return builder, err
@@ -208,14 +208,14 @@ func (builder ImageBuilder) setBackgroundImage(template Template) (ImageBuilder,
 		// Decode image data
 		imageBuffer := bytes.NewBuffer(imageData)
 		baseImage, _, err = image.Decode(imageBuffer)
+		if err != nil {
+			return builder, err
+		}
 		if ycbcr, ok := baseImage.(*image.YCbCr); ok {
 			var newImage draw.Image
 			newImage = image.NewNRGBA(ycbcr.Rect)
 			draw.Draw(newImage, ycbcr.Rect, ycbcr, ycbcr.Bounds().Min, draw.Over)
 			baseImage = newImage
-		}
-		if err != nil {
-			return builder, err
 		}
 	}
 	if b.Canvas == nil {
