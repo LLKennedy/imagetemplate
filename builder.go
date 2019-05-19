@@ -14,14 +14,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/LLKennedy/imagetemplate/render"
-	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
 	_ "github.com/LLKennedy/imagetemplate/components/barcode" // add barcode components to registry by default
-	_ "github.com/LLKennedy/imagetemplate/components/circle" // add circle components to registry by default
+	_ "github.com/LLKennedy/imagetemplate/components/circle"  // add circle components to registry by default
+	_ "github.com/LLKennedy/imagetemplate/components/datetime"
+	_ "github.com/LLKennedy/imagetemplate/components/image"     // add image components to registry by default
 	_ "github.com/LLKennedy/imagetemplate/components/rectangle" // add rectangle components to registry by default
-	_ "github.com/LLKennedy/imagetemplate/components/text" // add text components to registry by default
-	_ "github.com/LLKennedy/imagetemplate/components/image" // add image components to registry by default
-	//_ "github.com/LLKennedy/imagetemplate/components/datetime"
+	_ "github.com/LLKennedy/imagetemplate/components/text"      // add text components to registry by default
+	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
+	"github.com/LLKennedy/imagetemplate/render"
 
 	"github.com/disintegration/imaging"
 	"golang.org/x/image/bmp"
