@@ -59,8 +59,14 @@ const (
 )
 
 // Write draws text on the canvas
-func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
-	c := canvas
+func (component Component) Write(canvas render.Canvas) (c render.Canvas, err error) {
+	c = canvas
+	defer func() {
+		p := recover()
+		if p != nil {
+			err = fmt.Errorf("failed to write to canvas: %v", p)
+		}
+	}()
 	fontSize := (component.Size / 72) * canvas.GetPPI() // one point in fonts is almost exactly 1/72nd of one inch
 	fits := false
 	tries := 0
@@ -91,7 +97,7 @@ func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 	if !fits {
 		return canvas, fmt.Errorf("unable to fit text %v into maxWidth %d after %d tries", component.Content, component.MaxWidth, tries)
 	}
-	c, err := c.Text(component.Content, image.Pt(component.Start.X+alignmentOffset, component.Start.Y), face, component.Colour, component.MaxWidth)
+	c, err = c.Text(component.Content, image.Pt(component.Start.X+alignmentOffset, component.Start.Y), face, component.Colour, component.MaxWidth)
 	if err != nil {
 		return canvas, err
 	}

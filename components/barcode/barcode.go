@@ -46,6 +46,9 @@ type barcodeFormat struct {
 
 // Write draws a barcode on the canvas
 func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
+	if len(component.NamedPropertiesMap) != 0 {
+		return canvas, fmt.Errorf("cannot draw barcode, not all named properties are set: %v", component.NamedPropertiesMap)
+	}
 	c := canvas
 	var err error
 	c, err = c.Barcode(component.Type, []byte(component.Content), component.Extra, component.TopLeft, component.Width, component.Height, component.DataColour, component.BackgroundColour)
