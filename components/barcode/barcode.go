@@ -2,11 +2,12 @@ package barcode
 
 import (
 	"fmt"
-	"github.com/LLKennedy/imagetemplate/render"
-	"github.com/boombuler/barcode/qr"
 	"image"
 	"image/color"
 	"strings"
+
+	"github.com/LLKennedy/imagetemplate/render"
+	"github.com/boombuler/barcode/qr"
 )
 
 // Component implements the Component interface for images
@@ -286,4 +287,13 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 		props[key] = invalidStruct{Message: "Please replace me with real data"}
 	}
 	return c, props, nil
+}
+
+func init() {
+	for _, name := range []string{"barcode", "bar", "code", "Barcode", "BARCODE", "BAR", "Bar Code", "bar code"} {
+		err := render.RegisterComponent(name, func() render.Component { return Component{} })
+		if err != nil {
+			panic(fmt.Sprintf("barcode registration error: %v", err))
+		}
+	}
 }

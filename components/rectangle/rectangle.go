@@ -2,10 +2,11 @@ package rectangle
 
 import (
 	"fmt"
-	"github.com/LLKennedy/imagetemplate/render"
 	"image"
 	"image/color"
 	"strings"
+
+	"github.com/LLKennedy/imagetemplate/render"
 )
 
 // Component implements the Component interface for rectangles
@@ -174,4 +175,13 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 		props[key] = invalidStruct{Message: "Please replace me with real data"}
 	}
 	return c, props, nil
+}
+
+func init() {
+	for _, name := range []string{"rect", "RECT", "Rect", "rectangle", "Rectangle", "RECTANGLE"} {
+		err := render.RegisterComponent(name, func() render.Component { return Component{} })
+		if err != nil {
+			panic(fmt.Sprintf("rectangle registration error: %v", err))
+		}
+	}
 }
