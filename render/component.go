@@ -428,10 +428,9 @@ func (c ComponentConditional) GetNamedPropertiesList() NamedProperties {
 	if c.Name == "" && len(c.Group.Conditionals) == 0 {
 		return results
 	}
-	type invalidData struct {
+	results[c.Name] = struct {
 		Message string
-	}
-	results[c.Name] = invalidData{Message: "Please replace this struct with real data"}
+	}{Message: "Please replace this struct with real data"}
 	for _, subConditional := range c.Group.Conditionals {
 		subResults := subConditional.GetNamedPropertiesList()
 		for key, value := range subResults {

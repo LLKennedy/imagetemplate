@@ -191,7 +191,94 @@ func TestSetBackgroundImageData(t *testing.T) {
 	}
 }
 
+type mockComponent struct{ data int }
+
+func (c mockComponent) Write(canvas render.Canvas) (render.Canvas, error) {
+	return nil, nil
+}
+
+func (c mockComponent) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
+	return c, nil
+}
+
+func (c mockComponent) GetJSONFormat() interface{} {
+	return &struct {
+		SomeProp string `json:"someProp"`
+	}{}
+}
+
+func (c mockComponent) VerifyAndSetJSONData(data interface{}) (render.Component, render.NamedProperties, error) {
+	realData := data.(*struct {
+		SomeProp string `json:"someProp"`
+	})
+	if realData.SomeProp == "fail" {
+		return c, nil, fmt.Errorf("failed to set props from JSON")
+	} else if realData.SomeProp == "giveProp" {
+		return c, render.NamedProperties{"aprop": struct{ Message string }{Message: "Please replace this struct with real data"}}, nil
+	}
+	return c, nil, nil
+}
+
+func newMock() render.Component {
+	return &mockComponent{}
+}
+
+func TestParseComponents(t *testing.T) {
+	render.RegisterComponent("mock", newMock)
+	type testSet struct {
+		name        string
+		templates   []ComponentTemplate
+		toggleables []ToggleableComponent
+		props       render.NamedProperties
+		err         error
+	}
+	testFunc := func(test testSet, t *testing.T) {
+		toggleables, props, err := parseComponents(test.templates)
+		assert.Equal(t, test.toggleables, toggleables)
+		assert.Equal(t, test.props, props)
+		if test.err == nil {
+			assert.NoError(t, err)
+		} else {
+			assert.EqualError(t, err, test.err.Error())
+		}
+	}
+	tests := []testSet{
+		testSet{
+			name:  "empty templates",
+			props: render.NamedProperties{},
+		},
+		testSet{
+			name:      "error decoding type",
+			templates: []ComponentTemplate{ComponentTemplate{Type: "something wrong", Conditional: render.ComponentConditional{Name: "$myVar$"}}},
+			props:     render.NamedProperties{"$myVar$": struct{ Message string }{Message: "Please replace this struct with real data"}},
+			err:       fmt.Errorf("failed to find type matching component with user-specified type something wrong"),
+		},
+		testSet{
+			name:        "mock component with named props",
+			templates:   []ComponentTemplate{ComponentTemplate{Type: "mock", Properties: []byte(`{"someProp":"giveProp"}`)}},
+			props:       render.NamedProperties{"aprop": struct{ Message string }{Message: "Please replace this struct with real data"}},
+			toggleables: []ToggleableComponent{ToggleableComponent{Component: mockComponent{}}},
+		},
+		testSet{
+			name:      "mock component fails to set data",
+			templates: []ComponentTemplate{ComponentTemplate{Type: "mock", Properties: []byte(`{"someProp":"fail"}`)}},
+			props:     render.NamedProperties{},
+			err:       fmt.Errorf("failed to set props from JSON"),
+		},
+		testSet{
+			name:      "mock component with invalid JSON",
+			templates: []ComponentTemplate{ComponentTemplate{Type: "mock", Properties: []byte(`:"fail"}`)}},
+			props:     render.NamedProperties{},
+			err:       fmt.Errorf("invalid character ':' looking for beginning of value"),
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) { testFunc(test, t) })
+	}
+}
+
 func TestLoadComponentsData(t *testing.T) {
+	render.RegisterComponent("mock", newMock)
 	t.Run("circles", func(t *testing.T) {
 		sampleData := `{
 			"baseImage": {
@@ -294,4 +381,43 @@ func TestLoadComponentsData(t *testing.T) {
 		assert.NoError(t, err)
 		//TODO: output and check results
 	})
+	t.Run("failing on setbackgroundimage", func(t *testing.T) {
+
+	})
+}
+
+func TestGetComponents(t *testing.T) {
+	goodCondition := render.ComponentConditional{Name: "myVar", Operator: "ci_equals", Value: "something"}
+	goodCondition, _ = goodCondition.SetValue("myVar", "something")
+	badCondition := render.ComponentConditional{Name: "myVar", Operator: "ci_equals", Value: "something"}
+	badCondition, _ = badCondition.SetValue("myVar", "nothing")
+	builder := ImageBuilder{Components: []ToggleableComponent{
+		ToggleableComponent{
+			Conditional: goodCondition,
+			Component:   mockComponent{data: 1},
+		},
+		ToggleableComponent{
+			Conditional: badCondition,
+			Component:   mockComponent{data: 2},
+		},
+	}}
+	components := builder.GetComponents()
+	expectedComponents := []render.Component{
+		mockComponent{data: 1},
+	}
+	assert.Equal(t, expectedComponents, components)
+}
+
+func TestSetComponents(t *testing.T) {
+	builder := ImageBuilder{}
+	assert.Equal(t, []ToggleableComponent(nil), builder.Components)
+	builder = builder.SetComponents([]ToggleableComponent{}).(ImageBuilder)
+	assert.Equal(t, []ToggleableComponent{}, builder.Components)
+}
+
+func TestGetNamedPropertiesList(t *testing.T) {
+	builder := ImageBuilder{}
+	assert.Equal(t, render.NamedProperties(nil), builder.GetNamedPropertiesList())
+	builder.NamedProperties = render.NamedProperties{"something": "something else"}
+	assert.Equal(t, render.NamedProperties{"something": "something else"}, builder.GetNamedPropertiesList())
 }

@@ -14,9 +14,9 @@ import (
 	"strconv"
 	"strings"
 
-	_ "github.com/LLKennedy/imagetemplate/components/barcode" // add barcode component to registry by default
-	_ "github.com/LLKennedy/imagetemplate/components/circle"  // add circle component to registry by default
-	_ "github.com/LLKennedy/imagetemplate/components/datetime" // add datetime component to registry by default
+	_ "github.com/LLKennedy/imagetemplate/components/barcode"   // add barcode component to registry by default
+	_ "github.com/LLKennedy/imagetemplate/components/circle"    // add circle component to registry by default
+	_ "github.com/LLKennedy/imagetemplate/components/datetime"  // add datetime component to registry by default
 	_ "github.com/LLKennedy/imagetemplate/components/image"     // add image component to registry by default
 	_ "github.com/LLKennedy/imagetemplate/components/rectangle" // add rectangle component to registry by default
 	_ "github.com/LLKennedy/imagetemplate/components/text"      // add text component to registry by default
@@ -280,8 +280,8 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, rend
 		// Set real properties from JSON struct
 		newComponent, compNamedProps, err := newComponent.VerifyAndSetJSONData(shape)
 		if err != nil {
-			// Didn't match this type
-			continue
+			// Invalid data
+			return results, namedProperties, err
 		}
 		for key, value := range compNamedProps {
 			tempProperties[key] = value
@@ -312,10 +312,7 @@ func (builder ImageBuilder) GetComponents() []render.Component {
 	result := []render.Component{}
 	for _, tComponent := range builder.Components {
 		valid, err := tComponent.Conditional.Validate()
-		if err != nil {
-			continue
-		}
-		if valid {
+		if valid && err == nil {
 			result = append(result, tComponent.Component)
 		}
 	}

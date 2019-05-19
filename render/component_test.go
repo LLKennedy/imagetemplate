@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type mockComponent struct {}
+type mockComponent struct{}
 
 func (c mockComponent) Write(canvas Canvas) (Canvas, error) {
 	return nil, nil
