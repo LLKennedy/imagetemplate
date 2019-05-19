@@ -16,11 +16,11 @@ import (
 
 	"github.com/LLKennedy/imagetemplate/render"
 	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
-	_ "github.com/LLKennedy/imagetemplate/components/barcode"
-	_ "github.com/LLKennedy/imagetemplate/components/circle"
-	_ "github.com/LLKennedy/imagetemplate/components/rectangle"
-	_ "github.com/LLKennedy/imagetemplate/components/text"
-	_ "github.com/LLKennedy/imagetemplate/components/image"
+	_ "github.com/LLKennedy/imagetemplate/components/barcode" // add barcode components to registry by default
+	_ "github.com/LLKennedy/imagetemplate/components/circle" // add circle components to registry by default
+	_ "github.com/LLKennedy/imagetemplate/components/rectangle" // add rectangle components to registry by default
+	_ "github.com/LLKennedy/imagetemplate/components/text" // add text components to registry by default
+	_ "github.com/LLKennedy/imagetemplate/components/image" // add image components to registry by default
 	//_ "github.com/LLKennedy/imagetemplate/components/datetime"
 
 	"github.com/disintegration/imaging"
