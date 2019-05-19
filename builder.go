@@ -14,15 +14,15 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/LLKennedy/imagetemplate/components/barcode"
-	"github.com/LLKennedy/imagetemplate/components/circle"
-	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
-
-	//"github.com/LLKennedy/imagetemplate/components/datetime"
-	img "github.com/LLKennedy/imagetemplate/components/image"
-	"github.com/LLKennedy/imagetemplate/components/rectangle"
-	"github.com/LLKennedy/imagetemplate/components/text"
 	"github.com/LLKennedy/imagetemplate/render"
+	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
+	_ "github.com/LLKennedy/imagetemplate/components/barcode" // add barcode components to registry by default
+	_ "github.com/LLKennedy/imagetemplate/components/circle" // add circle components to registry by default
+	_ "github.com/LLKennedy/imagetemplate/components/rectangle" // add rectangle components to registry by default
+	_ "github.com/LLKennedy/imagetemplate/components/text" // add text components to registry by default
+	_ "github.com/LLKennedy/imagetemplate/components/image" // add image components to registry by default
+	//_ "github.com/LLKennedy/imagetemplate/components/datetime"
+
 	"github.com/disintegration/imaging"
 	"golang.org/x/image/bmp"
 	_ "golang.org/x/image/tiff" // tiff imported for image decoding
@@ -258,7 +258,7 @@ func (builder ImageBuilder) setBackgroundImage(template Template) (ImageBuilder,
 func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, render.NamedProperties, error) {
 	var results []ToggleableComponent
 	namedProperties := render.NamedProperties{}
-	for tCount, template := range templates {
+	for _, template := range templates {
 		//Handle conditional first
 		result := ToggleableComponent{}
 		tempProperties := namedProperties
@@ -266,51 +266,29 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, rend
 		for key, value := range result.Conditional.GetNamedPropertiesList() {
 			tempProperties[key] = value
 		}
-		var typeRange []string
-		switch template.Type {
-		case "circle", "Circle", "rectangle", "Rectangle", "rect", "Rect", "image", "Image", "photo", "Photo", "text", "Text", "words", "Words", "barcode", "Barcode":
-			typeRange = []string{template.Type}
-		default:
-			typeRange = []string{"circle", "Circle", "rectange", "Rectangle", "rect", "Rect", "image", "Image", "photo", "Photo", "text", "Text", "words", "Words", "barcode", "Barcode"}
-		}
-		for _, compType := range typeRange {
-			var newComponent render.Component
-			switch compType {
-			case "circle", "Circle":
-				newComponent = circle.Component{}
-			case "rectangle", "Rectangle", "rect", "Rect":
-				newComponent = rectangle.Component{}
-			case "image", "Image", "photo", "Photo":
-				newComponent = img.Component{}
-			case "text", "Text", "words", "Words":
-				newComponent = text.Component{}
-			case "barcode", "Barcode":
-				newComponent = barcode.Component{}
-			}
-			// Get JSON struct to parse into
-			shape := newComponent.GetJSONFormat()
-			err := json.Unmarshal(template.Properties, shape)
-			if err != nil {
-				// Invalid JSON
-				return results, namedProperties, err
-			}
-			// Set real properties from JSON struct
-			newComponent, compNamedProps, err := newComponent.VerifyAndSetJSONData(shape)
-			if err != nil {
-				// Didn't match this type
-				continue
-			}
-			for key, value := range compNamedProps {
-				tempProperties[key] = value
-			}
-			result.Component = newComponent
-			results = append(results, result)
-			namedProperties = tempProperties
-		}
-		if len(results) <= tCount {
-			// Failed to find a matching type
+		newComponent, err := render.Decode(template.Type)
+		if err != nil {
 			return results, namedProperties, fmt.Errorf("failed to find type matching component with user-specified type %v", template.Type)
 		}
+		// Get JSON struct to parse into
+		shape := newComponent.GetJSONFormat()
+		err = json.Unmarshal(template.Properties, shape)
+		if err != nil {
+			// Invalid JSON
+			return results, namedProperties, err
+		}
+		// Set real properties from JSON struct
+		newComponent, compNamedProps, err := newComponent.VerifyAndSetJSONData(shape)
+		if err != nil {
+			// Didn't match this type
+			continue
+		}
+		for key, value := range compNamedProps {
+			tempProperties[key] = value
+		}
+		result.Component = newComponent
+		results = append(results, result)
+		namedProperties = tempProperties
 	}
 	return results, namedProperties, nil
 }

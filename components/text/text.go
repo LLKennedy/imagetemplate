@@ -388,3 +388,12 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	}
 	return c, props, nil
 }
+
+func init() {
+	for _, name := range []string{"text", "Text", "TEXT", "words", "Words", "WORDS", "writing", "Writing", "WRITING"} {
+		err := render.RegisterComponent(name, func() render.Component { return Component{} })
+		if err != nil {
+			panic(fmt.Sprintf("text registration error: %v", err))
+		}
+	}
+}

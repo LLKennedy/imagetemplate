@@ -6,6 +6,28 @@ import (
 	"strings"
 )
 
+var registry = map[string](func() Component){}
+
+// RegisterComponent adds a new component to the registry, returning an error if duplicate names exist
+func RegisterComponent(name string, generator func() Component) error {
+	if registry == nil {
+		registry = map[string](func() Component){}
+	}
+	if registry[name] != nil {
+		return fmt.Errorf("cannot register component, %v is already registered", name)
+	}
+	registry[name] = generator
+	return nil
+}
+
+// Decode searches the registry for a component matching the provided name and returns a new blank component of that type
+func Decode(name string) (Component, error) {
+	if registry[name] == nil {
+		return nil, fmt.Errorf("component error: no component registered for name %v", name)
+	}
+	return registry[name](), nil
+}
+
 // NamedProperties is a map of property names to property values - application variables to be set
 type NamedProperties map[string]interface{}
 

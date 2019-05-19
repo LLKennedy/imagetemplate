@@ -234,3 +234,12 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	}
 	return c, props, nil
 }
+
+func init() {
+	for _, name := range []string{"image", "img", "photo", "Image", "IMG", "Photo", "picture", "Picture", "IMAGE", "PHOTO", "PICTURE"} {
+		err := render.RegisterComponent(name, func() render.Component { return Component{} })
+		if err != nil {
+			panic(fmt.Sprintf("image registration error: %v", err))
+		}
+	}
+}
