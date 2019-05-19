@@ -22,7 +22,7 @@ func RegisterComponent(name string, generator func() Component) error {
 
 // Decode searches the registry for a component matching the provided name and returns a new blank component of that type
 func Decode(name string) (Component, error) {
-	if registry[name] == nil {
+	if registry == nil || registry[name] == nil {
 		return nil, fmt.Errorf("component error: no component registered for name %v", name)
 	}
 	return registry[name](), nil

@@ -7,6 +7,51 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type mockComponent struct {}
+
+func (c mockComponent) Write(canvas Canvas) (Canvas, error) {
+	return nil, nil
+}
+
+func (c mockComponent) SetNamedProperties(properties NamedProperties) (Component, error) {
+	return c, nil
+}
+
+func (c mockComponent) GetJSONFormat() interface{} {
+	return nil
+}
+
+func (c mockComponent) VerifyAndSetJSONData(interface{}) (Component, NamedProperties, error) {
+	return nil, nil, nil
+}
+
+func newMock() Component {
+	return &mockComponent{}
+}
+
+func TestRegisterComponentAndDecode(t *testing.T) {
+	registry = nil
+	err := RegisterComponent("newComponent", newMock)
+	assert.NoError(t, err)
+	err = RegisterComponent("newComponent", newMock)
+	assert.EqualError(t, err, "cannot register component, newComponent is already registered")
+	registry = nil
+	c, err := Decode("newComponent")
+	assert.Nil(t, c)
+	assert.EqualError(t, err, "component error: no component registered for name newComponent")
+	err = RegisterComponent("newComponent", newMock)
+	assert.NoError(t, err)
+	c, err = Decode("wrong")
+	assert.Nil(t, c)
+	assert.EqualError(t, err, "component error: no component registered for name wrong")
+	c, err = Decode("newComponent")
+	assert.Equal(t, newMock(), c)
+	assert.NoError(t, err)
+}
+
+func TestDecode(t *testing.T) {
+}
+
 func TestStandardSetNamedProperties(t *testing.T) {
 	type setPropTest struct {
 		name            string
