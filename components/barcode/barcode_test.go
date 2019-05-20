@@ -247,3 +247,9 @@ func TestBarcodeVerifyAndTestBarcodeJSONData(t *testing.T) {
 		})
 	}
 }
+
+func TestInit(t *testing.T) {
+	c, err := render.Decode("barcode")
+	assert.NoError(t, err)
+	assert.Equal(t, Component{}, c)
+}

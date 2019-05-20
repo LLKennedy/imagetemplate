@@ -246,3 +246,9 @@ func TestRectangleVerifyAndTestRectangleJSONData(t *testing.T) {
 		})
 	}
 }
+
+func TestInit(t *testing.T) {
+	c, err := render.Decode("rectangle")
+	assert.NoError(t, err)
+	assert.Equal(t, Component{}, c)
+}

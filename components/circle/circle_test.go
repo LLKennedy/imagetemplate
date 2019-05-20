@@ -2,11 +2,12 @@ package circle
 
 import (
 	"errors"
-	"github.com/LLKennedy/imagetemplate/render"
-	"github.com/stretchr/testify/assert"
 	"image"
 	"image/color"
 	"testing"
+
+	"github.com/LLKennedy/imagetemplate/render"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCircleWrite(t *testing.T) {
@@ -244,4 +245,10 @@ func TestCircleVerifyAndTestCircleJSONData(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestInit(t *testing.T) {
+	newCircle, err := render.Decode("circle")
+	assert.NoError(t, err)
+	assert.Equal(t, Component{}, newCircle)
 }

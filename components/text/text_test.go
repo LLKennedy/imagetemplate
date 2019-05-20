@@ -253,3 +253,9 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 		})
 	}
 }
+
+func TestInit(t *testing.T) {
+	c, err := render.Decode("text")
+	assert.NoError(t, err)
+	assert.Equal(t, Component{}, c)
+}

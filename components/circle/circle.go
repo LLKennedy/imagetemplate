@@ -164,9 +164,6 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 
 func init() {
 	for _, name := range []string{"circle", "Circle", "CIRCLE"} {
-		err := render.RegisterComponent(name, func() render.Component { return Component{} })
-		if err != nil {
-			panic(fmt.Sprintf("circle registration error: %v", err))
-		}
+		render.RegisterComponent(name, func() render.Component { return Component{} })
 	}
 }
