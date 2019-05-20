@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/LLKennedy/imagetemplate/render"
+	"github.com/boombuler/barcode/qr"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -118,6 +119,74 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			err: "invalid component property in named property map: not a prop",
 		},
 		testSet{
+			name: "content invalid",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": []string{"content"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 15,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": []string{"content"},
+				},
+			},
+			err: "error converting 15 to string",
+		},
+		testSet{
+			name: "type invalid",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": []string{"barcodeType"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 15,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": []string{"barcodeType"},
+				},
+			},
+			err: "error converting 15 to barcode type",
+		},
+		testSet{
+			name: "unsupported type",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": []string{"barcodeType"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "15",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": []string{"barcodeType"},
+				},
+			},
+			err: "unsupported barcode type 15",
+		},
+		testSet{
+			name: "invalid colour code",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": []string{"Rd"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": uint8(12),
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": []string{"Rd"},
+				},
+			},
+			err: "name was a string inside RGBA and Value was a valid uint8, but Name wasn't R, G, B, or A. Name was: Rd",
+		},
+		testSet{
 			name: "topLeftX",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
@@ -166,14 +235,101 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			err: "",
 		},
 		testSet{
+			name: "aztec",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"type": []string{"barcodeType"},
+				},
+			},
+			input: render.NamedProperties{
+				"type": render.BarcodeTypeAztec,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Type:               render.BarcodeTypeAztec,
+				Extra:              render.BarcodeExtraData{AztecMinECCPercent: 50, AztecUserSpecifiedLayers: 4},
+			},
+			err: "",
+		},
+		testSet{
+			name: "39",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"type": []string{"barcodeType"},
+				},
+			},
+			input: render.NamedProperties{
+				"type": render.BarcodeTypeCode39,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Type:               render.BarcodeTypeCode39,
+				Extra:              render.BarcodeExtraData{Code39IncludeChecksum: true, Code39FullASCIIMode: true},
+			},
+			err: "",
+		},
+		testSet{
+			name: "93",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"type": []string{"barcodeType"},
+				},
+			},
+			input: render.NamedProperties{
+				"type": render.BarcodeTypeCode93,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Type:               render.BarcodeTypeCode93,
+				Extra:              render.BarcodeExtraData{Code93IncludeChecksum: true, Code93FullASCIIMode: true},
+			},
+			err: "",
+		},
+		testSet{
+			name: "pdf",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"type": []string{"barcodeType"},
+				},
+			},
+			input: render.NamedProperties{
+				"type": render.BarcodeTypePDF,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Type:               render.BarcodeTypePDF,
+				Extra:              render.BarcodeExtraData{PDFSecurityLevel: 4},
+			},
+			err: "",
+		},
+		testSet{
+			name: "qr",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"type": []string{"barcodeType"},
+				},
+			},
+			input: render.NamedProperties{
+				"type": render.BarcodeTypeQR,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Type:               render.BarcodeTypeQR,
+				Extra:              render.BarcodeExtraData{QRLevel: qr.Q, QRMode: qr.Unicode},
+			},
+			err: "",
+		},
+		testSet{
 			name: "full prop set, multiple sources, unused props",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"col1": []string{"dR", "dG", "dA"},
-					"left": []string{"topLeftX"},
-					"wide": []string{"width", "height", "topLeftY"},
-					"col3": []string{"dB"},
-					"what": []string{"bR", "bG", "bB", "bA", "topLeftX"},
+					"col1":             []string{"dR", "dG", "dA"},
+					"left":             []string{"topLeftX"},
+					"wide":             []string{"width", "height", "topLeftY"},
+					"col3":             []string{"dB", "bR", "bG", "bB", "bA"},
+					"what":             []string{"bR", "bG", "bB", "bA", "topLeftX"},
+					"some other thing": []string{"content"},
+					"type":             []string{"barcodeType"},
 				},
 			},
 			input: render.NamedProperties{
@@ -184,6 +340,7 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 				"col3":             uint8(150),
 				"wide":             80,
 				"left":             3,
+				"type":             render.BarcodeTypeDataMatrix,
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{"what": []string{"bR", "bG", "bB", "bA", "topLeftX"}},
@@ -191,6 +348,9 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 				Width:              80,
 				Height:             80,
 				DataColour:         color.NRGBA{R: uint8(15), G: uint8(15), B: uint8(150), A: uint8(15)},
+				BackgroundColour:   color.NRGBA{R: uint8(150), G: uint8(150), B: uint8(150), A: uint8(150)},
+				Type:               render.BarcodeTypeDataMatrix,
+				Content:            "doesn't matter",
 			},
 			err: "",
 		},

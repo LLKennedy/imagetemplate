@@ -71,7 +71,7 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 			c.Content = stringVal
 			return nil
 		case "barcodeType":
-			stringVal, ok := value.(render.BarcodeType)
+			stringVal, ok := value.(string)
 			if !ok {
 				return fmt.Errorf("error converting %v to barcode type", value)
 			}
@@ -101,7 +101,7 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 			default:
 				return fmt.Errorf("unsupported barcode type %v", stringVal)
 			}
-			c.Type = stringVal
+			c.Type = render.BarcodeType(stringVal)
 			return nil
 		}
 		if strings.Contains("dRdGdBdAbRbGbBbA", name) && len(name) == 2 {
@@ -283,20 +283,17 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	if newVal != nil {
 		c.BackgroundColour.A = newVal.(uint8)
 	}
-
+	type invalidStruct struct {
+		Message string
+	}
 	for key := range c.NamedPropertiesMap {
-		props[key] = struct {
-			Message string
-		}{Message: "Please replace me with real data"}
+		props[key] = invalidStruct{Message: "Please replace me with real data"}
 	}
 	return c, props, nil
 }
 
 func init() {
 	for _, name := range []string{"barcode", "bar", "code", "Barcode", "BARCODE", "BAR", "Bar Code", "bar code"} {
-		err := render.RegisterComponent(name, func() render.Component { return Component{} })
-		if err != nil {
-			panic(fmt.Sprintf("barcode registration error: %v", err))
-		}
+		render.RegisterComponent(name, func() render.Component { return Component{} })
 	}
 }
