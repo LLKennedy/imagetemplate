@@ -226,11 +226,144 @@ func TestCircleVerifyAndTestCircleJSONData(t *testing.T) {
 	tests := []testSet{
 		testSet{
 			name:  "incorrect format data",
-			start: Component{},
 			input: "hello",
-			res:   Component{},
 			props: render.NamedProperties{},
 			err:   "failed to convert returned data to component properties",
+		},
+		testSet{
+			name:  "empty data",
+			input: &circleFormat{},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property centreX: could not parse empty property",
+		},
+		testSet{
+			name: "full data",
+			input: &circleFormat{
+				CentreX: "6",
+				CentreY: "7",
+				Radius:  "10",
+				Colour: colourFormat{
+					Red:   "100",
+					Green: "10",
+					Blue:  "200",
+					Alpha: "80",
+				},
+			},
+			res:   Component{NamedPropertiesMap: map[string][]string{}, Centre: image.Pt(6, 7), Radius: 10, Colour: color.NRGBA{R: 100, G: 10, B: 200, A: 80}},
+			props: render.NamedProperties{},
+			err:   "",
+		},
+		testSet{
+			name: "error in centreY",
+			input: &circleFormat{
+				CentreX: "6",
+				CentreY: "a",
+				Radius:  "10",
+				Colour: colourFormat{
+					Red:   "100",
+					Green: "10",
+					Blue:  "200",
+					Alpha: "80",
+				},
+			},
+			props: render.NamedProperties{},
+			err:   `failed to convert property centreY to integer: strconv.ParseInt: parsing "a": invalid syntax`,
+		},
+		testSet{
+			name: "error in radius",
+			input: &circleFormat{
+				CentreX: "6",
+				CentreY: "7",
+				Radius:  "a",
+				Colour: colourFormat{
+					Red:   "100",
+					Green: "10",
+					Blue:  "200",
+					Alpha: "80",
+				},
+			},
+			props: render.NamedProperties{},
+			err:   `failed to convert property radius to integer: strconv.ParseInt: parsing "a": invalid syntax`,
+		},
+		testSet{
+			name: "error in red",
+			input: &circleFormat{
+				CentreX: "6",
+				CentreY: "7",
+				Radius:  "10",
+				Colour: colourFormat{
+					Red:   "a",
+					Green: "10",
+					Blue:  "200",
+					Alpha: "80",
+				},
+			},
+			props: render.NamedProperties{},
+			err:   `failed to convert property R to uint8: strconv.ParseUint: parsing "a": invalid syntax`,
+		},
+		testSet{
+			name: "error in green",
+			input: &circleFormat{
+				CentreX: "6",
+				CentreY: "7",
+				Radius:  "10",
+				Colour: colourFormat{
+					Red:   "10",
+					Green: "a",
+					Blue:  "200",
+					Alpha: "80",
+				},
+			},
+			props: render.NamedProperties{},
+			err:   `failed to convert property G to uint8: strconv.ParseUint: parsing "a": invalid syntax`,
+		},
+		testSet{
+			name: "error in blue",
+			input: &circleFormat{
+				CentreX: "6",
+				CentreY: "7",
+				Radius:  "10",
+				Colour: colourFormat{
+					Red:   "100",
+					Green: "10",
+					Blue:  "a",
+					Alpha: "80",
+				},
+			},
+			props: render.NamedProperties{},
+			err:   `failed to convert property B to uint8: strconv.ParseUint: parsing "a": invalid syntax`,
+		},
+		testSet{
+			name: "error in alpha",
+			input: &circleFormat{
+				CentreX: "6",
+				CentreY: "7",
+				Radius:  "10",
+				Colour: colourFormat{
+					Red:   "100",
+					Green: "10",
+					Blue:  "200",
+					Alpha: "a",
+				},
+			},
+			props: render.NamedProperties{},
+			err:   `failed to convert property A to uint8: strconv.ParseUint: parsing "a": invalid syntax`,
+		},
+		testSet{
+			name: "prop in alpha",
+			input: &circleFormat{
+				CentreX: "6",
+				CentreY: "7",
+				Radius:  "10",
+				Colour: colourFormat{
+					Red:   "100",
+					Green: "10",
+					Blue:  "200",
+					Alpha: "$a$",
+				},
+			},
+			res:   Component{NamedPropertiesMap: map[string][]string{"a": []string{"A"}}, Centre: image.Pt(6, 7), Radius: 10, Colour: color.NRGBA{R: 100, G: 10, B: 200}},
+			props: render.NamedProperties{"a": struct{ Message string }{Message: "Please replace me with real data"}},
 		},
 	}
 	for _, test := range tests {

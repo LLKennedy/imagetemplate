@@ -95,7 +95,7 @@ func ExtractSingleProp(inputVal, propName string, typeName PropType, namedPropsM
 	}
 	hasNamedProps, deconstructed, err := ParseDataValue(inputVal)
 	if err != nil {
-		return namedPropsMap, nil, err
+		return namedPropsMap, nil, fmt.Errorf("error parsing data for property %v: %v", propName, err)
 	}
 	if hasNamedProps {
 		if !isSingleProp(deconstructed) {

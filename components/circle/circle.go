@@ -18,15 +18,17 @@ type Component struct {
 }
 
 type circleFormat struct {
-	CentreX string `json:"centreX"`
-	CentreY string `json:"centreY"`
-	Radius  string `json:"radius"`
-	Colour  struct {
-		Red   string `json:"R"`
-		Green string `json:"G"`
-		Blue  string `json:"B"`
-		Alpha string `json:"A"`
-	} `json:"colour"`
+	CentreX string       `json:"centreX"`
+	CentreY string       `json:"centreY"`
+	Radius  string       `json:"radius"`
+	Colour  colourFormat `json:"colour"`
+}
+
+type colourFormat struct {
+	Red   string `json:"R"`
+	Green string `json:"G"`
+	Blue  string `json:"B"`
+	Alpha string `json:"A"`
 }
 
 // Write draws a circle on the canvas
@@ -153,11 +155,10 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	if newVal != nil {
 		c.Colour.A = newVal.(uint8)
 	}
-	type invalidStruct struct {
-		Message string
-	}
 	for key := range c.NamedPropertiesMap {
-		props[key] = invalidStruct{Message: "Please replace me with real data"}
+		props[key] = struct {
+			Message string
+		}{Message: "Please replace me with real data"}
 	}
 	return c, props, nil
 }

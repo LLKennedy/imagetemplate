@@ -386,11 +386,11 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	if newVal != nil {
 		c.Colour.A = newVal.(uint8)
 	}
-	type invalidStruct struct {
-		Message string
-	}
+
 	for key := range c.NamedPropertiesMap {
-		props[key] = invalidStruct{Message: "Please replace me with real data"}
+		props[key] = struct {
+			Message string
+		}{Message: "Please replace me with real data"}
 	}
 	return c, props, nil
 }

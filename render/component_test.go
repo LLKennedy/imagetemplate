@@ -243,7 +243,8 @@ func TestExtractSingleProp(t *testing.T) {
 		testSet{
 			name:     "error in input",
 			inputVal: "$",
-			err:      errors.New("unclosed named property in '$'"),
+			propName: "x",
+			err:      errors.New("error parsing data for property x: unclosed named property in '$'"),
 		},
 		testSet{
 			name:     "multiple properties",
