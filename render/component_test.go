@@ -294,6 +294,13 @@ func TestExtractSingleProp(t *testing.T) {
 			err:      errors.New("failed to convert property aProp to float64: strconv.ParseFloat: parsing \"laskdjf;alsdf\": invalid syntax"),
 		},
 		testSet{
+			name:     "invalid float64",
+			inputVal: "laskdjf;alsdf",
+			propName: "aProp",
+			typeName: TimeType,
+			err:      errors.New("failed to convert property aProp to time.Duration: time: invalid duration laskdjf;alsdf"),
+		},
+		testSet{
 			name:             "valid int",
 			inputVal:         "53",
 			propName:         "aProp",
@@ -338,6 +345,15 @@ func TestExtractSingleProp(t *testing.T) {
 			returnedPropsMap: map[string][]string{},
 			extractedValue:   float64(53),
 		},
+		// testSet{
+		// 	name:             "valid float64",
+		// 	inputVal:         "2000h",
+		// 	propName:         "aProp",
+		// 	typeName:         TimeType,
+		// 	err:              nil,
+		// 	returnedPropsMap: map[string][]string{},
+		// 	extractedValue:   time.Now().Add(time.Duration(2000)),
+		// },
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"testing"
+	"time"
 
 	"golang.org/x/image/font/gofont/goregular"
 
@@ -27,14 +28,16 @@ func TestDateTimeWrite(t *testing.T) {
 	})
 	t.Run("datetime error", func(t *testing.T) {
 		canvas := render.MockCanvas{FixedTextError: fmt.Errorf("some error"), FixedTryTextBool: true, FixedTryTextInt: 10, FixedPixelsPerInch: 72}
-		c := Component{Font: goreg, Size: 14, MaxWidth: 100}
+		timeVal := time.Now()
+		c := Component{Font: goreg, Size: 14, MaxWidth: 100, Time: &timeVal}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.EqualError(t, err, "some error")
 	})
 	t.Run("passing", func(t *testing.T) {
 		canvas := render.MockCanvas{FixedTextError: nil, FixedTryTextBool: true, FixedTryTextInt: 10, FixedPixelsPerInch: 72}
-		c := Component{Font: goreg, Size: 14, MaxWidth: 100}
+		timeVal := time.Now()
+		c := Component{Font: goreg, Size: 14, MaxWidth: 100, Time: &timeVal}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.NoError(t, err)
