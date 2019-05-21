@@ -1,14 +1,15 @@
 package main
 
 import (
-	img "github.com/LLKennedy/imagetemplate"
-	"github.com/LLKennedy/imagetemplate/render"
-	"github.com/boombuler/barcode/qr"
 	"image"
 	"image/color"
 	"io/ioutil"
 	"log"
 	"os"
+
+	img "github.com/LLKennedy/imagetemplate"
+	"github.com/LLKennedy/imagetemplate/render"
+	"github.com/boombuler/barcode/qr"
 )
 
 func main() {
@@ -19,11 +20,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create canvas: %v", err)
 	}
-	builder, err = img.NewBuilder()
+	builder = img.NewBuilder()
 	builder.SetCanvas(canvas)
-	if err != nil {
-		log.Fatalf("Failed to create builder: %v", err)
-	}
 	// canvas, err = canvas.Rectangle(image.Point{X: 110, Y: 40}, 60, 87, color.NRGBA{R: 255, G: 100, B: 0, A: 255})
 	// if err != nil {
 	// 	log.Fatalf("Failed to create rectangle: %v", err)

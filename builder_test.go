@@ -12,8 +12,8 @@ import (
 )
 
 func TestNewBuilder(t *testing.T) {
-	newBuilder, err := NewBuilder()
-	assert.NoError(t, err)
+	newBuilder := NewBuilder()
+	assert.Equal(t, ImageBuilder{reader: fs.IoutilFileReader{}}, newBuilder)
 	img := newBuilder.GetCanvas().GetUnderlyingImage()
 	assert.Equal(t, 0, img.Bounds().Size().X)
 	assert.Equal(t, 0, img.Bounds().Size().Y)
