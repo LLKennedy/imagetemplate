@@ -251,7 +251,7 @@ func TestParseComponents(t *testing.T) {
 			name:      "error decoding type",
 			templates: []ComponentTemplate{ComponentTemplate{Type: "something wrong", Conditional: render.ComponentConditional{Name: "$myVar$"}}},
 			props:     render.NamedProperties{"$myVar$": struct{ Message string }{Message: "Please replace this struct with real data"}},
-			err:       fmt.Errorf("failed to find type matching component with user-specified type something wrong"),
+			err:       fmt.Errorf("component error: no component registered for name something wrong"),
 		},
 		testSet{
 			name:        "mock component with named props",
