@@ -289,7 +289,12 @@ func (c ComponentConditional) SetValue(name string, value interface{}) (Componen
 			return c, err
 		}
 	}
-	if conditional.Name == name || (conditional.Name == "" && !conditional.valueSet) {
+	if conditional.Name == "" && !conditional.valueSet {
+		conditional.validated = true
+		conditional.valueSet = true
+		return conditional, nil
+	}
+	if conditional.Name == name {
 		switch conditional.Operator {
 		case equals, contains, startswith, endswith, ciEquals, ciContains, ciStartswith, ciEndswith:
 			// Handle string operators
