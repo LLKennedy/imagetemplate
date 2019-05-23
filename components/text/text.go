@@ -74,7 +74,7 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 	var alignmentOffset int
 	for !fits && tries < 10 {
 		tries++
-		face = truetype.NewFace(component.Font, &truetype.Options{Size: fontSize, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64})
+		face = truetype.NewFace(component.Font, &truetype.Options{Size: fontSize, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: canvas.GetPPI()})
 		var realWidth int
 		fits, realWidth = c.TryText(component.Content, component.Start, face, component.Colour, component.MaxWidth)
 		if realWidth > component.MaxWidth {
