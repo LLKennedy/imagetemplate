@@ -67,7 +67,7 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 			err = fmt.Errorf("failed to write to canvas: %v", p)
 		}
 	}()
-	fontSize := (component.Size / 72) * canvas.GetPPI() // one point in fonts is almost exactly 1/72nd of one inch
+	fontSize := component.Size
 	fits := false
 	tries := 0
 	var face font.Face
