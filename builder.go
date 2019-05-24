@@ -267,7 +267,7 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, rend
 		}
 		newComponent, err := render.Decode(template.Type)
 		if err != nil {
-			return results, namedProperties, fmt.Errorf("failed to find type matching component with user-specified type %v", template.Type)
+			return results, namedProperties, err
 		}
 		// Get JSON struct to parse into
 		shape := newComponent.GetJSONFormat()

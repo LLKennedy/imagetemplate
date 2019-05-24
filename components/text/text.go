@@ -67,14 +67,14 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 			err = fmt.Errorf("failed to write to canvas: %v", p)
 		}
 	}()
-	fontSize := (component.Size / 72) * canvas.GetPPI() // one point in fonts is almost exactly 1/72nd of one inch
+	fontSize := component.Size
 	fits := false
 	tries := 0
 	var face font.Face
 	var alignmentOffset int
 	for !fits && tries < 10 {
 		tries++
-		face = truetype.NewFace(component.Font, &truetype.Options{Size: fontSize, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64})
+		face = truetype.NewFace(component.Font, &truetype.Options{Size: fontSize, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: canvas.GetPPI()})
 		var realWidth int
 		fits, realWidth = c.TryText(component.Content, component.Start, face, component.Colour, component.MaxWidth)
 		if realWidth > component.MaxWidth {
