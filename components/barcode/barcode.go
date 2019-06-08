@@ -71,7 +71,7 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 			c.Content = stringVal
 			return nil
 		case "barcodeType":
-			stringVal, ok := value.(string)
+			stringVal, ok := value.(render.BarcodeType)
 			if !ok {
 				return fmt.Errorf("error converting %v to barcode type", value)
 			}
@@ -98,8 +98,6 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 			case render.BarcodeTypeQR:
 				c.Extra.QRLevel = qr.Q
 				c.Extra.QRMode = qr.Unicode
-			default:
-				return fmt.Errorf("unsupported barcode type %v", stringVal)
 			}
 			c.Type = render.BarcodeType(stringVal)
 			return nil

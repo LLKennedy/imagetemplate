@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"testing"
 
+	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
 
 	"github.com/LLKennedy/imagetemplate/render"
@@ -19,25 +20,37 @@ func TestTextWrite(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Run("not all props set", func(t *testing.T) {
-		canvas := render.MockCanvas{}
+		canvas := new(render.MockCanvas)
+		canvas.On("GetPPI").Return(float64(72))
 		c := Component{NamedPropertiesMap: map[string][]string{"not set": []string{"something"}}}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.EqualError(t, err, "failed to write to canvas: runtime error: invalid memory address or nil pointer dereference")
+		canvas.AssertExpectations(t)
 	})
 	t.Run("text error", func(t *testing.T) {
-		canvas := render.MockCanvas{FixedTextError: fmt.Errorf("some error"), FixedTryTextBool: true, FixedTryTextInt: 10, FixedPixelsPerInch: 72}
+		canvas := new(render.MockCanvas)
+		canvas.On("GetPPI").Return(float64(72))
+		expectedFont := truetype.NewFace(goreg, &truetype.Options{Size: 14, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
+		canvas.On("TryText", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(true, 10)
+		canvas.On("Text", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(canvas, fmt.Errorf("some error"))
 		c := Component{Font: goreg, Size: 14, MaxWidth: 100}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.EqualError(t, err, "some error")
+		//canvas.AssertExpectations(t)
 	})
 	t.Run("passing", func(t *testing.T) {
-		canvas := render.MockCanvas{FixedTextError: nil, FixedTryTextBool: true, FixedTryTextInt: 10, FixedPixelsPerInch: 72}
+		canvas := new(render.MockCanvas)
+		canvas.On("GetPPI").Return(float64(72))
+		expectedFont := truetype.NewFace(goreg, &truetype.Options{Size: 14, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
+		canvas.On("TryText", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(true, 10)
+		canvas.On("Text", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
 		c := Component{Font: goreg, Size: 14, MaxWidth: 100}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.NoError(t, err)
+		//canvas.AssertExpectations(t)
 	})
 }
 

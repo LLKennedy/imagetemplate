@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var registry = map[string](func() Component){}
@@ -85,6 +86,8 @@ const (
 	Uint8Type PropType = "uint8"
 	// Float64Type is a float64
 	Float64Type PropType = "float64"
+	// TimeType is a *time.Time
+	TimeType PropType = "time"
 )
 
 // ExtractSingleProp parses the loaded property configuration and application inputs and returns the desired property if it exists
@@ -134,6 +137,13 @@ func ExtractSingleProp(inputVal, propName string, typeName PropType, namedPropsM
 			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to float64: %v", propName, err)
 		}
 		return npm, float64Val, nil
+	case TimeType:
+		durationVal, err := time.ParseDuration(inputVal)
+		if err != nil {
+			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to time.Duration: %v", propName, err)
+		}
+		timeVal := time.Now().Add(durationVal)
+		return npm, &timeVal, nil
 	}
 	return namedPropsMap, nil, fmt.Errorf("cannot convert property %v to unsupported type %v", propName, typeName)
 }

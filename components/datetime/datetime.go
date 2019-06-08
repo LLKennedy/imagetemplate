@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"strings"
+	"time"
 
 	"github.com/LLKennedy/gosysfonts"
 	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
@@ -16,7 +17,8 @@ import (
 // Component implements the Component interface for datetime
 type Component struct {
 	NamedPropertiesMap map[string][]string
-	Content            string
+	Time               *time.Time
+	TimeFormat         string
 	Start              image.Point
 	Size               float64
 	MaxWidth           int
@@ -27,23 +29,28 @@ type Component struct {
 }
 
 type datetimeFormat struct {
-	Content   string `json:"content"`
-	StartX    string `json:"startX"`
-	StartY    string `json:"startY"`
-	Size      string `json:"size"`
-	MaxWidth  string `json:"maxWidth"`
-	Alignment string `json:"alignment"`
-	Font      struct {
-		FontName string `json:"fontName"`
-		FontFile string `json:"fontFile"`
-		FontURL  string `json:"fontURL"`
-	} `json:"font"`
-	Colour struct {
-		Red   string `json:"R"`
-		Green string `json:"G"`
-		Blue  string `json:"B"`
-		Alpha string `json:"A"`
-	} `json:"colour"`
+	Time       string       `json:"time"`
+	TimeFormat string       `json:"timeFormat"`
+	StartX     string       `json:"startX"`
+	StartY     string       `json:"startY"`
+	Size       string       `json:"size"`
+	MaxWidth   string       `json:"maxWidth"`
+	Alignment  string       `json:"alignment"`
+	Font       fontFormat   `json:"font"`
+	Colour     colourFormat `json:"colour"`
+}
+
+type fontFormat struct {
+	FontName string `json:"fontName"`
+	FontFile string `json:"fontFile"`
+	FontURL  string `json:"fontURL"`
+}
+
+type colourFormat struct {
+	Red   string `json:"R"`
+	Green string `json:"G"`
+	Blue  string `json:"B"`
+	Alpha string `json:"A"`
 }
 
 // Alignment is a datetime alignment
@@ -68,6 +75,7 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 		}
 	}()
 	fontSize := (component.Size / 72) * canvas.GetPPI() // one point in fonts is almost exactly 1/72nd of one inch
+	formattedTime := component.Time.Format(component.TimeFormat)
 	fits := false
 	tries := 0
 	var face font.Face
@@ -76,7 +84,7 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 		tries++
 		face = truetype.NewFace(component.Font, &truetype.Options{Size: fontSize, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64})
 		var realWidth int
-		fits, realWidth = c.TryText(component.Content, component.Start, face, component.Colour, component.MaxWidth)
+		fits, realWidth = c.TryText(formattedTime, component.Start, face, component.Colour, component.MaxWidth)
 		if realWidth > component.MaxWidth {
 			ratio := float64(component.MaxWidth) / float64(realWidth)
 			fontSize = ratio * fontSize
@@ -95,9 +103,9 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 		}
 	}
 	if !fits {
-		return canvas, fmt.Errorf("unable to fit datetime %v into maxWidth %d after %d tries", component.Content, component.MaxWidth, tries)
+		return canvas, fmt.Errorf("unable to fit datetime %v into maxWidth %d after %d tries", formattedTime, component.MaxWidth, tries)
 	}
-	c, err = c.Text(component.Content, image.Pt(component.Start.X+alignmentOffset, component.Start.Y), face, component.Colour, component.MaxWidth)
+	c, err = c.Text(formattedTime, image.Pt(component.Start.X+alignmentOffset, component.Start.Y), face, component.Colour, component.MaxWidth)
 	if err != nil {
 		return canvas, err
 	}
@@ -109,12 +117,33 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 	c := component
 	setFunc := func(name string, value interface{}) error {
 		switch name {
-		case "content":
+		case "time":
+			stringVal, isStrings := value.([]string)
+			timePointer, isTimePointer := value.(*time.Time)
+			timeVal, isTime := value.(time.Time)
+			if (!isStrings && !isTimePointer && !isTime) || (isTime && len(stringVal) != 2) {
+				return fmt.Errorf("error converting %v to []string, *time.Time or time.Time", value)
+			}
+			if isTime {
+				c.Time = &timeVal
+			}
+			if isTimePointer {
+				c.Time = timePointer
+			}
+			if isStrings {
+				timeVal, err := time.Parse(stringVal[0], stringVal[1])
+				if err != nil {
+					return fmt.Errorf("cannot convert time string %v to time format %v", stringVal[1], stringVal[0])
+				}
+				c.Time = &timeVal
+			}
+			return nil
+		case "timeFormat":
 			stringVal, ok := value.(string)
 			if !ok {
 				return fmt.Errorf("error converting %v to string", value)
 			}
-			c.Content = stringVal
+			c.TimeFormat = stringVal
 			return nil
 		case "fontName":
 			stringVal, ok := value.(string)
@@ -306,12 +335,19 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	}
 
 	// All other props
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Content, "content", render.StringType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Time, "time", render.TimeType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
-		c.Content = newVal.(string)
+		c.Time = newVal.(*time.Time)
+	}
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TimeFormat, "timeFormat", render.StringType, c.NamedPropertiesMap)
+	if err != nil {
+		return component, props, err
+	}
+	if newVal != nil {
+		c.TimeFormat = newVal.(string)
 	}
 	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.StartX, "startX", render.IntType, c.NamedPropertiesMap)
 	if err != nil {

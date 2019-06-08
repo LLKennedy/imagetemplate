@@ -1,7 +1,7 @@
 package barcode
 
 import (
-	"errors"
+	"fmt"
 	"image"
 	"image/color"
 	"testing"
@@ -13,25 +13,30 @@ import (
 
 func TestBarcodeWrite(t *testing.T) {
 	t.Run("not all props set", func(t *testing.T) {
-		canvas := render.MockCanvas{}
+		canvas := new(render.MockCanvas)
 		c := Component{NamedPropertiesMap: map[string][]string{"not set": []string{"something"}}}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.EqualError(t, err, "cannot draw barcode, not all named properties are set: map[not set:[something]]")
+		canvas.AssertExpectations(t)
 	})
 	t.Run("barcode error", func(t *testing.T) {
-		canvas := render.MockCanvas{FixedBarcodeError: errors.New("some error")}
+		canvas := new(render.MockCanvas)
+		canvas.On("Barcode", render.BarcodeType(""), []byte{}, render.BarcodeExtraData{}, image.Point{}, 0, 0, color.NRGBA{}, color.NRGBA{}).Return(canvas, fmt.Errorf("some error"))
 		c := Component{}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.EqualError(t, err, "some error")
+		canvas.AssertExpectations(t)
 	})
 	t.Run("passing", func(t *testing.T) {
-		canvas := render.MockCanvas{FixedBarcodeError: nil}
+		canvas := new(render.MockCanvas)
+		canvas.On("Barcode", render.BarcodeType(""), []byte{}, render.BarcodeExtraData{}, image.Point{}, 0, 0, color.NRGBA{}, color.NRGBA{}).Return(canvas, nil)
 		c := Component{}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.NoError(t, err)
+		canvas.AssertExpectations(t)
 	})
 }
 
@@ -167,7 +172,7 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 					"aProp": []string{"barcodeType"},
 				},
 			},
-			err: "unsupported barcode type 15",
+			err: "error converting 15 to barcode type",
 		},
 		testSet{
 			name: "invalid colour code",
