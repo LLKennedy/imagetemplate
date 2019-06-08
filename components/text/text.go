@@ -76,7 +76,7 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 		tries++
 		face = truetype.NewFace(component.Font, &truetype.Options{Size: fontSize, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: canvas.GetPPI()})
 		var realWidth int
-		fits, realWidth = c.TryText(component.Content, component.Start, face, component.Colour, component.MaxWidth)
+		fits, realWidth = c.TryText(component.Content, component.Start, font.Face(face), component.Colour, component.MaxWidth)
 		if realWidth > component.MaxWidth {
 			ratio := float64(component.MaxWidth) / float64(realWidth)
 			fontSize = ratio * fontSize
@@ -97,7 +97,7 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 	if !fits {
 		return canvas, fmt.Errorf("unable to fit text %v into maxWidth %d after %d tries", component.Content, component.MaxWidth, tries)
 	}
-	c, err = c.Text(component.Content, image.Pt(component.Start.X+alignmentOffset, component.Start.Y), face, component.Colour, component.MaxWidth)
+	c, err = c.Text(component.Content, image.Pt(component.Start.X+alignmentOffset, component.Start.Y), font.Face(face), component.Colour, component.MaxWidth)
 	if err != nil {
 		return canvas, err
 	}
