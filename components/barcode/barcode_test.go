@@ -6,7 +6,7 @@ import (
 	"image/color"
 	"testing"
 
-	"github.com/LLKennedy/imagetemplate/render"
+	"github.com/LLKennedy/imagetemplate/v2/render"
 	"github.com/boombuler/barcode/qr"
 	"github.com/stretchr/testify/assert"
 )

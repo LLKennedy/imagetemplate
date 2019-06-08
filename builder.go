@@ -14,14 +14,14 @@ import (
 	"strconv"
 	"strings"
 
-	_ "github.com/LLKennedy/imagetemplate/components/barcode"   // add barcode component to registry by default
-	_ "github.com/LLKennedy/imagetemplate/components/circle"    // add circle component to registry by default
-	_ "github.com/LLKennedy/imagetemplate/components/datetime"  // add datetime component to registry by default
-	_ "github.com/LLKennedy/imagetemplate/components/image"     // add image component to registry by default
-	_ "github.com/LLKennedy/imagetemplate/components/rectangle" // add rectangle component to registry by default
-	_ "github.com/LLKennedy/imagetemplate/components/text"      // add text component to registry by default
-	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
-	"github.com/LLKennedy/imagetemplate/render"
+	_ "github.com/LLKennedy/imagetemplate/v2/components/barcode"   // add barcode component to registry by default
+	_ "github.com/LLKennedy/imagetemplate/v2/components/circle"    // add circle component to registry by default
+	_ "github.com/LLKennedy/imagetemplate/v2/components/datetime"  // add datetime component to registry by default
+	_ "github.com/LLKennedy/imagetemplate/v2/components/image"     // add image component to registry by default
+	_ "github.com/LLKennedy/imagetemplate/v2/components/rectangle" // add rectangle component to registry by default
+	_ "github.com/LLKennedy/imagetemplate/v2/components/text"      // add text component to registry by default
+	fs "github.com/LLKennedy/imagetemplate/v2/internal/filesystem"
+	"github.com/LLKennedy/imagetemplate/v2/render"
 
 	"github.com/disintegration/imaging"
 	"golang.org/x/image/bmp"

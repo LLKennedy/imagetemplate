@@ -7,7 +7,7 @@ import (
 	"image/color"
 	"image/draw"
 
-	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
+	fs "github.com/LLKennedy/imagetemplate/v2/internal/filesystem"
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/aztec"
 	"github.com/boombuler/barcode/codabar"

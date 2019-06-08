@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/LLKennedy/gosysfonts"
-	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
-	"github.com/LLKennedy/imagetemplate/render"
+	fs "github.com/LLKennedy/imagetemplate/v2/internal/filesystem"
+	"github.com/LLKennedy/imagetemplate/v2/render"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
 )

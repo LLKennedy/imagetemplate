@@ -10,7 +10,7 @@ import (
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
 
-	"github.com/LLKennedy/imagetemplate/render"
+	"github.com/LLKennedy/imagetemplate/v2/render"
 	"github.com/golang/freetype/truetype"
 	"github.com/stretchr/testify/assert"
 )
