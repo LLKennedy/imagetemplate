@@ -267,10 +267,10 @@ func TestRectangle(t *testing.T) {
 	})
 	t.Run("ouside range", func(t *testing.T) {
 		tests := [][]int{
-			[]int{-100, -100, 50, 50},
-			[]int{-100, 100, 50, 50},
-			[]int{100, -100, 50, 50},
-			[]int{100, 100, 50, 50},
+			{-100, -100, 50, 50},
+			{-100, 100, 50, 50},
+			{100, -100, 50, 50},
+			{100, 100, 50, 50},
 		}
 		for _, test := range tests {
 			t.Run(fmt.Sprintf("x=%d,y=%d,w=%d,h=%d", test[0], test[1], test[2], test[3]), func(t *testing.T) {
@@ -289,10 +289,10 @@ func TestRectangle(t *testing.T) {
 	})
 	t.Run("ouside range", func(t *testing.T) {
 		tests := [][]int{
-			[]int{-100, -100, 50, 50},
-			[]int{-100, 100, 50, 50},
-			[]int{100, -100, 50, 50},
-			[]int{100, 100, 50, 50},
+			{-100, -100, 50, 50},
+			{-100, 100, 50, 50},
+			{100, -100, 50, 50},
+			{100, 100, 50, 50},
 		}
 		for _, test := range tests {
 			t.Run(fmt.Sprintf("x=%d,y=%d,w=%d,h=%d", test[0], test[1], test[2], test[3]), func(t *testing.T) {
@@ -311,13 +311,13 @@ func TestRectangle(t *testing.T) {
 	})
 	t.Run("visible draws", func(t *testing.T) {
 		tests := [][]int{
-			[]int{-4, -4, 5, 5},
-			[]int{-4, 4, 5, 5},
-			[]int{4, -4, 5, 5},
-			[]int{4, 4, 5, 5},
-			[]int{0, 0, 5, 5},
-			[]int{0, 2, 5, 5},
-			[]int{2, 0, 5, 5},
+			{-4, -4, 5, 5},
+			{-4, 4, 5, 5},
+			{4, -4, 5, 5},
+			{4, 4, 5, 5},
+			{0, 0, 5, 5},
+			{0, 2, 5, 5},
+			{2, 0, 5, 5},
 		}
 		for _, test := range tests {
 			x, y, w, h := test[0], test[1], test[2], test[3]
@@ -479,7 +479,7 @@ func TestBarcode(t *testing.T) {
 		refData          []byte
 	}
 	tests := []testBarcode{
-		testBarcode{
+		{
 			name:     "qr",
 			codeType: BarcodeTypeQR,
 			content:  []byte("www.github.com/LLKennedy/imagetemplate"),
@@ -489,7 +489,7 @@ func TestBarcode(t *testing.T) {
 			height:   130,
 			refData:  barcodeQR,
 		},
-		testBarcode{
+		{
 			name:             "bad qr",
 			codeType:         BarcodeTypeQR,
 			content:          []byte("test"),
@@ -501,7 +501,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			err:              fmt.Errorf(`"test" can not be encoded as Numeric`),
 		},
-		testBarcode{
+		{
 			name:             "tiny qr",
 			codeType:         BarcodeTypeQR,
 			content:          []byte("test"),
@@ -513,7 +513,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			err:              fmt.Errorf("can not scale barcode to an image smaller than 21x21"),
 		},
-		testBarcode{
+		{
 			name:             "aztec",
 			codeType:         BarcodeTypeAztec,
 			content:          []byte("www.github.com/LLKennedy/imagetemplate"),
@@ -525,7 +525,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			refData:          barcodeAztec,
 		},
-		testBarcode{
+		{
 			name:             "bad aztec",
 			codeType:         BarcodeTypeAztec,
 			content:          []byte("www.github.com/LLKennedy/imagetemplate"),
@@ -537,7 +537,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			err:              fmt.Errorf("Illegal value 150 for layers"),
 		},
-		testBarcode{
+		{
 			name:             "pdf",
 			codeType:         BarcodeTypePDF,
 			content:          []byte("Luke"),
@@ -549,7 +549,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			refData:          barcodePDF,
 		},
-		testBarcode{
+		{
 			name:             "bad pdf",
 			codeType:         BarcodeTypePDF,
 			content:          []byte("Luke"),
@@ -561,7 +561,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			err:              fmt.Errorf("Invalid security level 150"),
 		},
-		testBarcode{
+		{
 			name:             "datamatrix",
 			codeType:         BarcodeTypeDataMatrix,
 			content:          []byte("https://www.github.com/LLKennedy/imagetemplate"),
@@ -573,7 +573,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			refData:          barcodeDataMatrix,
 		},
-		testBarcode{
+		{
 			name:             "bad datamatrix",
 			codeType:         BarcodeTypeDataMatrix,
 			content:          []byte("this is a ridiculously long string designed to cause datamatrix barcode encoding to fail when attempting to pack this much data into a single image, though it's possible it will just keep growing the datamatrix to allow it to scale infinitely, I'm really not sure how the library works at the time of writing this test this is a ridiculously long string designed to cause datamatrix barcode encoding to fail when attempting to pack this much data into a single image, though it's possible it will just keep growing the datamatrix to allow it to scale infinitely, I'm really not sure how the library works at the time of writing this test this is a ridiculously long string designed to cause datamatrix barcode encoding to fail when attempting to pack this much data into a single image, though it's possible it will just keep growing the datamatrix to allow it to scale infinitely, I'm really not sure how the library works at the time of writing this test this is a ridiculously long string designed to cause datamatrix barcode encoding to fail when attempting to pack this much data into a single image, though it's possible it will just keep growing the datamatrix to allow it to scale infinitely, I'm really not sure how the library works at the time of writing this test this is a ridiculously long string designed to cause datamatrix barcode encoding to fail when attempting to pack this much data into a single image, though it's possible it will just keep growing the datamatrix to allow it to scale infinitely, I'm really not sure how the library works at the time of writing this test"),
@@ -585,7 +585,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			err:              fmt.Errorf("to much data to encode"),
 		},
-		testBarcode{
+		{
 			name:             "nine of three",
 			codeType:         BarcodeTypeCode93,
 			content:          []byte("Luke"),
@@ -597,7 +597,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			refData:          barcode93,
 		},
-		testBarcode{
+		{
 			name:             "bad nine of three",
 			codeType:         BarcodeTypeCode93,
 			content:          []byte("😏"),
@@ -609,7 +609,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			err:              fmt.Errorf("invalid data"),
 		},
-		testBarcode{
+		{
 			name:             "two of five",
 			codeType:         BarcodeType2of5,
 			content:          []byte("12345678"),
@@ -621,7 +621,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			refData:          barcode25,
 		},
-		testBarcode{
+		{
 			name:             "bad two of five",
 			codeType:         BarcodeType2of5,
 			content:          []byte("😏"),
@@ -633,7 +633,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			err:              fmt.Errorf("can not encode \"😏\""),
 		},
-		testBarcode{
+		{
 			name:             "two of five interleaved",
 			codeType:         BarcodeType2of5Interleaved,
 			content:          []byte("12345678"),
@@ -645,7 +645,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			refData:          barcode25i,
 		},
-		testBarcode{
+		{
 			name:             "bad two of five interleaved",
 			codeType:         BarcodeType2of5Interleaved,
 			content:          []byte("😏😏😏😏😏😏"),
@@ -669,7 +669,7 @@ func TestBarcode(t *testing.T) {
 		// 	backgroundColour: color.White,
 		// 	refData:          barcodeCodabar,
 		// },
-		testBarcode{
+		{
 			name:             "bad codabar",
 			codeType:         BarcodeTypeCodabar,
 			content:          []byte("😏"),
@@ -681,7 +681,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			err:              fmt.Errorf("can not encode \"😏\""),
 		},
-		testBarcode{
+		{
 			name:             "code128",
 			codeType:         BarcodeTypeCode128,
 			content:          []byte("Luke"),
@@ -693,7 +693,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			refData:          barcodeCode128,
 		},
-		testBarcode{
+		{
 			name:             "bad code128",
 			codeType:         BarcodeTypeCode128,
 			content:          []byte("😏😏😏😏😏😏"),
@@ -705,7 +705,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			err:              fmt.Errorf("\"😏😏😏😏😏😏\" could not be encoded"),
 		},
-		testBarcode{
+		{
 			name:             "ean13",
 			codeType:         BarcodeTypeEAN13,
 			content:          []byte("5901234123457"),
@@ -717,7 +717,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			refData:          barcodeEan13,
 		},
-		testBarcode{
+		{
 			name:             "short ean13",
 			codeType:         BarcodeTypeEAN13,
 			content:          []byte("😏"),
@@ -729,7 +729,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			err:              fmt.Errorf("EAN13 Barcode requires 13 characters"),
 		},
-		testBarcode{
+		{
 			name:             "bad ean13",
 			codeType:         BarcodeTypeEAN13,
 			content:          []byte("😏😏😏a"),
@@ -741,7 +741,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			err:              fmt.Errorf("checksum missmatch"),
 		},
-		testBarcode{
+		{
 			name:             "ean8",
 			codeType:         BarcodeTypeEAN8,
 			content:          []byte("11223344"),
@@ -753,7 +753,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			refData:          barcodeEan8,
 		},
-		testBarcode{
+		{
 			name:             "short ean8",
 			codeType:         BarcodeTypeEAN8,
 			content:          []byte("😏"),
@@ -765,7 +765,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			err:              fmt.Errorf("EAN8 Barcode requires 8 characters"),
 		},
-		testBarcode{
+		{
 			name:             "bad ean8",
 			codeType:         BarcodeTypeEAN8,
 			content:          []byte("😏😏"),
@@ -777,7 +777,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			err:              fmt.Errorf("checksum missmatch"),
 		},
-		testBarcode{
+		{
 			name:             "three of nine",
 			codeType:         BarcodeTypeCode39,
 			content:          []byte("Luke"),
@@ -789,7 +789,7 @@ func TestBarcode(t *testing.T) {
 			backgroundColour: color.White,
 			refData:          barcode39,
 		},
-		testBarcode{
+		{
 			name:             "bad three of nine",
 			codeType:         BarcodeTypeCode39,
 			content:          []byte("😏"),

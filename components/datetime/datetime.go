@@ -274,17 +274,17 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	var err error
 	// Deal with the font restrictions
 	propData := []render.PropData{
-		render.PropData{
+		{
 			InputValue: stringStruct.Font.FontName,
 			PropName:   "fontName",
 			Type:       render.StringType,
 		},
-		render.PropData{
+		{
 			InputValue: stringStruct.Font.FontFile,
 			PropName:   "fontFile",
 			Type:       render.StringType,
 		},
-		render.PropData{
+		{
 			InputValue: stringStruct.Font.FontURL,
 			PropName:   "fontURL",
 			Type:       render.StringType,

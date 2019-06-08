@@ -69,33 +69,33 @@ func TestStandardSetNamedProperties(t *testing.T) {
 		return errors.New("failed to set property")
 	}
 	testArray := []setPropTest{
-		setPropTest{
+		{
 			name: "single property success",
 			properties: NamedProperties{
 				"username": "john smith",
 			},
 			propMap: map[string][]string{
-				"username": []string{"innerPropUsername"},
+				"username": {"innerPropUsername"},
 			},
 			setFunc:         successSetFunc,
 			resultLeftovers: map[string][]string{},
 			resultErr:       nil,
 		},
-		setPropTest{
+		{
 			name: "single property success",
 			properties: NamedProperties{
 				"username": "john smith",
 			},
 			propMap: map[string][]string{
-				"username": []string{"innerPropUsername"},
+				"username": {"innerPropUsername"},
 			},
 			setFunc: errorSetFunc,
 			resultLeftovers: map[string][]string{
-				"username": []string{"innerPropUsername"},
+				"username": {"innerPropUsername"},
 			},
 			resultErr: errors.New("failed to set property"),
 		},
-		setPropTest{
+		{
 			name: "many properties success",
 			properties: NamedProperties{
 				"username": "john smith",
@@ -103,9 +103,9 @@ func TestStandardSetNamedProperties(t *testing.T) {
 				"title":    "Mr.",
 			},
 			propMap: map[string][]string{
-				"username": []string{"innerPropUsername", "innerPropEmail"},
-				"age":      []string{"innerPropAge"},
-				"title":    []string{"innerPropTitle", "TITLE", "innerPropRank", "some random field"},
+				"username": {"innerPropUsername", "innerPropEmail"},
+				"age":      {"innerPropAge"},
+				"title":    {"innerPropTitle", "TITLE", "innerPropRank", "some random field"},
 			},
 			setFunc:         successSetFunc,
 			resultLeftovers: map[string][]string{},
@@ -156,9 +156,9 @@ func TestStandardSetNamedProperties(t *testing.T) {
 				"unused":   "whatever",
 			},
 			propMap: map[string][]string{
-				"username": []string{"innerPropUsername", "innerPropEmail"},
-				"age":      []string{"innerPropAge"},
-				"title":    []string{"innerPropTitle", "TITLE", "innerPropRank", "some random field"},
+				"username": {"innerPropUsername", "innerPropEmail"},
+				"age":      {"innerPropAge"},
+				"title":    {"innerPropTitle", "TITLE", "innerPropRank", "some random field"},
 			},
 			setFunc:         testSetFunc,
 			resultLeftovers: map[string][]string{},
@@ -241,67 +241,67 @@ func TestExtractSingleProp(t *testing.T) {
 		}
 	}
 	tests := []testSet{
-		testSet{
+		{
 			name:     "error in input",
 			inputVal: "$",
 			propName: "x",
 			err:      errors.New("error parsing data for property x: unclosed named property in '$'"),
 		},
-		testSet{
+		{
 			name:     "multiple properties",
 			inputVal: "$a$$b$",
 			err:      errors.New("composite properties are not yet supported: $a$$b$"),
 		},
-		testSet{
+		{
 			name:             "valid single prop",
 			inputVal:         "$a$",
 			propName:         "myInternalProp",
-			returnedPropsMap: map[string][]string{"a": []string{"myInternalProp"}},
+			returnedPropsMap: map[string][]string{"a": {"myInternalProp"}},
 			err:              nil,
 		},
-		testSet{
+		{
 			name:     "invalid type",
 			inputVal: "laskdjf;alsdf",
 			propName: "bad data",
 			typeName: PropType("something else"),
 			err:      errors.New("cannot convert property bad data to unsupported type something else"),
 		},
-		testSet{
+		{
 			name:     "invalid int",
 			inputVal: "laskdjf;alsdf",
 			propName: "aProp",
 			typeName: IntType,
 			err:      errors.New("failed to convert property aProp to integer: strconv.ParseInt: parsing \"laskdjf;alsdf\": invalid syntax"),
 		},
-		testSet{
+		{
 			name:     "invalid bool",
 			inputVal: "laskdjf;alsdf",
 			propName: "aProp",
 			typeName: BoolType,
 			err:      errors.New("failed to convert property aProp to bool: strconv.ParseBool: parsing \"laskdjf;alsdf\": invalid syntax"),
 		},
-		testSet{
+		{
 			name:     "invalid uint8",
 			inputVal: "laskdjf;alsdf",
 			propName: "aProp",
 			typeName: Uint8Type,
 			err:      errors.New("failed to convert property aProp to uint8: strconv.ParseUint: parsing \"laskdjf;alsdf\": invalid syntax"),
 		},
-		testSet{
+		{
 			name:     "invalid float64",
 			inputVal: "laskdjf;alsdf",
 			propName: "aProp",
 			typeName: Float64Type,
 			err:      errors.New("failed to convert property aProp to float64: strconv.ParseFloat: parsing \"laskdjf;alsdf\": invalid syntax"),
 		},
-		testSet{
+		{
 			name:     "invalid float64",
 			inputVal: "laskdjf;alsdf",
 			propName: "aProp",
 			typeName: TimeType,
 			err:      errors.New("failed to convert property aProp to time.Duration: time: invalid duration laskdjf;alsdf"),
 		},
-		testSet{
+		{
 			name:             "valid int",
 			inputVal:         "53",
 			propName:         "aProp",
@@ -310,7 +310,7 @@ func TestExtractSingleProp(t *testing.T) {
 			returnedPropsMap: map[string][]string{},
 			extractedValue:   53,
 		},
-		testSet{
+		{
 			name:             "valid string",
 			inputVal:         "53",
 			propName:         "aProp",
@@ -319,7 +319,7 @@ func TestExtractSingleProp(t *testing.T) {
 			returnedPropsMap: map[string][]string{},
 			extractedValue:   "53",
 		},
-		testSet{
+		{
 			name:             "valid bool",
 			inputVal:         "true",
 			propName:         "aProp",
@@ -328,7 +328,7 @@ func TestExtractSingleProp(t *testing.T) {
 			returnedPropsMap: map[string][]string{},
 			extractedValue:   true,
 		},
-		testSet{
+		{
 			name:             "valid uint8",
 			inputVal:         "53",
 			propName:         "aProp",
@@ -337,7 +337,7 @@ func TestExtractSingleProp(t *testing.T) {
 			returnedPropsMap: map[string][]string{},
 			extractedValue:   uint8(53),
 		},
-		testSet{
+		{
 			name:             "valid float64",
 			inputVal:         "53",
 			propName:         "aProp",
@@ -397,15 +397,15 @@ func TestExtractExclusiveProp(t *testing.T) {
 		}
 	}
 	tests := []testSet{
-		testSet{
+		{
 			name:               "no data",
 			returnedValidIndex: -1,
 			err:                errors.New("exactly one of () must be set"),
 		},
-		testSet{
+		{
 			name: "single invalid prop option",
 			propData: []PropData{
-				PropData{
+				{
 					InputValue: "a",
 					PropName:   "myProp",
 					Type:       IntType,
@@ -414,10 +414,10 @@ func TestExtractExclusiveProp(t *testing.T) {
 			returnedValidIndex: -1,
 			err:                errors.New("exactly one of (myProp) must be set"),
 		},
-		testSet{
+		{
 			name: "single valid prop option",
 			propData: []PropData{
-				PropData{
+				{
 					InputValue: "6",
 					PropName:   "myProp",
 					Type:       IntType,
@@ -427,15 +427,15 @@ func TestExtractExclusiveProp(t *testing.T) {
 			extractedValue:     6,
 			err:                nil,
 		},
-		testSet{
+		{
 			name: "multiple valid prop options",
 			propData: []PropData{
-				PropData{
+				{
 					InputValue: "6",
 					PropName:   "myProp",
 					Type:       IntType,
 				},
-				PropData{
+				{
 					InputValue: "something",
 					PropName:   "anotherProp",
 					Type:       StringType,
@@ -444,40 +444,40 @@ func TestExtractExclusiveProp(t *testing.T) {
 			returnedValidIndex: -1,
 			err:                errors.New("exactly one of (myProp,anotherProp) must be set"),
 		},
-		testSet{
+		{
 			name: "single valid named prop option",
 			propData: []PropData{
-				PropData{
+				{
 					InputValue: "$setMeLater$",
 					PropName:   "myProp",
 					Type:       IntType,
 				},
 			},
 			returnedValidIndex: 0,
-			returnedPropsMap:   map[string][]string{"setMeLater": []string{"myProp"}},
+			returnedPropsMap:   map[string][]string{"setMeLater": {"myProp"}},
 			err:                nil,
 		},
-		testSet{
+		{
 			name: "multiple props, only one valid",
 			propData: []PropData{
-				PropData{
+				{
 					InputValue: "$setMeLater$",
 					PropName:   "myProp",
 					Type:       IntType,
 				},
-				PropData{
+				{
 					InputValue: "a",
 					PropName:   "someProp",
 					Type:       IntType,
 				},
-				PropData{
+				{
 					InputValue: "-67",
 					PropName:   "nothing",
 					Type:       Uint8Type,
 				},
 			},
 			returnedValidIndex: 0,
-			returnedPropsMap:   map[string][]string{"setMeLater": []string{"myProp"}},
+			returnedPropsMap:   map[string][]string{"setMeLater": {"myProp"}},
 			err:                nil,
 		},
 	}
@@ -498,7 +498,7 @@ func TestParseDataValue(t *testing.T) {
 		err                error
 	}
 	testArray := []parseTest{
-		parseTest{
+		{
 			name:               "simple value",
 			value:              "some data",
 			hasNamedProperties: false,
@@ -506,7 +506,7 @@ func TestParseDataValue(t *testing.T) {
 			propNames:          []string(nil),
 			err:                nil,
 		},
-		parseTest{
+		{
 			name:               "simple value 2",
 			value:              "123",
 			hasNamedProperties: false,
@@ -514,7 +514,7 @@ func TestParseDataValue(t *testing.T) {
 			propNames:          []string(nil),
 			err:                nil,
 		},
-		parseTest{
+		{
 			name:               "simple value 3",
 			value:              "#4: This. Is. Just. Data!~",
 			hasNamedProperties: false,
@@ -522,7 +522,7 @@ func TestParseDataValue(t *testing.T) {
 			propNames:          []string(nil),
 			err:                nil,
 		},
-		parseTest{
+		{
 			name:               "escaped dollars",
 			value:              "some $$ data 2 be pr$$ocessed!",
 			hasNamedProperties: false,
@@ -530,7 +530,7 @@ func TestParseDataValue(t *testing.T) {
 			propNames:          []string(nil),
 			err:                nil,
 		},
-		parseTest{
+		{
 			name:               "simple property",
 			value:              "$username$",
 			hasNamedProperties: true,
@@ -538,7 +538,7 @@ func TestParseDataValue(t *testing.T) {
 			propNames:          []string{"username"},
 			err:                nil,
 		},
-		parseTest{
+		{
 			name:               "multiple properties with surrounding text",
 			value:              "Hello there, $title$. $username$!",
 			hasNamedProperties: true,
@@ -546,7 +546,7 @@ func TestParseDataValue(t *testing.T) {
 			propNames:          []string{"title", "username"},
 			err:                nil,
 		},
-		parseTest{
+		{
 			name:               "unclosed property",
 			value:              "Hello there, $title$. $username!",
 			hasNamedProperties: true,
@@ -554,7 +554,7 @@ func TestParseDataValue(t *testing.T) {
 			propNames:          []string{"title"},
 			err:                errors.New("unclosed named property in 'Hello there, $title$. $username!'"),
 		},
-		parseTest{
+		{
 			name:               "empty value",
 			value:              "",
 			hasNamedProperties: false,
@@ -627,7 +627,7 @@ func TestConditionals(t *testing.T) {
 	}
 
 	testArray := []testSet{
-		testSet{
+		{
 			name: "single string condition",
 			conditional: ComponentConditional{
 				Name:     "username",
@@ -637,7 +637,7 @@ func TestConditionals(t *testing.T) {
 			},
 			foundNamedProps: []string{"username"},
 			namedProperties: []testProperty{
-				testProperty{
+				{
 					name:   "username",
 					value:  "john smith",
 					setErr: nil,
@@ -646,7 +646,7 @@ func TestConditionals(t *testing.T) {
 			validateResult: true,
 			validateError:  nil,
 		},
-		testSet{
+		{
 			name: "string condition, int set value",
 			conditional: ComponentConditional{
 				Name:     "username",
@@ -656,7 +656,7 @@ func TestConditionals(t *testing.T) {
 			},
 			foundNamedProps: []string{"username"},
 			namedProperties: []testProperty{
-				testProperty{
+				{
 					name:   "username",
 					value:  18,
 					setErr: errors.New("invalid value for string operator: 18"),
@@ -665,7 +665,7 @@ func TestConditionals(t *testing.T) {
 			validateResult: false,
 			validateError:  errors.New("attempted to validate conditional username equals john smith without setting username"),
 		},
-		testSet{
+		{
 			name: "string condition, mismatched value name",
 			conditional: ComponentConditional{
 				Name:     "username",
@@ -675,7 +675,7 @@ func TestConditionals(t *testing.T) {
 			},
 			foundNamedProps: []string{"username"},
 			namedProperties: []testProperty{
-				testProperty{
+				{
 					name:   "UserName",
 					value:  "john smith",
 					setErr: nil,
@@ -684,7 +684,7 @@ func TestConditionals(t *testing.T) {
 			validateResult: false,
 			validateError:  errors.New("attempted to validate conditional username equals john smith without setting username"),
 		},
-		testSet{
+		{
 			name: "string equals, fails on case sensitivity",
 			conditional: ComponentConditional{
 				Name:     "username",
@@ -694,7 +694,7 @@ func TestConditionals(t *testing.T) {
 			},
 			foundNamedProps: []string{"username"},
 			namedProperties: []testProperty{
-				testProperty{
+				{
 					name:   "username",
 					value:  "John Smith",
 					setErr: nil,
@@ -703,7 +703,7 @@ func TestConditionals(t *testing.T) {
 			validateResult: false,
 			validateError:  nil,
 		},
-		testSet{
+		{
 			name: "string ci_equals fixed cs problems",
 			conditional: ComponentConditional{
 				Name:     "username",
@@ -713,7 +713,7 @@ func TestConditionals(t *testing.T) {
 			},
 			foundNamedProps: []string{"username"},
 			namedProperties: []testProperty{
-				testProperty{
+				{
 					name:   "username",
 					value:  "John Smith",
 					setErr: nil,
@@ -722,7 +722,7 @@ func TestConditionals(t *testing.T) {
 			validateResult: true,
 			validateError:  nil,
 		},
-		testSet{
+		{
 			name: "single int condition",
 			conditional: ComponentConditional{
 				Name:     "age",
@@ -732,7 +732,7 @@ func TestConditionals(t *testing.T) {
 			},
 			foundNamedProps: []string{"age"},
 			namedProperties: []testProperty{
-				testProperty{
+				{
 					name:   "age",
 					value:  18,
 					setErr: nil,
@@ -741,7 +741,7 @@ func TestConditionals(t *testing.T) {
 			validateResult: true,
 			validateError:  nil,
 		},
-		testSet{
+		{
 			name: "int condition, string value",
 			conditional: ComponentConditional{
 				Name:     "age",
@@ -751,7 +751,7 @@ func TestConditionals(t *testing.T) {
 			},
 			foundNamedProps: []string{"age"},
 			namedProperties: []testProperty{
-				testProperty{
+				{
 					name:   "age",
 					value:  "john smith",
 					setErr: errors.New("invalid value for float operator: john smith"),
@@ -760,7 +760,7 @@ func TestConditionals(t *testing.T) {
 			validateResult: false,
 			validateError:  errors.New("attempted to validate conditional age >= 18 without setting age"),
 		},
-		testSet{
+		{
 			name: "int condition, mismatched value name",
 			conditional: ComponentConditional{
 				Name:     "age",
@@ -770,7 +770,7 @@ func TestConditionals(t *testing.T) {
 			},
 			foundNamedProps: []string{"age"},
 			namedProperties: []testProperty{
-				testProperty{
+				{
 					name:   "age",
 					value:  "john smith",
 					setErr: errors.New("invalid value for float operator: john smith"),
@@ -779,7 +779,7 @@ func TestConditionals(t *testing.T) {
 			validateResult: false,
 			validateError:  errors.New("attempted to validate conditional age >= 18 without setting age"),
 		},
-		testSet{
+		{
 			name: "failing xor",
 			conditional: ComponentConditional{
 				Name:     "age",
@@ -789,7 +789,7 @@ func TestConditionals(t *testing.T) {
 				Group: conditionalGroup{
 					Operator: xor,
 					Conditionals: []ComponentConditional{
-						ComponentConditional{
+						{
 							Name:     "height",
 							Not:      false,
 							Operator: "==",
@@ -800,12 +800,12 @@ func TestConditionals(t *testing.T) {
 			},
 			foundNamedProps: []string{"age", "height"},
 			namedProperties: []testProperty{
-				testProperty{
+				{
 					name:   "age",
 					value:  18,
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "height",
 					value:  180,
 					setErr: nil,
@@ -814,7 +814,7 @@ func TestConditionals(t *testing.T) {
 			validateResult: false,
 			validateError:  nil,
 		},
-		testSet{
+		{
 			name: "overflowing endswith",
 			conditional: ComponentConditional{
 				Name:     "username",
@@ -824,7 +824,7 @@ func TestConditionals(t *testing.T) {
 			},
 			foundNamedProps: []string{"username"},
 			namedProperties: []testProperty{
-				testProperty{
+				{
 					name:   "username",
 					value:  "john smith",
 					setErr: nil,
@@ -833,7 +833,7 @@ func TestConditionals(t *testing.T) {
 			validateResult: false,
 			validateError:  nil,
 		},
-		testSet{
+		{
 			name: "invalid float condition",
 			conditional: ComponentConditional{
 				Name:     "age1",
@@ -843,7 +843,7 @@ func TestConditionals(t *testing.T) {
 				Group: conditionalGroup{
 					Operator: and,
 					Conditionals: []ComponentConditional{
-						ComponentConditional{
+						{
 							Name:     "age2",
 							Not:      false,
 							Operator: ">",
@@ -854,12 +854,12 @@ func TestConditionals(t *testing.T) {
 			},
 			foundNamedProps: []string{"age1", "age2"},
 			namedProperties: []testProperty{
-				testProperty{
+				{
 					name:   "age1",
 					value:  18,
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "age2",
 					value:  20,
 					setErr: errors.New("failed to convert conditional value to float: smith"),
@@ -868,7 +868,7 @@ func TestConditionals(t *testing.T) {
 			validateResult: false,
 			validateError:  errors.New("attempted to validate conditional age2 > smith without setting age2"),
 		},
-		testSet{
+		{
 			name: "invalid operator",
 			conditional: ComponentConditional{
 				Name:     "age",
@@ -878,7 +878,7 @@ func TestConditionals(t *testing.T) {
 				Group: conditionalGroup{
 					Operator: and,
 					Conditionals: []ComponentConditional{
-						ComponentConditional{
+						{
 							Name:     "username",
 							Not:      false,
 							Operator: "is exactly",
@@ -889,12 +889,12 @@ func TestConditionals(t *testing.T) {
 			},
 			foundNamedProps: []string{"age", "username"},
 			namedProperties: []testProperty{
-				testProperty{
+				{
 					name:   "age",
 					value:  18,
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "username",
 					value:  "john smith",
 					setErr: errors.New("invalid conditional operator is exactly"),
@@ -903,7 +903,7 @@ func TestConditionals(t *testing.T) {
 			validateResult: false,
 			validateError:  errors.New("attempted to validate conditional username is exactly john smith without setting username"),
 		},
-		testSet{
+		{
 			name: "unset inner conditional",
 			conditional: ComponentConditional{
 				Name:     "age",
@@ -913,7 +913,7 @@ func TestConditionals(t *testing.T) {
 				Group: conditionalGroup{
 					Operator: xor,
 					Conditionals: []ComponentConditional{
-						ComponentConditional{
+						{
 							Name:     "username",
 							Not:      false,
 							Operator: "equals",
@@ -924,7 +924,7 @@ func TestConditionals(t *testing.T) {
 			},
 			foundNamedProps: []string{"age", "username"},
 			namedProperties: []testProperty{
-				testProperty{
+				{
 					name:   "age",
 					value:  18,
 					setErr: nil,
@@ -933,7 +933,7 @@ func TestConditionals(t *testing.T) {
 			validateResult: false,
 			validateError:  errors.New("attempted to validate conditional username equals john smith without setting username"),
 		},
-		testSet{
+		{
 			name: "unset inner conditional",
 			conditional: ComponentConditional{
 				Name:     "age",
@@ -943,7 +943,7 @@ func TestConditionals(t *testing.T) {
 				Group: conditionalGroup{
 					Operator: "some other operator",
 					Conditionals: []ComponentConditional{
-						ComponentConditional{
+						{
 							Name:     "username",
 							Not:      false,
 							Operator: "equals",
@@ -954,12 +954,12 @@ func TestConditionals(t *testing.T) {
 			},
 			foundNamedProps: []string{"age", "username"},
 			namedProperties: []testProperty{
-				testProperty{
+				{
 					name:   "age",
 					value:  18,
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "username",
 					value:  "john smith",
 					setErr: nil,
@@ -968,7 +968,7 @@ func TestConditionals(t *testing.T) {
 			validateResult: false,
 			validateError:  errors.New("invalid group operator some other operator"),
 		},
-		testSet{
+		{
 			name: "one of everything, all passing",
 			conditional: ComponentConditional{
 				Name:     "prop1",
@@ -978,13 +978,13 @@ func TestConditionals(t *testing.T) {
 				Group: conditionalGroup{
 					Operator: and,
 					Conditionals: []ComponentConditional{
-						ComponentConditional{
+						{
 							Name:     "prop2",
 							Not:      false,
 							Operator: "equals",
 							Value:    "vAlUe2!",
 						},
-						ComponentConditional{
+						{
 							Name:     "prop3",
 							Not:      false,
 							Operator: "ci_contains",
@@ -992,25 +992,25 @@ func TestConditionals(t *testing.T) {
 							Group: conditionalGroup{
 								Operator: or,
 								Conditionals: []ComponentConditional{
-									ComponentConditional{
+									{
 										Name:     "prop4",
 										Not:      false,
 										Operator: "contains",
 										Value:    "al",
 									},
-									ComponentConditional{
+									{
 										Name:     "prop5",
 										Not:      false,
 										Operator: "ci_startswith",
 										Value:    "va",
 									},
-									ComponentConditional{
+									{
 										Name:     "prop6",
 										Not:      false,
 										Operator: "startswith",
 										Value:    "va",
 									},
-									ComponentConditional{
+									{
 										Name:     "prop7",
 										Not:      false,
 										Operator: "startswith",
@@ -1019,7 +1019,7 @@ func TestConditionals(t *testing.T) {
 								},
 							},
 						},
-						ComponentConditional{
+						{
 							Name:     "prop8",
 							Not:      false,
 							Operator: "ci_endswith",
@@ -1027,7 +1027,7 @@ func TestConditionals(t *testing.T) {
 							Group: conditionalGroup{
 								Operator: nand,
 								Conditionals: []ComponentConditional{
-									ComponentConditional{
+									{
 										Name:     "prop9",
 										Not:      true,
 										Operator: "endswith",
@@ -1035,7 +1035,7 @@ func TestConditionals(t *testing.T) {
 										Group: conditionalGroup{
 											Operator: nor,
 											Conditionals: []ComponentConditional{
-												ComponentConditional{
+												{
 													Name:     "prop10",
 													Not:      false,
 													Operator: "<",
@@ -1047,7 +1047,7 @@ func TestConditionals(t *testing.T) {
 								},
 							},
 						},
-						ComponentConditional{
+						{
 							Name:     "prop11",
 							Not:      false,
 							Operator: ">",
@@ -1055,13 +1055,13 @@ func TestConditionals(t *testing.T) {
 							Group: conditionalGroup{
 								Operator: xor,
 								Conditionals: []ComponentConditional{
-									ComponentConditional{
+									{
 										Name:     "prop12",
 										Not:      false,
 										Operator: "<=",
 										Value:    "6",
 									},
-									ComponentConditional{
+									{
 										Name:     "prop13",
 										Not:      false,
 										Operator: ">=",
@@ -1070,31 +1070,31 @@ func TestConditionals(t *testing.T) {
 								},
 							},
 						},
-						ComponentConditional{
+						{
 							Name:     "prop14",
 							Not:      false,
 							Operator: "<=",
 							Value:    "6",
 						},
-						ComponentConditional{
+						{
 							Name:     "prop15",
 							Not:      false,
 							Operator: ">=",
 							Value:    "9",
 						},
-						ComponentConditional{
+						{
 							Name:     "prop16",
 							Not:      false,
 							Operator: ">=",
 							Value:    "9",
 						},
-						ComponentConditional{
+						{
 							Name:     "prop17",
 							Not:      false,
 							Operator: "==",
 							Value:    "52",
 						},
-						ComponentConditional{
+						{
 							Name:     "",
 							Not:      true,
 							Operator: "ci_equals",
@@ -1105,87 +1105,87 @@ func TestConditionals(t *testing.T) {
 			},
 			foundNamedProps: []string{"prop1", "prop2", "prop3", "prop4", "prop5", "prop6", "prop7", "prop8", "prop9", "prop10", "prop11", "prop12", "prop13", "prop14", "prop15", "prop16", "prop17"},
 			namedProperties: []testProperty{
-				testProperty{
+				{
 					name:   "prop1",
 					value:  "value1!",
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "prop2",
 					value:  "vAlUe2!",
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "prop3",
 					value:  "vAlUe3!",
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "prop4",
 					value:  "vAlUe4!",
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "prop5",
 					value:  "vAlUe5!",
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "prop6",
 					value:  "vAlUe6!",
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "prop7",
 					value:  "vAlUe7!",
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "prop8",
 					value:  "vAlUe8!",
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "prop9",
 					value:  "vAlUe9!",
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "prop10",
 					value:  10,
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "prop11",
 					value:  10,
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "prop12",
 					value:  4,
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "prop13",
 					value:  2,
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "prop14",
 					value:  6,
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "prop15",
 					value:  9,
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "prop16",
 					value:  100,
 					setErr: nil,
 				},
-				testProperty{
+				{
 					name:   "prop17",
 					value:  52,
 					setErr: nil,

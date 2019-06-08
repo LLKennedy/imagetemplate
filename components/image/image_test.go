@@ -17,7 +17,7 @@ import (
 func TestImageWrite(t *testing.T) {
 	t.Run("not all props set", func(t *testing.T) {
 		canvas := new(render.MockCanvas)
-		c := Component{NamedPropertiesMap: map[string][]string{"not set": []string{"something"}}}
+		c := Component{NamedPropertiesMap: map[string][]string{"not set": {"something"}}}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.EqualError(t, err, "cannot draw image, not all named properties are set: map[not set:[something]]")
@@ -58,18 +58,18 @@ func TestImageSetNamedProperties(t *testing.T) {
 	sampleTinyImage, _, err := image.Decode(bytes.NewBuffer(sampleTinyImageData))
 	assert.NoError(t, err, "failed to import sample image")
 	tests := []testSet{
-		testSet{
+		{
 			name:  "no props",
 			start: Component{},
 			input: render.NamedProperties{},
 			res:   Component{},
 			err:   "",
 		},
-		testSet{
+		{
 			name: "data invalid",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"data"},
+					"aProp": {"data"},
 				},
 			},
 			input: render.NamedProperties{
@@ -77,16 +77,16 @@ func TestImageSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"data"},
+					"aProp": {"data"},
 				},
 			},
 			err: "error converting 3 to []byte, string or io.Reader",
 		},
-		testSet{
+		{
 			name: "data bytes",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"data"},
+					"aProp": {"data"},
 				},
 			},
 			input: render.NamedProperties{
@@ -98,11 +98,11 @@ func TestImageSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "data string",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"data"},
+					"aProp": {"data"},
 				},
 			},
 			input: render.NamedProperties{
@@ -114,11 +114,11 @@ func TestImageSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "data reader",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"data"},
+					"aProp": {"data"},
 				},
 			},
 			input: render.NamedProperties{
@@ -130,11 +130,11 @@ func TestImageSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "data image error",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"data"},
+					"aProp": {"data"},
 				},
 			},
 			input: render.NamedProperties{
@@ -142,16 +142,16 @@ func TestImageSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"data"},
+					"aProp": {"data"},
 				},
 			},
 			err: "image: unknown format",
 		},
-		testSet{
+		{
 			name: "filename invalid",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"fileName"},
+					"aProp": {"fileName"},
 				},
 			},
 			input: render.NamedProperties{
@@ -159,56 +159,56 @@ func TestImageSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"fileName"},
+					"aProp": {"fileName"},
 				},
 			},
 			err: "error converting 3 to string",
 		},
-		testSet{
+		{
 			name: "file load error",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"fileName"},
+					"aProp": {"fileName"},
 				},
-				reader: fs.MockReader{Files: map[string]fs.MockFile{"somefile.jpg": fs.MockFile{Data: sampleTinyImageData, Err: errors.New("file not found")}}},
+				reader: fs.MockReader{Files: map[string]fs.MockFile{"somefile.jpg": {Data: sampleTinyImageData, Err: errors.New("file not found")}}},
 			},
 			input: render.NamedProperties{
 				"aProp": "somefile.jpg",
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"fileName"},
+					"aProp": {"fileName"},
 				},
-				reader: fs.MockReader{Files: map[string]fs.MockFile{"somefile.jpg": fs.MockFile{Data: sampleTinyImageData, Err: errors.New("file not found")}}},
+				reader: fs.MockReader{Files: map[string]fs.MockFile{"somefile.jpg": {Data: sampleTinyImageData, Err: errors.New("file not found")}}},
 			},
 			err: "file not found",
 		},
-		testSet{
+		{
 			name: "image file data invalid",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"fileName"},
+					"aProp": {"fileName"},
 				},
-				reader: fs.MockReader{Files: map[string]fs.MockFile{"somefile.jpg": fs.MockFile{Data: []byte{0x00, 0x00, 0x00, 0x00}, Err: nil}}},
+				reader: fs.MockReader{Files: map[string]fs.MockFile{"somefile.jpg": {Data: []byte{0x00, 0x00, 0x00, 0x00}, Err: nil}}},
 			},
 			input: render.NamedProperties{
 				"aProp": "somefile.jpg",
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"fileName"},
+					"aProp": {"fileName"},
 				},
-				reader: fs.MockReader{Files: map[string]fs.MockFile{"somefile.jpg": fs.MockFile{Data: []byte{0x00, 0x00, 0x00, 0x00}, Err: nil}}},
+				reader: fs.MockReader{Files: map[string]fs.MockFile{"somefile.jpg": {Data: []byte{0x00, 0x00, 0x00, 0x00}, Err: nil}}},
 			},
 			err: "image: unknown format",
 		},
-		testSet{
+		{
 			name: "filename valid",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"fileName"},
+					"aProp": {"fileName"},
 				},
-				reader: fs.MockReader{Files: map[string]fs.MockFile{"somefile.jpg": fs.MockFile{Data: sampleTinyImageData, Err: nil}}},
+				reader: fs.MockReader{Files: map[string]fs.MockFile{"somefile.jpg": {Data: sampleTinyImageData, Err: nil}}},
 			},
 			input: render.NamedProperties{
 				"aProp": "somefile.jpg",
@@ -216,15 +216,15 @@ func TestImageSetNamedProperties(t *testing.T) {
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
 				Image:              sampleTinyImage,
-				reader:             fs.MockReader{Files: map[string]fs.MockFile{"somefile.jpg": fs.MockFile{Data: sampleTinyImageData, Err: nil}}},
+				reader:             fs.MockReader{Files: map[string]fs.MockFile{"somefile.jpg": {Data: sampleTinyImageData, Err: nil}}},
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "other invalid type",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"not a prop"},
+					"aProp": {"not a prop"},
 				},
 			},
 			input: render.NamedProperties{
@@ -232,16 +232,16 @@ func TestImageSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"not a prop"},
+					"aProp": {"not a prop"},
 				},
 			},
 			err: "error converting not a number to int",
 		},
-		testSet{
+		{
 			name: "other invalid name",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"not a prop"},
+					"aProp": {"not a prop"},
 				},
 			},
 			input: render.NamedProperties{
@@ -249,16 +249,16 @@ func TestImageSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"not a prop"},
+					"aProp": {"not a prop"},
 				},
 			},
 			err: "invalid component property in named property map: not a prop",
 		},
-		testSet{
+		{
 			name: "topLeftX",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"topLeftX"},
+					"aProp": {"topLeftX"},
 				},
 			},
 			input: render.NamedProperties{
@@ -270,11 +270,11 @@ func TestImageSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "topLeftY",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"topLeftY"},
+					"aProp": {"topLeftY"},
 				},
 			},
 			input: render.NamedProperties{
@@ -286,11 +286,11 @@ func TestImageSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "width",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"width"},
+					"aProp": {"width"},
 				},
 			},
 			input: render.NamedProperties{
@@ -302,11 +302,11 @@ func TestImageSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "height",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"height"},
+					"aProp": {"height"},
 				},
 			},
 			input: render.NamedProperties{
@@ -380,7 +380,7 @@ func TestImageVerifyAndTestImageJSONData(t *testing.T) {
 		err   string
 	}
 	tests := []testSet{
-		testSet{
+		{
 			name:  "incorrect format data",
 			start: Component{},
 			input: "hello",

@@ -10,7 +10,7 @@ import (
 func TestImageSetNamedPropertiesLoadRealFile(t *testing.T) {
 	c := Component{
 		NamedPropertiesMap: map[string][]string{
-			"aProp": []string{"fileName"},
+			"aProp": {"fileName"},
 		},
 	}
 	input := render.NamedProperties{
@@ -18,7 +18,7 @@ func TestImageSetNamedPropertiesLoadRealFile(t *testing.T) {
 	}
 	expected := Component{
 		NamedPropertiesMap: map[string][]string{
-			"aProp": []string{"fileName"},
+			"aProp": {"fileName"},
 		},
 		reader: fs.IoutilFileReader{},
 	}

@@ -22,7 +22,7 @@ func TestTextWrite(t *testing.T) {
 	t.Run("not all props set", func(t *testing.T) {
 		canvas := new(render.MockCanvas)
 		canvas.On("GetPPI").Return(float64(72))
-		c := Component{NamedPropertiesMap: map[string][]string{"not set": []string{"something"}}}
+		c := Component{NamedPropertiesMap: map[string][]string{"not set": {"something"}}}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.EqualError(t, err, "failed to write to canvas: runtime error: invalid memory address or nil pointer dereference")
@@ -79,18 +79,18 @@ func TestTextSetNamedProperties(t *testing.T) {
 		err   string
 	}
 	tests := []testSet{
-		testSet{
+		{
 			name:  "no props",
 			start: Component{},
 			input: render.NamedProperties{},
 			res:   Component{},
 			err:   "",
 		},
-		testSet{
+		{
 			name: "RGBA invalid",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"R"},
+					"aProp": {"R"},
 				},
 			},
 			input: render.NamedProperties{
@@ -98,16 +98,16 @@ func TestTextSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"R"},
+					"aProp": {"R"},
 				},
 			},
 			err: "error converting not a number to uint8",
 		},
-		testSet{
+		{
 			name: "RGBA valid",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"R", "G", "B", "A"},
+					"aProp": {"R", "G", "B", "A"},
 				},
 			},
 			input: render.NamedProperties{
@@ -119,11 +119,11 @@ func TestTextSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "non-RGBA invalid type",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"not a prop"},
+					"aProp": {"not a prop"},
 				},
 			},
 			input: render.NamedProperties{
@@ -131,16 +131,16 @@ func TestTextSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"not a prop"},
+					"aProp": {"not a prop"},
 				},
 			},
 			err: "error converting not a number to int",
 		},
-		testSet{
+		{
 			name: "non-RGBA invalid name",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"not a prop"},
+					"aProp": {"not a prop"},
 				},
 			},
 			input: render.NamedProperties{
@@ -148,16 +148,16 @@ func TestTextSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"not a prop"},
+					"aProp": {"not a prop"},
 				},
 			},
 			err: "invalid component property in named property map: not a prop",
 		},
-		testSet{
+		{
 			name: "startX",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"startX"},
+					"aProp": {"startX"},
 				},
 			},
 			input: render.NamedProperties{
@@ -169,11 +169,11 @@ func TestTextSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "startY",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"startY"},
+					"aProp": {"startY"},
 				},
 			},
 			input: render.NamedProperties{
@@ -185,11 +185,11 @@ func TestTextSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "size",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"size"},
+					"aProp": {"size"},
 				},
 			},
 			input: render.NamedProperties{
@@ -201,15 +201,15 @@ func TestTextSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "full prop set, multiple sources, unused props",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"col1": []string{"R", "G", "A"},
-					"left": []string{"startX", "startY"},
-					"wide": []string{"size"},
-					"col3": []string{"B"},
-					"what": []string{"R", "G", "B", "A", "startX"},
+					"col1": {"R", "G", "A"},
+					"left": {"startX", "startY"},
+					"wide": {"size"},
+					"col3": {"B"},
+					"what": {"R", "G", "B", "A", "startX"},
 				},
 			},
 			input: render.NamedProperties{
@@ -222,7 +222,7 @@ func TestTextSetNamedProperties(t *testing.T) {
 				"left":             3,
 			},
 			res: Component{
-				NamedPropertiesMap: map[string][]string{"what": []string{"R", "G", "B", "A", "startX"}},
+				NamedPropertiesMap: map[string][]string{"what": {"R", "G", "B", "A", "startX"}},
 				Start:              image.Pt(3, 3),
 				Size:               80,
 				Colour:             color.NRGBA{R: uint8(15), G: uint8(15), B: uint8(150), A: uint8(15)},
@@ -260,7 +260,7 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 		err   string
 	}
 	tests := []testSet{
-		testSet{
+		{
 			name:  "incorrect format data",
 			start: Component{},
 			input: "hello",
