@@ -193,6 +193,7 @@ func TestSetBackgroundImageData(t *testing.T) {
 	for _, test := range tests {
 		testFunc(test, t)
 	}
+	canvas.AssertExpectations(t)
 }
 
 type mockComponent struct{ data int }
