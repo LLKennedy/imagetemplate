@@ -1,4 +1,4 @@
-module github.com/LLKennedy/imagetemplate
+module github.com/LLKennedy/imagetemplate/v2
 
 go 1.12
 

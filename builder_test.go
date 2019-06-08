@@ -6,8 +6,8 @@ import (
 	"image/color"
 	"testing"
 
-	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
-	"github.com/LLKennedy/imagetemplate/render"
+	fs "github.com/LLKennedy/imagetemplate/v2/internal/filesystem"
+	"github.com/LLKennedy/imagetemplate/v2/render"
 	"github.com/stretchr/testify/assert"
 )
 

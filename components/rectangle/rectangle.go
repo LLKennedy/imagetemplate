@@ -6,7 +6,7 @@ import (
 	"image/color"
 	"strings"
 
-	"github.com/LLKennedy/imagetemplate/render"
+	"github.com/LLKennedy/imagetemplate/v2/render"
 )
 
 // Component implements the Component interface for rectangles

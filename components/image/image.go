@@ -10,8 +10,8 @@ import (
 	"io"
 	"strings"
 
-	fs "github.com/LLKennedy/imagetemplate/internal/filesystem"
-	"github.com/LLKennedy/imagetemplate/render"
+	fs "github.com/LLKennedy/imagetemplate/v2/internal/filesystem"
+	"github.com/LLKennedy/imagetemplate/v2/render"
 	"github.com/disintegration/imaging"
 	_ "golang.org/x/image/bmp"  // bmp imported for image decoding
 	_ "golang.org/x/image/tiff" // tiff imported for image decoding
