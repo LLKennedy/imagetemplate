@@ -1,27 +1,30 @@
-package imagetemplate
+package image
 
 import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
-	"github.com/disintegration/imaging"
-	_ "golang.org/x/image/bmp"  // bmp imported for image decoding
-	_ "golang.org/x/image/tiff" // tiff imported for image decoding
 	"image"
 	_ "image/jpeg" // jpeg imported for image decoding
 	_ "image/png"  // png imported for image decoding
 	"io"
 	"strings"
+
+	fs "github.com/LLKennedy/imagetemplate/v2/internal/filesystem"
+	"github.com/LLKennedy/imagetemplate/v2/render"
+	"github.com/disintegration/imaging"
+	_ "golang.org/x/image/bmp"  // bmp imported for image decoding
+	_ "golang.org/x/image/tiff" // tiff imported for image decoding
 )
 
-// ImageComponent implements the Component interface for images
-type ImageComponent struct {
+// Component implements the Component interface for images
+type Component struct {
 	NamedPropertiesMap map[string][]string
 	Image              image.Image
 	TopLeft            image.Point
 	Width              int
 	Height             int
-	reader             fileReader
+	reader             fs.FileReader
 }
 
 type imageFormat struct {
@@ -34,7 +37,10 @@ type imageFormat struct {
 }
 
 // Write draws an image on the canvas
-func (component ImageComponent) Write(canvas Canvas) (Canvas, error) {
+func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
+	if len(component.NamedPropertiesMap) != 0 {
+		return canvas, fmt.Errorf("cannot draw image, not all named properties are set: %v", component.NamedPropertiesMap)
+	}
 	c := canvas
 	var err error
 	scaledImage := imaging.Resize(component.Image, component.Width, component.Height, imaging.Lanczos)
@@ -46,7 +52,7 @@ func (component ImageComponent) Write(canvas Canvas) (Canvas, error) {
 }
 
 // SetNamedProperties proceses the named properties and sets them into the image properties
-func (component ImageComponent) SetNamedProperties(properties NamedProperties) (Component, error) {
+func (component Component) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
 	c := component
 	setFunc := func(name string, value interface{}) error {
 		switch name {
@@ -62,7 +68,7 @@ func (component ImageComponent) SetNamedProperties(properties NamedProperties) (
 				reader = bytes.NewBuffer(bytesVal)
 			} else if isString {
 				stringReader := strings.NewReader(stringVal)
-				reader = base64.NewDecoder(base64.RawStdEncoding, stringReader)
+				reader = base64.NewDecoder(base64.StdEncoding, stringReader)
 			} else if isReader {
 				reader = readerVal
 			}
@@ -78,7 +84,7 @@ func (component ImageComponent) SetNamedProperties(properties NamedProperties) (
 				return fmt.Errorf("error converting %v to string", value)
 			}
 			if component.reader == nil {
-				component.reader = ioutilFileReader{}
+				component.reader = fs.IoutilFileReader{}
 			}
 			bytesVal, err := component.reader.ReadFile(stringVal)
 			if err != nil {
@@ -114,7 +120,7 @@ func (component ImageComponent) SetNamedProperties(properties NamedProperties) (
 		}
 	}
 	var err error
-	c.NamedPropertiesMap, err = StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
+	c.NamedPropertiesMap, err = render.StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
 	if err != nil {
 		return component, err
 	}
@@ -122,14 +128,14 @@ func (component ImageComponent) SetNamedProperties(properties NamedProperties) (
 }
 
 // GetJSONFormat returns the JSON structure of a image component
-func (component ImageComponent) GetJSONFormat() interface{} {
+func (component Component) GetJSONFormat() interface{} {
 	return &imageFormat{}
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set image properties and fill the named properties map
-func (component ImageComponent) VerifyAndSetJSONData(data interface{}) (Component, NamedProperties, error) {
+func (component Component) VerifyAndSetJSONData(data interface{}) (render.Component, render.NamedProperties, error) {
 	c := component
-	props := make(NamedProperties)
+	props := make(render.NamedProperties)
 	stringStruct, ok := data.(*imageFormat)
 	if !ok {
 		return component, props, fmt.Errorf("failed to convert returned data to component properties")
@@ -138,21 +144,21 @@ func (component ImageComponent) VerifyAndSetJSONData(data interface{}) (Componen
 	var newVal interface{}
 	var err error
 	// Deal with the file/data restrictions
-	inputs := []string{
-		stringStruct.FileName,
-		stringStruct.Data,
-	}
-	propNames := []string{
-		"fileName",
-		"data",
-	}
-	types := []propType{
-		stringType,
-		stringType,
+	propData := []render.PropData{
+		render.PropData{
+			InputValue: stringStruct.FileName,
+			PropName:   "fileName",
+			Type:       render.StringType,
+		},
+		render.PropData{
+			InputValue: stringStruct.Data,
+			PropName:   "data",
+			Type:       render.StringType,
+		},
 	}
 	var extractedVal interface{}
 	validIndex := -1
-	c.NamedPropertiesMap, extractedVal, validIndex, err = extractExclusiveProp(inputs, propNames, types, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, extractedVal, validIndex, err = render.ExtractExclusiveProp(propData, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
@@ -177,7 +183,7 @@ func (component ImageComponent) VerifyAndSetJSONData(data interface{}) (Componen
 	if file != nil {
 		stringVal := file.(string)
 		if component.reader == nil {
-			component.reader = ioutilFileReader{}
+			component.reader = fs.IoutilFileReader{}
 		}
 		bytesVal, err := component.reader.ReadFile(stringVal)
 		if err != nil {
@@ -192,39 +198,45 @@ func (component ImageComponent) VerifyAndSetJSONData(data interface{}) (Componen
 	}
 
 	// All other props
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.TopLeftX, "topLeftX", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TopLeftX, "topLeftX", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.TopLeft.X = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.TopLeftY, "topLeftY", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TopLeftY, "topLeftY", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.TopLeft.Y = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Width, "width", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Width, "width", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Width = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Height, "height", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Height, "height", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Height = newVal.(int)
 	}
-	type invalidStruct struct {
-		Message string
-	}
+
 	for key := range c.NamedPropertiesMap {
-		props[key] = invalidStruct{Message: "Please replace me with real data"}
+		props[key] = struct {
+			Message string
+		}{Message: "Please replace me with real data"}
 	}
 	return c, props, nil
+}
+
+func init() {
+	for _, name := range []string{"image", "img", "photo", "Image", "IMG", "Photo", "picture", "Picture", "IMAGE", "PHOTO", "PICTURE"} {
+		render.RegisterComponent(name, func() render.Component { return Component{} })
+	}
 }

@@ -1,3 +1,6 @@
-go test . -cover -coverprofile="coverage.out"; 
-go tool cover -html="coverage.out";
+go test . ./components/... ./internal/filesystem ./render/... -cover -coverprofile="coverage.out"; 
+if ($LastExitCode -eq 0) {
+	go tool cover -html="coverage.out";
+	go tool cover -func="coverage.out";
+}
 Remove-Item coverage.out;

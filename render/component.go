@@ -1,10 +1,33 @@
-package imagetemplate
+package render
 
 import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
+
+var registry = map[string](func() Component){}
+
+// RegisterComponent adds a new component to the registry, returning an error if duplicate names exist
+func RegisterComponent(name string, generator func() Component) error {
+	if registry == nil {
+		registry = map[string](func() Component){}
+	}
+	if registry[name] != nil {
+		return fmt.Errorf("cannot register component, %v is already registered", name)
+	}
+	registry[name] = generator
+	return nil
+}
+
+// Decode searches the registry for a component matching the provided name and returns a new blank component of that type
+func Decode(name string) (Component, error) {
+	if registry == nil || registry[name] == nil {
+		return nil, fmt.Errorf("component error: no component registered for name %v", name)
+	}
+	return registry[name](), nil
+}
 
 // NamedProperties is a map of property names to property values - application variables to be set
 type NamedProperties map[string]interface{}
@@ -49,24 +72,33 @@ func isSingleProp(d DeconstructedDataValue) bool {
 	return len(d.PropNames) == 1 && len(d.StaticValues) == 2 && d.StaticValues[0] == "" && d.StaticValues[1] == ""
 }
 
-type propType string
+// PropType represents the types of properties which can be parsed
+type PropType string
 
 const (
-	intType     propType = "int"
-	stringType  propType = "string"
-	boolType    propType = "bool"
-	uint8Type   propType = "uint8"
-	float64Type propType = "float64"
+	// IntType is an int
+	IntType PropType = "int"
+	// StringType is a string
+	StringType PropType = "string"
+	// BoolType is a bool
+	BoolType PropType = "bool"
+	// Uint8Type is a uint8
+	Uint8Type PropType = "uint8"
+	// Float64Type is a float64
+	Float64Type PropType = "float64"
+	// TimeType is a *time.Time
+	TimeType PropType = "time"
 )
 
-func extractSingleProp(inputVal, propName string, typeName propType, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, extractedValue interface{}, err error) {
+// ExtractSingleProp parses the loaded property configuration and application inputs and returns the desired property if it exists
+func ExtractSingleProp(inputVal, propName string, typeName PropType, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, ExtractedValue interface{}, err error) {
 	npm := namedPropsMap
 	if npm == nil {
 		npm = make(map[string][]string)
 	}
 	hasNamedProps, deconstructed, err := ParseDataValue(inputVal)
 	if err != nil {
-		return namedPropsMap, nil, err
+		return namedPropsMap, nil, fmt.Errorf("error parsing data for property %v: %v", propName, err)
 	}
 	if hasNamedProps {
 		if !isSingleProp(deconstructed) {
@@ -77,66 +109,92 @@ func extractSingleProp(inputVal, propName string, typeName propType, namedPropsM
 		return npm, nil, nil
 	}
 	switch typeName {
-	case intType:
-		intVal, err := strconv.Atoi(inputVal)
+	case IntType:
+		int64Val, err := strconv.ParseInt(inputVal, 10, 64) //Use ParseInt instead of Atoi for compatibility with go 1.7
 		if err != nil {
 			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to integer: %v", propName, err)
 		}
+		intVal := int(int64Val)
 		return npm, intVal, nil
-	case stringType:
+	case StringType:
 		return npm, inputVal, nil
-	case boolType:
+	case BoolType:
 		boolVal, err := strconv.ParseBool(inputVal)
 		if err != nil {
 			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to bool: %v", propName, err)
 		}
 		return npm, boolVal, nil
-	case uint8Type:
+	case Uint8Type:
 		uintVal, err := strconv.ParseUint(inputVal, 0, 8)
 		if err != nil {
-			return namedPropsMap, nil, err
+			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to uint8: %v", propName, err)
 		}
 		uint8Val := uint8(uintVal)
 		return npm, uint8Val, nil
-	case float64Type:
+	case Float64Type:
 		float64Val, err := strconv.ParseFloat(inputVal, 64)
 		if err != nil {
-			return namedPropsMap, nil, err
+			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to float64: %v", propName, err)
 		}
 		return npm, float64Val, nil
+	case TimeType:
+		durationVal, err := time.ParseDuration(inputVal)
+		if err != nil {
+			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to time.Duration: %v", propName, err)
+		}
+		timeVal := time.Now().Add(durationVal)
+		return npm, &timeVal, nil
 	}
 	return namedPropsMap, nil, fmt.Errorf("cannot convert property %v to unsupported type %v", propName, typeName)
 }
 
-func extractExclusiveProp(inputVals, propNames []string, typeNames []propType, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, extractedValue interface{}, validIndex int, err error) {
-	listSize := len(inputVals)
-	if len(propNames) != listSize || len(typeNames) != listSize {
-		return namedPropsMap, nil, -1, fmt.Errorf("input arrays are misaligned: %d : %d : %d", listSize, len(propNames), len(typeNames))
+// PropData is a matched triplet of input property data for use with extraction of exclusive properties
+type PropData struct {
+	InputValue string
+	PropName   string
+	Type       PropType
+}
+
+// ExtractExclusiveProp parses the loaded property configuration and application inputs and returns the desired property if it exists and if only one of the desired options exists
+func ExtractExclusiveProp(data []PropData, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, ExtractedValue interface{}, validIndex int, err error) {
+	listSize := len(data)
+	type result struct {
+		props map[string][]string
+		err   error
+		value interface{}
 	}
-	propsArray := make([]map[string][]string, listSize)
-	errArray := make([]error, listSize)
-	allVals := make([]interface{}, listSize)
+	resultArray := make([]*result, listSize)
+	for i := range resultArray {
+		resultArray[i] = &result{props: make(map[string][]string)}
+	}
 	setCount := 0
 	validIndex = -1
-	for i := 0; i < listSize; i++ {
-		propsArray[i] = make(map[string][]string)
-		propsArray[i], allVals[i], errArray[i] = extractSingleProp(inputVals[i], propNames[i], typeNames[i], propsArray[i])
-		if len(propsArray[i]) != 0 || errArray[i] == nil {
+	for i, datum := range data {
+		aResult := resultArray[i]
+		aResult.props, aResult.value, aResult.err = ExtractSingleProp(datum.InputValue, datum.PropName, datum.Type, aResult.props)
+		if len(aResult.props) != 0 || aResult.err == nil { //This is an || because if a property has been added to the blank array, the function succeeded
 			setCount++
 			validIndex = i
 		}
 	}
 	if setCount != 1 {
-		return namedPropsMap, nil, -1, fmt.Errorf("exactly one of (%v) must be set", strings.Join(propNames, ", "))
+		concatString := ""
+		for i, datum := range data {
+			if i != 0 {
+				concatString = concatString + ","
+			}
+			concatString = concatString + datum.PropName
+		}
+		return namedPropsMap, nil, -1, fmt.Errorf("exactly one of (%v) must be set", concatString)
 	}
 	returnedPropsMap = namedPropsMap
-	for key, value := range propsArray[validIndex] {
+	for key, value := range resultArray[validIndex].props {
 		if returnedPropsMap == nil {
 			returnedPropsMap = make(map[string][]string)
 		}
 		returnedPropsMap[key] = append(returnedPropsMap[key], value...)
 	}
-	extractedValue = allVals[validIndex]
+	ExtractedValue = resultArray[validIndex].value
 	err = nil
 	return
 }
@@ -241,6 +299,11 @@ func (c ComponentConditional) SetValue(name string, value interface{}) (Componen
 			return c, err
 		}
 	}
+	if conditional.Name == "" && !conditional.valueSet {
+		conditional.validated = true
+		conditional.valueSet = true
+		return conditional, nil
+	}
 	if conditional.Name == name {
 		switch conditional.Operator {
 		case equals, contains, startswith, endswith, ciEquals, ciContains, ciStartswith, ciEndswith:
@@ -323,7 +386,7 @@ func (c ComponentConditional) SetValue(name string, value interface{}) (Componen
 
 // Validate validates this conditional chain, erroring if a value down the line has not been set and evaluated
 func (c ComponentConditional) Validate() (bool, error) {
-	if !c.valueSet {
+	if !c.valueSet && c.Name != "" {
 		return false, fmt.Errorf("attempted to validate conditional %v %v %v without setting %v", c.Name, c.Operator, c.Value, c.Name)
 	}
 	group := c.Group.Conditionals
@@ -380,10 +443,9 @@ func (c ComponentConditional) GetNamedPropertiesList() NamedProperties {
 	if c.Name == "" && len(c.Group.Conditionals) == 0 {
 		return results
 	}
-	type invalidData struct {
+	results[c.Name] = struct {
 		Message string
-	}
-	results[c.Name] = invalidData{Message: "Please replace this struct with real data"}
+	}{Message: "Please replace this struct with real data"}
 	for _, subConditional := range c.Group.Conditionals {
 		subResults := subConditional.GetNamedPropertiesList()
 		for key, value := range subResults {

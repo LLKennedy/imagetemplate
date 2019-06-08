@@ -1,24 +1,26 @@
-package imagetemplate
+package barcode
 
 import (
 	"fmt"
-	"github.com/boombuler/barcode/qr"
 	"image"
 	"image/color"
 	"strings"
+
+	"github.com/LLKennedy/imagetemplate/v2/render"
+	"github.com/boombuler/barcode/qr"
 )
 
-// BarcodeComponent implements the Component interface for images
-type BarcodeComponent struct {
+// Component implements the Component interface for images
+type Component struct {
 	NamedPropertiesMap map[string][]string
 	Content            string
-	Type               BarcodeType
+	Type               render.BarcodeType
 	TopLeft            image.Point
 	Width              int
 	Height             int
 	DataColour         color.NRGBA
 	BackgroundColour   color.NRGBA
-	Extra              BarcodeExtraData
+	Extra              render.BarcodeExtraData
 }
 
 type barcodeFormat struct {
@@ -43,7 +45,10 @@ type barcodeFormat struct {
 }
 
 // Write draws a barcode on the canvas
-func (component BarcodeComponent) Write(canvas Canvas) (Canvas, error) {
+func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
+	if len(component.NamedPropertiesMap) != 0 {
+		return canvas, fmt.Errorf("cannot draw barcode, not all named properties are set: %v", component.NamedPropertiesMap)
+	}
 	c := canvas
 	var err error
 	c, err = c.Barcode(component.Type, []byte(component.Content), component.Extra, component.TopLeft, component.Width, component.Height, component.DataColour, component.BackgroundColour)
@@ -54,7 +59,7 @@ func (component BarcodeComponent) Write(canvas Canvas) (Canvas, error) {
 }
 
 // SetNamedProperties proceses the named properties and sets them into the barcode properties
-func (component BarcodeComponent) SetNamedProperties(properties NamedProperties) (Component, error) {
+func (component Component) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
 	c := component
 	setFunc := func(name string, value interface{}) error {
 		switch name {
@@ -66,37 +71,35 @@ func (component BarcodeComponent) SetNamedProperties(properties NamedProperties)
 			c.Content = stringVal
 			return nil
 		case "barcodeType":
-			stringVal, ok := value.(BarcodeType)
+			stringVal, ok := value.(render.BarcodeType)
 			if !ok {
 				return fmt.Errorf("error converting %v to barcode type", value)
 			}
-			c.Extra = BarcodeExtraData{}
+			c.Extra = render.BarcodeExtraData{}
 			switch stringVal {
-			case BarcodeType2of5:
-			case BarcodeType2of5Interleaved:
-			case BarcodeTypeAztec:
+			case render.BarcodeType2of5:
+			case render.BarcodeType2of5Interleaved:
+			case render.BarcodeTypeAztec:
 				c.Extra.AztecMinECCPercent = 50      //TODO: get a beter value for this, or set it from the file
 				c.Extra.AztecUserSpecifiedLayers = 4 //TODO: get a better value for this, or set it from the file
-			case BarcodeTypeCodabar:
-			case BarcodeTypeCode128:
-			case BarcodeTypeCode39:
+			case render.BarcodeTypeCodabar:
+			case render.BarcodeTypeCode128:
+			case render.BarcodeTypeCode39:
 				c.Extra.Code39IncludeChecksum = true
 				c.Extra.Code39FullASCIIMode = true
-			case BarcodeTypeCode93:
+			case render.BarcodeTypeCode93:
 				c.Extra.Code93IncludeChecksum = true
 				c.Extra.Code93FullASCIIMode = true
-			case BarcodeTypeDataMatrix:
-			case BarcodeTypeEAN13:
-			case BarcodeTypeEAN8:
-			case BarcodeTypePDF:
+			case render.BarcodeTypeDataMatrix:
+			case render.BarcodeTypeEAN13:
+			case render.BarcodeTypeEAN8:
+			case render.BarcodeTypePDF:
 				c.Extra.PDFSecurityLevel = 4 //TODO: get a better value for this, or set it from the file
-			case BarcodeTypeQR:
+			case render.BarcodeTypeQR:
 				c.Extra.QRLevel = qr.Q
 				c.Extra.QRMode = qr.Unicode
-			default:
-				return fmt.Errorf("unsupported barcode type %v", stringVal)
 			}
-			c.Type = stringVal
+			c.Type = render.BarcodeType(stringVal)
 			return nil
 		}
 		if strings.Contains("dRdGdBdAbRbGbBbA", name) && len(name) == 2 {
@@ -157,7 +160,7 @@ func (component BarcodeComponent) SetNamedProperties(properties NamedProperties)
 		}
 	}
 	var err error
-	c.NamedPropertiesMap, err = StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
+	c.NamedPropertiesMap, err = render.StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
 	if err != nil {
 		return component, err
 	}
@@ -165,14 +168,14 @@ func (component BarcodeComponent) SetNamedProperties(properties NamedProperties)
 }
 
 // GetJSONFormat returns the JSON structure of a barcode component
-func (component BarcodeComponent) GetJSONFormat() interface{} {
+func (component Component) GetJSONFormat() interface{} {
 	return &barcodeFormat{}
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set barcode properties and fill the named properties map
-func (component BarcodeComponent) VerifyAndSetJSONData(data interface{}) (Component, NamedProperties, error) {
+func (component Component) VerifyAndSetJSONData(data interface{}) (render.Component, render.NamedProperties, error) {
 	c := component
-	props := make(NamedProperties)
+	props := make(render.NamedProperties)
 	stringStruct, ok := data.(*barcodeFormat)
 	if !ok {
 		return component, props, fmt.Errorf("failed to convert returned data to component properties")
@@ -180,98 +183,98 @@ func (component BarcodeComponent) VerifyAndSetJSONData(data interface{}) (Compon
 	// Get named properties and assign each real property
 	var newVal interface{}
 	var err error
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Type, "barcodeType", stringType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Type, "barcodeType", render.StringType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
-		c.Type = BarcodeType(newVal.(string))
+		c.Type = render.BarcodeType(newVal.(string))
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Content, "content", stringType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Content, "content", render.StringType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Content = newVal.(string)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.TopLeftX, "topLeftX", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TopLeftX, "topLeftX", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.TopLeft.X = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.TopLeftY, "topLeftY", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TopLeftY, "topLeftY", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.TopLeft.Y = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Width, "width", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Width, "width", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Width = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Height, "height", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Height, "height", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Height = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.DataColour.Red, "dR", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.DataColour.Red, "dR", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.DataColour.R = newVal.(uint8)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.DataColour.Green, "dG", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.DataColour.Green, "dG", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.DataColour.G = newVal.(uint8)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.DataColour.Blue, "dB", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.DataColour.Blue, "dB", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.DataColour.B = newVal.(uint8)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.DataColour.Alpha, "dA", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.DataColour.Alpha, "dA", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.DataColour.A = newVal.(uint8)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.BackgroundColour.Red, "bR", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.BackgroundColour.Red, "bR", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.BackgroundColour.R = newVal.(uint8)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.BackgroundColour.Green, "bG", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.BackgroundColour.Green, "bG", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.BackgroundColour.G = newVal.(uint8)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.BackgroundColour.Blue, "bB", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.BackgroundColour.Blue, "bB", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.BackgroundColour.B = newVal.(uint8)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.BackgroundColour.Alpha, "bA", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.BackgroundColour.Alpha, "bA", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
@@ -285,4 +288,10 @@ func (component BarcodeComponent) VerifyAndSetJSONData(data interface{}) (Compon
 		props[key] = invalidStruct{Message: "Please replace me with real data"}
 	}
 	return c, props, nil
+}
+
+func init() {
+	for _, name := range []string{"barcode", "bar", "code", "Barcode", "BARCODE", "BAR", "Bar Code", "bar code"} {
+		render.RegisterComponent(name, func() render.Component { return Component{} })
+	}
 }

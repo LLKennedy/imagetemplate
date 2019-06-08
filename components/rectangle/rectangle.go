@@ -1,14 +1,16 @@
-package imagetemplate
+package rectangle
 
 import (
 	"fmt"
 	"image"
 	"image/color"
 	"strings"
+
+	"github.com/LLKennedy/imagetemplate/v2/render"
 )
 
-// RectangleComponent implements the Component interface for rectangles
-type RectangleComponent struct {
+// Component implements the Component interface for rectangles
+type Component struct {
 	NamedPropertiesMap map[string][]string
 	TopLeft            image.Point
 	Width              int
@@ -30,7 +32,7 @@ type rectangleFormat struct {
 }
 
 // Write draws a rectangle on the canvas
-func (component RectangleComponent) Write(canvas Canvas) (Canvas, error) {
+func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 	if len(component.NamedPropertiesMap) != 0 {
 		return canvas, fmt.Errorf("cannot draw rectangle, not all named properties are set: %v", component.NamedPropertiesMap)
 	}
@@ -38,7 +40,7 @@ func (component RectangleComponent) Write(canvas Canvas) (Canvas, error) {
 }
 
 // SetNamedProperties proceses the named properties and sets them into the rectangle properties
-func (component RectangleComponent) SetNamedProperties(properties NamedProperties) (Component, error) {
+func (component Component) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
 	c := component
 	setFunc := func(name string, value interface{}) error {
 		if strings.Contains("RGBA", name) && len(name) == 1 {
@@ -87,7 +89,7 @@ func (component RectangleComponent) SetNamedProperties(properties NamedPropertie
 		}
 	}
 	var err error
-	c.NamedPropertiesMap, err = StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
+	c.NamedPropertiesMap, err = render.StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
 	if err != nil {
 		return component, err
 	}
@@ -95,14 +97,14 @@ func (component RectangleComponent) SetNamedProperties(properties NamedPropertie
 }
 
 // GetJSONFormat returns the JSON structure of a rectangle component
-func (component RectangleComponent) GetJSONFormat() interface{} {
+func (component Component) GetJSONFormat() interface{} {
 	return &rectangleFormat{}
 }
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set rectangle properties and fill the named properties map
-func (component RectangleComponent) VerifyAndSetJSONData(data interface{}) (Component, NamedProperties, error) {
+func (component Component) VerifyAndSetJSONData(data interface{}) (render.Component, render.NamedProperties, error) {
 	c := component
-	props := make(NamedProperties)
+	props := make(render.NamedProperties)
 	stringStruct, ok := data.(*rectangleFormat)
 	if !ok {
 		return component, props, fmt.Errorf("failed to convert returned data to component properties")
@@ -110,67 +112,73 @@ func (component RectangleComponent) VerifyAndSetJSONData(data interface{}) (Comp
 	// Get named properties and assign each real property
 	var newVal interface{}
 	var err error
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.TopLeftX, "topLeftX", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TopLeftX, "topLeftX", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.TopLeft.X = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.TopLeftY, "topLeftY", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TopLeftY, "topLeftY", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.TopLeft.Y = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Width, "width", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Width, "width", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Width = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Height, "height", intType, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Height, "height", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Height = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Colour.Red, "R", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Red, "R", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Colour.R = newVal.(uint8)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Colour.Green, "G", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Green, "G", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Colour.G = newVal.(uint8)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Colour.Blue, "B", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Blue, "B", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Colour.B = newVal.(uint8)
 	}
-	c.NamedPropertiesMap, newVal, err = extractSingleProp(stringStruct.Colour.Alpha, "A", uint8Type, c.NamedPropertiesMap)
+	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Alpha, "A", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
 	if newVal != nil {
 		c.Colour.A = newVal.(uint8)
 	}
-	type invalidStruct struct {
-		Message string
-	}
+
 	for key := range c.NamedPropertiesMap {
-		props[key] = invalidStruct{Message: "Please replace me with real data"}
+		props[key] = struct {
+			Message string
+		}{Message: "Please replace me with real data"}
 	}
 	return c, props, nil
+}
+
+func init() {
+	for _, name := range []string{"rect", "RECT", "Rect", "rectangle", "Rectangle", "RECTANGLE"} {
+		render.RegisterComponent(name, func() render.Component { return Component{} })
+	}
 }
