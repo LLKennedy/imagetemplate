@@ -25,6 +25,7 @@ func TestDateTimeWrite(t *testing.T) {
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.EqualError(t, err, "failed to write to canvas: runtime error: invalid memory address or nil pointer dereference")
+		canvas.AssertExpectations(t)
 	})
 	t.Run("datetime error", func(t *testing.T) {
 		canvas := render.MockCanvas{FixedTextError: fmt.Errorf("some error"), FixedTryTextBool: true, FixedTryTextInt: 10, FixedPixelsPerInch: 72}
@@ -33,6 +34,7 @@ func TestDateTimeWrite(t *testing.T) {
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.EqualError(t, err, "some error")
+		canvas.AssertExpectations(t)
 	})
 	t.Run("passing", func(t *testing.T) {
 		canvas := render.MockCanvas{FixedTextError: nil, FixedTryTextBool: true, FixedTryTextInt: 10, FixedPixelsPerInch: 72}
@@ -41,6 +43,7 @@ func TestDateTimeWrite(t *testing.T) {
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.NoError(t, err)
+		canvas.AssertExpectations(t)
 	})
 }
 
