@@ -401,6 +401,25 @@ func TestLoadComponentsData(t *testing.T) {
 		newBuilder, err := newBuilder.LoadComponentsData([]byte(sampleData))
 		assert.EqualError(t, err, "cannot load base image from file and load from data string and generate from base colour, specify only data or fileName or base colour")
 	})
+	t.Run("failing on parseComponents", func(t *testing.T) {
+		sampleData := `{
+			"baseImage": {
+				"fileName": "baseone.bmp"
+			},
+			"components": [
+				{
+					"type": "something",
+					"properties": {}
+				}
+			]
+		}`
+		var newBuilder Builder
+		reader := fs.MockReader{Files: make(map[string]fs.MockFile)}
+		reader.Files["baseone.bmp"] = fs.MockFile{Err: nil, Data: []byte{0x42, 0x4d, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x01, 0x00, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x50, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xcc, 0x48, 0x3f, 0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x24, 0x1c, 0xed, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0xf2, 0xff, 0x00}}
+		newBuilder = ImageBuilder{reader: reader}
+		newBuilder, err := newBuilder.LoadComponentsData([]byte(sampleData))
+		assert.EqualError(t, err, "component error: no component registered for name something")
+	})
 }
 
 func TestGetComponents(t *testing.T) {
@@ -437,4 +456,37 @@ func TestGetNamedPropertiesList(t *testing.T) {
 	assert.Equal(t, render.NamedProperties(nil), builder.GetNamedPropertiesList())
 	builder.NamedProperties = render.NamedProperties{"something": "something else"}
 	assert.Equal(t, render.NamedProperties{"something": "something else"}, builder.GetNamedPropertiesList())
+}
+
+type dodgyComponent struct {}
+
+func (c dodgyComponent) Write(canvas render.Canvas) (render.Canvas, error) {
+	return canvas, nil
+}
+func (c dodgyComponent) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
+	return c, fmt.Errorf("failed")
+}
+func (c dodgyComponent) GetJSONFormat() interface{} {
+	return nil
+}
+func (c dodgyComponent) VerifyAndSetJSONData(interface{}) (render.Component, render.NamedProperties, error) {
+	return c, render.NamedProperties{}, nil
+}
+
+func TestSetNamedProperties(t *testing.T) {
+	t.Run("empty components list", func(t *testing.T) {
+		b := ImageBuilder{}
+		m, err := b.SetNamedProperties(render.NamedProperties{})
+		assert.Equal(t, b, m)
+		assert.NoError(t, err)
+	})
+	t.Run("error setting component properties", func(t *testing.T) {
+		c := render.Component(dodgyComponent{})
+		b := ImageBuilder{Components: []ToggleableComponent{
+			ToggleableComponent{Component: c},
+		}}
+		m, err := b.SetNamedProperties(render.NamedProperties{})
+		assert.Equal(t, b, m)
+		assert.EqualError(t, err, "failed")
+	})
 }
