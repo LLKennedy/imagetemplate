@@ -332,6 +332,7 @@ func (builder ImageBuilder) GetNamedPropertiesList() render.NamedProperties {
 // SetNamedProperties sets the values of names properties in all components and conditionals in the builder
 func (builder ImageBuilder) SetNamedProperties(properties render.NamedProperties) (Builder, error) {
 	b := builder
+	b.Components = builder.Components[:]
 	for tIndex, tComponent := range b.Components {
 		var err error
 		tComponent.Component, err = tComponent.Component.SetNamedProperties(properties)
@@ -346,7 +347,7 @@ func (builder ImageBuilder) SetNamedProperties(properties render.NamedProperties
 		}
 		b.Components[tIndex] = tComponent
 	}
-	return builder, nil
+	return b, nil
 }
 
 // ApplyComponents iterates over the internal Component array, applying each in turn to the Canvas

@@ -461,7 +461,7 @@ func TestGetNamedPropertiesList(t *testing.T) {
 type dodgyComponent struct {}
 
 func (c dodgyComponent) Write(canvas render.Canvas) (render.Canvas, error) {
-	return canvas, nil
+	return canvas, fmt.Errorf("failed to write")
 }
 func (c dodgyComponent) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
 	return c, fmt.Errorf("failed")
@@ -470,6 +470,25 @@ func (c dodgyComponent) GetJSONFormat() interface{} {
 	return nil
 }
 func (c dodgyComponent) VerifyAndSetJSONData(interface{}) (render.Component, render.NamedProperties, error) {
+	return c, render.NamedProperties{}, fmt.Errorf("failed to verify")
+}
+
+type workingComponent struct {
+	someVar int
+}
+
+func (c *workingComponent) Write(canvas render.Canvas) (render.Canvas, error) {
+	return canvas, nil
+}
+func (c *workingComponent) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
+	c2 := *c
+	c2.someVar++
+	return &c2, nil
+}
+func (c *workingComponent) GetJSONFormat() interface{} {
+	return nil
+}
+func (c *workingComponent) VerifyAndSetJSONData(interface{}) (render.Component, render.NamedProperties, error) {
 	return c, render.NamedProperties{}, nil
 }
 
@@ -481,12 +500,74 @@ func TestSetNamedProperties(t *testing.T) {
 		assert.NoError(t, err)
 	})
 	t.Run("error setting component properties", func(t *testing.T) {
-		c := render.Component(dodgyComponent{})
 		b := ImageBuilder{Components: []ToggleableComponent{
-			ToggleableComponent{Component: c},
+			ToggleableComponent{Component: dodgyComponent{}},
 		}}
 		m, err := b.SetNamedProperties(render.NamedProperties{})
 		assert.Equal(t, b, m)
 		assert.EqualError(t, err, "failed")
+	})
+	t.Run("no properties, no errors", func(t *testing.T) {
+		b := ImageBuilder{Components: []ToggleableComponent{
+			ToggleableComponent{Component: &workingComponent{}},
+		}}
+		m, err := b.SetNamedProperties(render.NamedProperties{})
+		assert.Equal(t, b, m)
+		assert.NoError(t, err)
+	})
+	t.Run("property error", func(t *testing.T) {
+		b := ImageBuilder{Components: []ToggleableComponent{
+			ToggleableComponent{Component: &workingComponent{}, Conditional: render.ComponentConditional{Name: "a", Operator: "badOperator"}},
+		}}
+		m, err := b.SetNamedProperties(render.NamedProperties{"a": "b"})
+		assert.Equal(t, b, m)
+		assert.EqualError(t, err, "invalid conditional operator badOperator")
+	})
+}
+
+func TestApplyComponents(t *testing.T) {
+	t.Run("empty component list", func(t *testing.T) {
+		b := ImageBuilder{}
+		m, err := b.ApplyComponents()
+		assert.Equal(t, b, m)
+		assert.NoError(t, err)
+	})
+	t.Run("write error in non-conditional component", func(t *testing.T) {
+		b := ImageBuilder{Components: []ToggleableComponent{
+			ToggleableComponent{Component: dodgyComponent{}},
+		}}
+		m, err := b.ApplyComponents()
+		assert.Equal(t, b, m)
+		assert.EqualError(t, err, "failed to write")
+	})
+	t.Run("validation error in conditional component", func(t *testing.T) {
+		b := ImageBuilder{Components: []ToggleableComponent{
+			ToggleableComponent{Component: dodgyComponent{}, Conditional: render.ComponentConditional{Name: "a", Operator: "badOperator"}},
+		}}
+		m, err := b.ApplyComponents()
+		assert.Equal(t, b, m)
+		assert.EqualError(t, err, "attempted to validate conditional a badOperator  without setting a")
+	})
+	t.Run("write error in conditional component", func(t *testing.T) {
+		condition := render.ComponentConditional{Name: "a", Operator: "==", Value: "0"}
+		condition, err := condition.SetValue("a", 0)
+		assert.NoError(t, err)
+		b := ImageBuilder{Components: []ToggleableComponent{
+			ToggleableComponent{Component: dodgyComponent{}, Conditional: condition},
+		}}
+		m, err := b.ApplyComponents()
+		assert.Equal(t, b, m)
+		assert.EqualError(t, err, "failed to write")
+	})
+	t.Run("passing", func(t *testing.T) {
+		condition := render.ComponentConditional{Name: "a", Operator: "==", Value: "0"}
+		condition, err := condition.SetValue("a", 0)
+		assert.NoError(t, err)
+		b := ImageBuilder{Components: []ToggleableComponent{
+			ToggleableComponent{Component: &workingComponent{}, Conditional: condition},
+		}}
+		m, err := b.ApplyComponents()
+		assert.Equal(t, b, m)
+		assert.NoError(t, err)
 	})
 }
