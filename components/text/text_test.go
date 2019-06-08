@@ -52,6 +52,22 @@ func TestTextWrite(t *testing.T) {
 		assert.NoError(t, err)
 		//canvas.AssertExpectations(t)
 	})
+	t.Run("multiple passes required", func(t *testing.T) {
+		expectedFont := truetype.NewFace(goreg, &truetype.Options{Size: float64(24), Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
+		expectedFont2 := truetype.NewFace(goreg, &truetype.Options{Size: float64(12), Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
+		expectedFont3 := truetype.NewFace(goreg, &truetype.Options{Size: float64(8), Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
+		canvas := new(render.MockCanvas)
+		canvas.On("GetPPI").Return(float64(72))
+		canvas.On("TryText", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(false, 200)
+		canvas.On("TryText", "", image.Point{}, expectedFont2, color.NRGBA{}, 100).Return(false, 150)
+		canvas.On("TryText", "", image.Point{}, expectedFont3, color.NRGBA{}, 100).Return(true, 100)
+		canvas.On("Text", "", image.Point{}, expectedFont3, color.NRGBA{}, 100).Return(canvas, nil)
+		c := Component{Font: goreg, Size: 24, MaxWidth: 100}
+		modifiedCanvas, err := c.Write(canvas)
+		assert.Equal(t, canvas, modifiedCanvas)
+		assert.NoError(t, err)
+		canvas.AssertExpectations(t)
+	})
 }
 
 func TestTextSetNamedProperties(t *testing.T) {
