@@ -205,29 +205,29 @@ type BarcodeType string
 
 const (
 	// BarcodeTypeAztec           is an alias for an imported barcode type
-	BarcodeTypeAztec = barcode.TypeAztec
+	BarcodeTypeAztec BarcodeType = barcode.TypeAztec
 	// BarcodeTypeCodabar         is an alias for an imported barcode type
-	BarcodeTypeCodabar = barcode.TypeCodabar
+	BarcodeTypeCodabar BarcodeType = barcode.TypeCodabar
 	// BarcodeTypeCode128         is an alias for an imported barcode type
-	BarcodeTypeCode128 = barcode.TypeCode128
+	BarcodeTypeCode128 BarcodeType = barcode.TypeCode128
 	// BarcodeTypeCode39          is an alias for an imported barcode type
-	BarcodeTypeCode39 = barcode.TypeCode39
+	BarcodeTypeCode39 BarcodeType = barcode.TypeCode39
 	// BarcodeTypeCode93          is an alias for an imported barcode type
-	BarcodeTypeCode93 = barcode.TypeCode93
+	BarcodeTypeCode93 BarcodeType = barcode.TypeCode93
 	// BarcodeTypeDataMatrix      is an alias for an imported barcode type
-	BarcodeTypeDataMatrix = barcode.TypeDataMatrix
+	BarcodeTypeDataMatrix BarcodeType = barcode.TypeDataMatrix
 	// BarcodeTypeEAN8            is an alias for an imported barcode type
-	BarcodeTypeEAN8 = barcode.TypeEAN8
+	BarcodeTypeEAN8 BarcodeType = barcode.TypeEAN8
 	// BarcodeTypeEAN13           is an alias for an imported barcode type
-	BarcodeTypeEAN13 = barcode.TypeEAN13
+	BarcodeTypeEAN13 BarcodeType = barcode.TypeEAN13
 	// BarcodeTypePDF             is an alias for an imported barcode type
-	BarcodeTypePDF = barcode.TypePDF
+	BarcodeTypePDF BarcodeType = barcode.TypePDF
 	// BarcodeTypeQR              is an alias for an imported barcode type
-	BarcodeTypeQR = barcode.TypeQR
+	BarcodeTypeQR BarcodeType = barcode.TypeQR
 	// BarcodeType2of5            is an alias for an imported barcode type
-	BarcodeType2of5 = barcode.Type2of5
+	BarcodeType2of5 BarcodeType = barcode.Type2of5
 	// BarcodeType2of5Interleaved is an alias for an imported barcode type
-	BarcodeType2of5Interleaved = barcode.Type2of5Interleaved
+	BarcodeType2of5Interleaved BarcodeType = barcode.Type2of5Interleaved
 )
 
 // BarcodeExtraData contains additional data required for some barcode formats, leave any fields not named for the type in use alone
