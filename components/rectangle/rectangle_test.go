@@ -21,7 +21,7 @@ func TestRectangleWrite(t *testing.T) {
 	})
 	t.Run("rectangle error", func(t *testing.T) {
 		canvas := new(render.MockCanvas)
-		canvas.On("Rectangle", image.Pt(0,0), 0, 0, color.NRGBA{}).Return(canvas, fmt.Errorf("some error"))
+		canvas.On("Rectangle", image.Pt(0, 0), 0, 0, color.NRGBA{}).Return(canvas, fmt.Errorf("some error"))
 		c := Component{}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
@@ -30,7 +30,7 @@ func TestRectangleWrite(t *testing.T) {
 	})
 	t.Run("passing", func(t *testing.T) {
 		canvas := new(render.MockCanvas)
-		canvas.On("Rectangle", image.Pt(0,0), 0, 0, color.NRGBA{}).Return(canvas, nil)
+		canvas.On("Rectangle", image.Pt(0, 0), 0, 0, color.NRGBA{}).Return(canvas, nil)
 		c := Component{}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
