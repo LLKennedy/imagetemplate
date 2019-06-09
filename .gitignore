@@ -4,8 +4,6 @@
 *.exe~
 .vscode/
 
-!examples/*
-
 
 # Every conceivable image type
 
@@ -72,3 +70,5 @@
 # 3D Images
 *.3dm
 *.max
+
+!examples/
