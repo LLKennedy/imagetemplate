@@ -145,12 +145,12 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	var err error
 	// Deal with the file/data restrictions
 	propData := []render.PropData{
-		render.PropData{
+		{
 			InputValue: stringStruct.FileName,
 			PropName:   "fileName",
 			Type:       render.StringType,
 		},
-		render.PropData{
+		{
 			InputValue: stringStruct.Data,
 			PropName:   "data",
 			Type:       render.StringType,
