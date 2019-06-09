@@ -8,10 +8,10 @@ The main readme file for the repository provides code for a basic usage example,
 ## Contents
 
 ### 1. [Terminology](#Terminology)
-### 2. [Template Files](#Template%20Files)
+### 2. [Template Files](#Template-Files)
 ### 3. [Builder](#Builder)
-### 4. [Default Components](#Default%20Components)
-### 5. [Example Results](#Example%20Results)
+### 4. [Default Components](#Default-Components)
+### 5. [Example Results](#Example-Results)
 
 ## Terminology
 
