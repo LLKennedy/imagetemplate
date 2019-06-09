@@ -1,7 +1,13 @@
-package imagetemplate
+// Package render renders images onto a canvas.
+package render
 
 import (
 	"errors"
+	"image"
+	"image/color"
+	"image/draw"
+
+	fs "github.com/LLKennedy/imagetemplate/v2/internal/filesystem"
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/aztec"
 	"github.com/boombuler/barcode/codabar"
@@ -15,9 +21,6 @@ import (
 	"github.com/boombuler/barcode/twooffive"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
-	"image"
-	"image/color"
-	"image/draw"
 )
 
 // Canvas holds the image struct and associated properties
@@ -26,6 +29,8 @@ type Canvas interface {
 	GetUnderlyingImage() image.Image
 	GetWidth() int
 	GetHeight() int
+	GetPPI() float64
+	SetPPI(float64) Canvas
 	Rectangle(topLeft image.Point, width, height int, colour color.Color) (Canvas, error)
 	Circle(centre image.Point, radius int, colour color.Color) (Canvas, error)
 	Text(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (Canvas, error)
@@ -36,8 +41,9 @@ type Canvas interface {
 
 // ImageCanvas uses golang's native Image package to implement the Canvas interface
 type ImageCanvas struct {
-	Image  draw.Image
-	reader fileReader
+	Image         draw.Image
+	reader        fs.FileReader
+	pixelsPerInch float64
 }
 
 // NewCanvas generates a new canvas of the given width and height
@@ -54,12 +60,16 @@ func NewCanvas(width, height int) (ImageCanvas, error) {
 			Min: image.Point{X: 0, Y: 0},
 			Max: image.Point{X: width, Y: height},
 		}),
-		reader: ioutilFileReader{},
+		reader: fs.IoutilFileReader{},
 	}, nil
 }
 
 // SetUnderlyingImage sets the internal Image property to the given object
 func (canvas ImageCanvas) SetUnderlyingImage(newImage image.Image) Canvas {
+	if newImage == nil {
+		canvas.Image = nil
+		return canvas
+	}
 	drawImage, ok := newImage.(draw.Image)
 	if !ok {
 		bounds := newImage.Bounds()
@@ -72,23 +82,37 @@ func (canvas ImageCanvas) SetUnderlyingImage(newImage image.Image) Canvas {
 
 // GetUnderlyingImage gets the internal Image property
 func (canvas ImageCanvas) GetUnderlyingImage() image.Image {
+	if canvas.Image == nil {
+		return image.NewNRGBA(image.Rect(0, 0, 0, 0))
+	}
 	return canvas.Image
 }
 
-// GetWidth returns the width of the underlying Image. Returns -1 if no canvas is set.
+// GetWidth returns the width of the underlying Image. Returns 0 if no canvas is set.
 func (canvas ImageCanvas) GetWidth() int {
 	if canvas.Image == nil {
-		return -1
+		return 0
 	}
 	return canvas.Image.Bounds().Size().X
 }
 
-// GetHeight returns the geight of the underlying Image. Returns -1 if no canvas is set.
+// GetHeight returns the height of the underlying Image. Returns 0 if no canvas is set.
 func (canvas ImageCanvas) GetHeight() int {
 	if canvas.Image == nil {
-		return -1
+		return 0
 	}
 	return canvas.Image.Bounds().Size().Y
+}
+
+// SetPPI sets the pixels per inch of the canvas
+func (canvas ImageCanvas) SetPPI(ppi float64) Canvas {
+	canvas.pixelsPerInch = ppi
+	return canvas
+}
+
+// GetPPI returns the pixels per inch of the canvas
+func (canvas ImageCanvas) GetPPI() float64 {
+	return canvas.pixelsPerInch
 }
 
 // Rectangle draws a rectangle of a specific colour on the canvas
@@ -131,7 +155,6 @@ func (canvas ImageCanvas) Text(text string, start image.Point, typeFace font.Fac
 		return canvas, errors.New("no image set for canvas to draw on")
 	}
 	c := canvas
-	//FIXME: how to use start?
 	drawer := &font.Drawer{
 		Dot:  fixed.Point26_6{X: fixed.I(start.X), Y: fixed.I(start.Y)},
 		Dst:  c.Image,
@@ -154,7 +177,6 @@ func (canvas ImageCanvas) TryText(text string, start image.Point, typeFace font.
 	if canvas.Image == nil {
 		return false, -2
 	}
-	//FIXME: how to use start?
 	drawer := &font.Drawer{
 		Dot:  fixed.Point26_6{X: fixed.I(start.X), Y: fixed.I(start.Y)},
 		Dst:  canvas.Image,
@@ -183,29 +205,29 @@ type BarcodeType string
 
 const (
 	// BarcodeTypeAztec           is an alias for an imported barcode type
-	BarcodeTypeAztec = barcode.TypeAztec
+	BarcodeTypeAztec BarcodeType = barcode.TypeAztec
 	// BarcodeTypeCodabar         is an alias for an imported barcode type
-	BarcodeTypeCodabar = barcode.TypeCodabar
+	BarcodeTypeCodabar BarcodeType = barcode.TypeCodabar
 	// BarcodeTypeCode128         is an alias for an imported barcode type
-	BarcodeTypeCode128 = barcode.TypeCode128
+	BarcodeTypeCode128 BarcodeType = barcode.TypeCode128
 	// BarcodeTypeCode39          is an alias for an imported barcode type
-	BarcodeTypeCode39 = barcode.TypeCode39
+	BarcodeTypeCode39 BarcodeType = barcode.TypeCode39
 	// BarcodeTypeCode93          is an alias for an imported barcode type
-	BarcodeTypeCode93 = barcode.TypeCode93
+	BarcodeTypeCode93 BarcodeType = barcode.TypeCode93
 	// BarcodeTypeDataMatrix      is an alias for an imported barcode type
-	BarcodeTypeDataMatrix = barcode.TypeDataMatrix
+	BarcodeTypeDataMatrix BarcodeType = barcode.TypeDataMatrix
 	// BarcodeTypeEAN8            is an alias for an imported barcode type
-	BarcodeTypeEAN8 = barcode.TypeEAN8
+	BarcodeTypeEAN8 BarcodeType = barcode.TypeEAN8
 	// BarcodeTypeEAN13           is an alias for an imported barcode type
-	BarcodeTypeEAN13 = barcode.TypeEAN13
+	BarcodeTypeEAN13 BarcodeType = barcode.TypeEAN13
 	// BarcodeTypePDF             is an alias for an imported barcode type
-	BarcodeTypePDF = barcode.TypePDF
+	BarcodeTypePDF BarcodeType = barcode.TypePDF
 	// BarcodeTypeQR              is an alias for an imported barcode type
-	BarcodeTypeQR = barcode.TypeQR
+	BarcodeTypeQR BarcodeType = barcode.TypeQR
 	// BarcodeType2of5            is an alias for an imported barcode type
-	BarcodeType2of5 = barcode.Type2of5
+	BarcodeType2of5 BarcodeType = barcode.Type2of5
 	// BarcodeType2of5Interleaved is an alias for an imported barcode type
-	BarcodeType2of5Interleaved = barcode.Type2of5Interleaved
+	BarcodeType2of5Interleaved BarcodeType = barcode.Type2of5Interleaved
 )
 
 // BarcodeExtraData contains additional data required for some barcode formats, leave any fields not named for the type in use alone
@@ -262,6 +284,9 @@ func (canvas ImageCanvas) Barcode(codeType BarcodeType, content []byte, extra Ba
 	case BarcodeTypeCode93:
 		encodedBarcode, err = code93.Encode(string(content), extra.Code93IncludeChecksum, extra.Code93FullASCIIMode)
 		if err != nil {
+			if err.Error() == "invalid data!" {
+				err = errors.New("invalid data") //because golang won't shut up otherwise
+			}
 			return canvas, err
 		}
 	case BarcodeTypeDataMatrix:
