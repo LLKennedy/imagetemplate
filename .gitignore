@@ -10,6 +10,7 @@
 !*.sh
 
 # garnish
+.vscode/
 !*.git*
 !*.keep
 !.travis.yml
@@ -18,5 +19,4 @@
 !LICENSE
 
 # special cases
-.vscode/
 !examples/**
