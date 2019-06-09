@@ -87,7 +87,7 @@ type ImageBuilder struct {
 }
 
 // NewBuilder generates a new ImageBuilder with an internal canvas of the specified width and height, and optionally the specified starting colour. No provided colour will result in defaults for Image.
-func NewBuilder() ImageBuilder {
+func NewBuilder() Builder {
 	return ImageBuilder{reader: fs.IoutilFileReader{}}
 }
 

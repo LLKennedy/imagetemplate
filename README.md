@@ -14,32 +14,12 @@ Several default components are included, see their documentation as well as deta
 
 ## Basic Usage
 ```
-// Load your custom template file
-newBuilder := imagetemplate.NewBuilder()
-newBuilder, err := newBuilder.LoadComponentsFile("myTemplate.json")
+props, callback, err := imagetemplate.LoadTemplate("template.json")
 
-// Handle file parsing errors here
+// Check props here, set any discovered variables with real values
 
-// Extract the "named properties" (custom variables) from the file then insert corresponding values according to your application logic
-
-customVariables := newBuilder.GetNamedPropertiesList()
-
-// Process your custom variables here
-// eg customVariables["username"] = "John Smith"
-
-newBuilder, err = newBuilder.SetNamedProperties(customVariables)
-
-// Handle value parsing errors here
-
-// Write the loaded components to the canvas
-newBuilder, err = newBuilder.ApplyComponents()
-
-// Handle rendering errors here
-
-// Export the canvas to a BMP image. 
-// The underlying image.Image object can also be extracted for export to any other image format using newBuilder.GetCanvas().GetUnderlyingImage()
-imgBytes, err := newBuilder.WriteToBMP()
-// imgBytes now contains the rendered BMP image
+data, err := callback(props)
+err = ioutil.WriteFile("simple-static.bmp", data, os.ModeExclusive)
 ```
 
 ## Testing
