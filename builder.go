@@ -55,6 +55,7 @@ type BaseImage struct {
 	BaseColour BaseColour `json:"baseColour"`
 	BaseWidth  string     `json:"width"`
 	BaseHeight string     `json:"height"`
+	PPI        string     `json:"ppi"`
 }
 
 // BaseColour is the template format of the base colour settings
@@ -223,6 +224,12 @@ func (builder ImageBuilder) setBackgroundImage(template Template) (ImageBuilder,
 		drawImage = image.NewNRGBA(baseImage.Bounds())
 		draw.Draw(drawImage, baseImage.Bounds(), baseImage, baseImage.Bounds().Min, draw.Over)
 		b = b.SetCanvas(render.ImageCanvas{Image: drawImage}).(ImageBuilder)
+		ppi, err := strconv.ParseFloat(template.BaseImage.PPI, 64)
+		if err != nil || ppi == 0 {
+			ppi = float64(72)
+		}
+		canvas := b.GetCanvas().SetPPI(ppi)
+		b = (b.SetCanvas(canvas)).(ImageBuilder)
 		return b, nil
 	}
 	// Check if resizing is necessary
@@ -246,11 +253,16 @@ func (builder ImageBuilder) setBackgroundImage(template Template) (ImageBuilder,
 		}
 		baseImage = imaging.Resize(baseImage, resizedWidth, resizedHeight, imaging.Lanczos)
 	}
-	canvas, err := b.GetCanvas().DrawImage(image.Point{X: 0, Y: 0}, baseImage)
+	ppi, err := strconv.ParseFloat(template.BaseImage.PPI, 64)
+	if err != nil || ppi == 0 {
+		ppi = float64(72)
+	}
+	canvas := b.GetCanvas().SetPPI(ppi)
+	canvas, err = canvas.DrawImage(image.Point{X: 0, Y: 0}, baseImage)
 	if err != nil {
 		return builder, err
 	}
-	b = b.SetCanvas(canvas).(ImageBuilder)
+	b = (b.SetCanvas(canvas)).(ImageBuilder)
 	return b, nil
 }
 
@@ -356,7 +368,7 @@ func (builder ImageBuilder) ApplyComponents() (Builder, error) {
 	for _, tComponent := range b.Components {
 		if tComponent.Conditional.Name == "" {
 			var err error
-			b.Canvas, err = tComponent.Component.Write(b.Canvas)
+			b.Canvas, err = tComponent.Component.Write(b.GetCanvas())
 			if err != nil {
 				return builder, err
 			}
@@ -366,7 +378,7 @@ func (builder ImageBuilder) ApplyComponents() (Builder, error) {
 				return builder, err
 			}
 			if valid {
-				b.Canvas, err = tComponent.Component.Write(b.Canvas)
+				b.Canvas, err = tComponent.Component.Write(b.GetCanvas())
 				if err != nil {
 					return builder, err
 				}

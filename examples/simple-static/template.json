@@ -7,7 +7,8 @@
 			"G": "255",
 			"B": "255",
 			"A": "255"
-		}
+		},
+		"ppi": "150"
 	},
 	"components": [
 		{
@@ -18,6 +19,26 @@
 				"topLeftY": "20",
 				"width": "150",
 				"height": "150"
+			}
+		},
+		{
+			"type": "text",
+			"properties": {
+				"content": "Braun",
+				"startX": "190",
+				"startY": "50",
+				"size": "24",
+				"font": {
+					"fontFile": "Cabin-Regular.ttf"
+				},
+				"maxWidth": "100",
+				"alignment": "left",
+				"colour": {
+					"R": "0",
+					"G": "0",
+					"B": "0",
+					"A": "255"
+				}
 			}
 		}
 	]
