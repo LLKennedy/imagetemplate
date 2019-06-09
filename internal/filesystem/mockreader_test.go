@@ -9,7 +9,7 @@ import (
 func TestMockReadFile(t *testing.T) {
 	m := MockReader{
 		Files: map[string]MockFile{
-			"a file": MockFile{
+			"a file": {
 				Data: []byte("hello!"),
 				Err:  errors.New("an error"),
 			},

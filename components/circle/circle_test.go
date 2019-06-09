@@ -13,7 +13,7 @@ import (
 func TestCircleWrite(t *testing.T) {
 	t.Run("not all props set", func(t *testing.T) {
 		canvas := new(render.MockCanvas)
-		c := Component{NamedPropertiesMap: map[string][]string{"not set": []string{"something"}}}
+		c := Component{NamedPropertiesMap: map[string][]string{"not set": {"something"}}}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.EqualError(t, err, "cannot draw circle, not all named properties are set: map[not set:[something]]")
@@ -48,18 +48,18 @@ func TestCircleSetNamedProperties(t *testing.T) {
 		err   string
 	}
 	tests := []testSet{
-		testSet{
+		{
 			name:  "no props",
 			start: Component{},
 			input: render.NamedProperties{},
 			res:   Component{},
 			err:   "",
 		},
-		testSet{
+		{
 			name: "RGBA invalid",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"R"},
+					"aProp": {"R"},
 				},
 			},
 			input: render.NamedProperties{
@@ -67,16 +67,16 @@ func TestCircleSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"R"},
+					"aProp": {"R"},
 				},
 			},
 			err: "error converting not a number to uint8",
 		},
-		testSet{
+		{
 			name: "RGBA valid",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"R", "G", "B", "A"},
+					"aProp": {"R", "G", "B", "A"},
 				},
 			},
 			input: render.NamedProperties{
@@ -88,11 +88,11 @@ func TestCircleSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "non-RGBA invalid type",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"not a prop"},
+					"aProp": {"not a prop"},
 				},
 			},
 			input: render.NamedProperties{
@@ -100,16 +100,16 @@ func TestCircleSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"not a prop"},
+					"aProp": {"not a prop"},
 				},
 			},
 			err: "error converting not a number to int",
 		},
-		testSet{
+		{
 			name: "non-RGBA invalid name",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"not a prop"},
+					"aProp": {"not a prop"},
 				},
 			},
 			input: render.NamedProperties{
@@ -117,16 +117,16 @@ func TestCircleSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"not a prop"},
+					"aProp": {"not a prop"},
 				},
 			},
 			err: "invalid component property in named property map: not a prop",
 		},
-		testSet{
+		{
 			name: "centreX",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"centreX"},
+					"aProp": {"centreX"},
 				},
 			},
 			input: render.NamedProperties{
@@ -138,11 +138,11 @@ func TestCircleSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "centreY",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"centreY"},
+					"aProp": {"centreY"},
 				},
 			},
 			input: render.NamedProperties{
@@ -154,11 +154,11 @@ func TestCircleSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "radius",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"radius"},
+					"aProp": {"radius"},
 				},
 			},
 			input: render.NamedProperties{
@@ -170,15 +170,15 @@ func TestCircleSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "full prop set, multiple sources, unused props",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"col1": []string{"R", "G", "A"},
-					"left": []string{"centreX"},
-					"wide": []string{"radius", "centreY"},
-					"col3": []string{"B"},
-					"what": []string{"R", "G", "B", "A", "centreX"},
+					"col1": {"R", "G", "A"},
+					"left": {"centreX"},
+					"wide": {"radius", "centreY"},
+					"col3": {"B"},
+					"what": {"R", "G", "B", "A", "centreX"},
 				},
 			},
 			input: render.NamedProperties{
@@ -191,7 +191,7 @@ func TestCircleSetNamedProperties(t *testing.T) {
 				"left":             3,
 			},
 			res: Component{
-				NamedPropertiesMap: map[string][]string{"what": []string{"R", "G", "B", "A", "centreX"}},
+				NamedPropertiesMap: map[string][]string{"what": {"R", "G", "B", "A", "centreX"}},
 				Centre:             image.Pt(3, 80),
 				Radius:             80,
 				Colour:             color.NRGBA{R: uint8(15), G: uint8(15), B: uint8(150), A: uint8(15)},
@@ -229,19 +229,19 @@ func TestCircleVerifyAndTestCircleJSONData(t *testing.T) {
 		err   string
 	}
 	tests := []testSet{
-		testSet{
+		{
 			name:  "incorrect format data",
 			input: "hello",
 			props: render.NamedProperties{},
 			err:   "failed to convert returned data to component properties",
 		},
-		testSet{
+		{
 			name:  "empty data",
 			input: &circleFormat{},
 			props: render.NamedProperties{},
 			err:   "error parsing data for property centreX: could not parse empty property",
 		},
-		testSet{
+		{
 			name: "full data",
 			input: &circleFormat{
 				CentreX: "6",
@@ -258,7 +258,7 @@ func TestCircleVerifyAndTestCircleJSONData(t *testing.T) {
 			props: render.NamedProperties{},
 			err:   "",
 		},
-		testSet{
+		{
 			name: "error in centreY",
 			input: &circleFormat{
 				CentreX: "6",
@@ -274,7 +274,7 @@ func TestCircleVerifyAndTestCircleJSONData(t *testing.T) {
 			props: render.NamedProperties{},
 			err:   `failed to convert property centreY to integer: strconv.ParseInt: parsing "a": invalid syntax`,
 		},
-		testSet{
+		{
 			name: "error in radius",
 			input: &circleFormat{
 				CentreX: "6",
@@ -290,7 +290,7 @@ func TestCircleVerifyAndTestCircleJSONData(t *testing.T) {
 			props: render.NamedProperties{},
 			err:   `failed to convert property radius to integer: strconv.ParseInt: parsing "a": invalid syntax`,
 		},
-		testSet{
+		{
 			name: "error in red",
 			input: &circleFormat{
 				CentreX: "6",
@@ -306,7 +306,7 @@ func TestCircleVerifyAndTestCircleJSONData(t *testing.T) {
 			props: render.NamedProperties{},
 			err:   `failed to convert property R to uint8: strconv.ParseUint: parsing "a": invalid syntax`,
 		},
-		testSet{
+		{
 			name: "error in green",
 			input: &circleFormat{
 				CentreX: "6",
@@ -322,7 +322,7 @@ func TestCircleVerifyAndTestCircleJSONData(t *testing.T) {
 			props: render.NamedProperties{},
 			err:   `failed to convert property G to uint8: strconv.ParseUint: parsing "a": invalid syntax`,
 		},
-		testSet{
+		{
 			name: "error in blue",
 			input: &circleFormat{
 				CentreX: "6",
@@ -338,7 +338,7 @@ func TestCircleVerifyAndTestCircleJSONData(t *testing.T) {
 			props: render.NamedProperties{},
 			err:   `failed to convert property B to uint8: strconv.ParseUint: parsing "a": invalid syntax`,
 		},
-		testSet{
+		{
 			name: "error in alpha",
 			input: &circleFormat{
 				CentreX: "6",
@@ -354,7 +354,7 @@ func TestCircleVerifyAndTestCircleJSONData(t *testing.T) {
 			props: render.NamedProperties{},
 			err:   `failed to convert property A to uint8: strconv.ParseUint: parsing "a": invalid syntax`,
 		},
-		testSet{
+		{
 			name: "prop in alpha",
 			input: &circleFormat{
 				CentreX: "6",
@@ -367,7 +367,7 @@ func TestCircleVerifyAndTestCircleJSONData(t *testing.T) {
 					Alpha: "$a$",
 				},
 			},
-			res:   Component{NamedPropertiesMap: map[string][]string{"a": []string{"A"}}, Centre: image.Pt(6, 7), Radius: 10, Colour: color.NRGBA{R: 100, G: 10, B: 200}},
+			res:   Component{NamedPropertiesMap: map[string][]string{"a": {"A"}}, Centre: image.Pt(6, 7), Radius: 10, Colour: color.NRGBA{R: 100, G: 10, B: 200}},
 			props: render.NamedProperties{"a": struct{ Message string }{Message: "Please replace me with real data"}},
 		},
 	}

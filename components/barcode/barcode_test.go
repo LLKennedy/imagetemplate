@@ -14,7 +14,7 @@ import (
 func TestBarcodeWrite(t *testing.T) {
 	t.Run("not all props set", func(t *testing.T) {
 		canvas := new(render.MockCanvas)
-		c := Component{NamedPropertiesMap: map[string][]string{"not set": []string{"something"}}}
+		c := Component{NamedPropertiesMap: map[string][]string{"not set": {"something"}}}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.EqualError(t, err, "cannot draw barcode, not all named properties are set: map[not set:[something]]")
@@ -49,18 +49,18 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 		err   string
 	}
 	tests := []testSet{
-		testSet{
+		{
 			name:  "no props",
 			start: Component{},
 			input: render.NamedProperties{},
 			res:   Component{},
 			err:   "",
 		},
-		testSet{
+		{
 			name: "RGBA invalid",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"dR"},
+					"aProp": {"dR"},
 				},
 			},
 			input: render.NamedProperties{
@@ -68,16 +68,16 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"dR"},
+					"aProp": {"dR"},
 				},
 			},
 			err: "error converting not a number to uint8",
 		},
-		testSet{
+		{
 			name: "dRGBA valid",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"dR", "dG", "dB", "dA"},
+					"aProp": {"dR", "dG", "dB", "dA"},
 				},
 			},
 			input: render.NamedProperties{
@@ -89,11 +89,11 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "non-RGBA invalid type",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"not a prop"},
+					"aProp": {"not a prop"},
 				},
 			},
 			input: render.NamedProperties{
@@ -101,16 +101,16 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"not a prop"},
+					"aProp": {"not a prop"},
 				},
 			},
 			err: "error converting not a number to int",
 		},
-		testSet{
+		{
 			name: "non-RGBA invalid name",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"not a prop"},
+					"aProp": {"not a prop"},
 				},
 			},
 			input: render.NamedProperties{
@@ -118,16 +118,16 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"not a prop"},
+					"aProp": {"not a prop"},
 				},
 			},
 			err: "invalid component property in named property map: not a prop",
 		},
-		testSet{
+		{
 			name: "content invalid",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"content"},
+					"aProp": {"content"},
 				},
 			},
 			input: render.NamedProperties{
@@ -135,16 +135,16 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"content"},
+					"aProp": {"content"},
 				},
 			},
 			err: "error converting 15 to string",
 		},
-		testSet{
+		{
 			name: "type invalid",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"barcodeType"},
+					"aProp": {"barcodeType"},
 				},
 			},
 			input: render.NamedProperties{
@@ -152,16 +152,16 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"barcodeType"},
+					"aProp": {"barcodeType"},
 				},
 			},
 			err: "error converting 15 to barcode type",
 		},
-		testSet{
+		{
 			name: "unsupported type",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"barcodeType"},
+					"aProp": {"barcodeType"},
 				},
 			},
 			input: render.NamedProperties{
@@ -169,16 +169,16 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"barcodeType"},
+					"aProp": {"barcodeType"},
 				},
 			},
 			err: "error converting 15 to barcode type",
 		},
-		testSet{
+		{
 			name: "invalid colour code",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"Rd"},
+					"aProp": {"Rd"},
 				},
 			},
 			input: render.NamedProperties{
@@ -186,16 +186,16 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"Rd"},
+					"aProp": {"Rd"},
 				},
 			},
 			err: "name was a string inside RGBA and Value was a valid uint8, but Name wasn't R, G, B, or A. Name was: Rd",
 		},
-		testSet{
+		{
 			name: "topLeftX",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"topLeftX"},
+					"aProp": {"topLeftX"},
 				},
 			},
 			input: render.NamedProperties{
@@ -207,11 +207,11 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "topLeftY",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"topLeftY"},
+					"aProp": {"topLeftY"},
 				},
 			},
 			input: render.NamedProperties{
@@ -223,11 +223,11 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "width",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"aProp": []string{"width"},
+					"aProp": {"width"},
 				},
 			},
 			input: render.NamedProperties{
@@ -239,11 +239,11 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "aztec",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"type": []string{"barcodeType"},
+					"type": {"barcodeType"},
 				},
 			},
 			input: render.NamedProperties{
@@ -256,11 +256,11 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "39",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"type": []string{"barcodeType"},
+					"type": {"barcodeType"},
 				},
 			},
 			input: render.NamedProperties{
@@ -273,11 +273,11 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "93",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"type": []string{"barcodeType"},
+					"type": {"barcodeType"},
 				},
 			},
 			input: render.NamedProperties{
@@ -290,11 +290,11 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "pdf",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"type": []string{"barcodeType"},
+					"type": {"barcodeType"},
 				},
 			},
 			input: render.NamedProperties{
@@ -307,11 +307,11 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "qr",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"type": []string{"barcodeType"},
+					"type": {"barcodeType"},
 				},
 			},
 			input: render.NamedProperties{
@@ -324,17 +324,17 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			},
 			err: "",
 		},
-		testSet{
+		{
 			name: "full prop set, multiple sources, unused props",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
-					"col1":             []string{"dR", "dG", "dA"},
-					"left":             []string{"topLeftX"},
-					"wide":             []string{"width", "height", "topLeftY"},
-					"col3":             []string{"dB", "bR", "bG", "bB", "bA"},
-					"what":             []string{"bR", "bG", "bB", "bA", "topLeftX"},
-					"some other thing": []string{"content"},
-					"type":             []string{"barcodeType"},
+					"col1":             {"dR", "dG", "dA"},
+					"left":             {"topLeftX"},
+					"wide":             {"width", "height", "topLeftY"},
+					"col3":             {"dB", "bR", "bG", "bB", "bA"},
+					"what":             {"bR", "bG", "bB", "bA", "topLeftX"},
+					"some other thing": {"content"},
+					"type":             {"barcodeType"},
 				},
 			},
 			input: render.NamedProperties{
@@ -348,7 +348,7 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 				"type":             render.BarcodeTypeDataMatrix,
 			},
 			res: Component{
-				NamedPropertiesMap: map[string][]string{"what": []string{"bR", "bG", "bB", "bA", "topLeftX"}},
+				NamedPropertiesMap: map[string][]string{"what": {"bR", "bG", "bB", "bA", "topLeftX"}},
 				TopLeft:            image.Pt(3, 80),
 				Width:              80,
 				Height:             80,
@@ -390,7 +390,7 @@ func TestBarcodeVerifyAndTestBarcodeJSONData(t *testing.T) {
 		err   string
 	}
 	tests := []testSet{
-		testSet{
+		{
 			name:  "incorrect format data",
 			start: Component{},
 			input: "hello",
