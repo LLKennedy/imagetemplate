@@ -4,6 +4,11 @@
 *.exe~
 .vscode/
 
+!examples/*
+
+
+# Every conceivable image type
+
 # JPEG
 *.jpg
 *.jpeg
