@@ -7,11 +7,11 @@ The main readme file for the repository provides code for a basic usage example,
 
 ## Contents
 
-### 1. [Terminology](#Terminology)
-### 2. [Template Files](#Template-Files)
-### 3. [Builder](#Builder)
-### 4. [Default Components](#Default-Components)
-### 5. [Example Results](#Example-Results)
+#### 1. [Terminology](#Terminology)
+#### 2. [Template Files](#Template-Files)
+#### 3. [Builder](#Builder)
+#### 4. [Default Components](#Default-Components)
+#### 5. [Example Results](#Example-Results)
 
 ## Terminology
 
