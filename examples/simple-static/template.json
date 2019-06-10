@@ -1,0 +1,75 @@
+{
+	"baseImage": {
+		"width": "500",
+		"height": "300",
+		"baseColour": {
+			"R": "150",
+			"G": "150",
+			"B": "150",
+			"A": "255"
+		},
+		"ppi": "150"
+	},
+	"components": [
+		{
+			"type": "photo",
+			"properties": {
+				"fileName": "Lydia Braun.jpg",
+				"topLeftX": "20",
+				"topLeftY": "20",
+				"width": "150",
+				"height": "150"
+			}
+		},
+		{
+			"type": "text",
+			"properties": {
+				"content": "Braun",
+				"startX": "190",
+				"startY": "75",
+				"size": "35",
+				"font": {
+					"fontFile": "Cabin-Regular.ttf"
+				},
+				"maxWidth": "1000",
+				"alignment": "left",
+				"colour": {
+					"R": "0",
+					"G": "0",
+					"B": "0",
+					"A": "255"
+				}
+			}
+		},
+		{
+			"type": "text",
+			"properties": {
+				"content": "Lydia",
+				"startX": "190",
+				"startY": "110",
+				"size": "20",
+				"font": {
+					"fontFile": "Cabin-Regular.ttf"
+				},
+				"maxWidth": "1000",
+				"alignment": "left",
+				"colour": {
+					"R": "0",
+					"G": "0",
+					"B": "0",
+					"A": "255"
+				}
+			}
+		},
+		{
+			"type": "photo",
+			"properties": {
+				"fileName": "CollabFuel.png",
+				"topLeftX": "120",
+				"topLeftY": "120",
+				"width": "360",
+				"height": "200"
+			}
+		}
+	]
+}

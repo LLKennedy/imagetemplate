@@ -22,7 +22,6 @@ func TestDateTimeWrite(t *testing.T) {
 	}
 	t.Run("not all props set", func(t *testing.T) {
 		canvas := new(render.MockCanvas)
-		canvas.On("GetPPI").Return(float64(72))
 		c := Component{NamedPropertiesMap: map[string][]string{"not set": {"something"}}}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)

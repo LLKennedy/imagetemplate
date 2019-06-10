@@ -1,7 +1,23 @@
 package main
 
-import "github.com/LLKennedy/imagetemplate/v2"
+import (
+	"fmt"
+	"io/ioutil"
+	"os"
+
+	"github.com/LLKennedy/imagetemplate/v2"
+)
 
 func main() {
-	imagetemplate.NewBuilder()
+	props, callback, err := imagetemplate.LoadTemplate("template.json")
+	if err != nil {
+		fmt.Printf("failed to load file: %v\n", err)
+		os.Exit(1)
+	}
+	data, err := callback(props)
+	err = ioutil.WriteFile("simple-static.bmp", data, os.ModeExclusive)
+	if err != nil {
+		fmt.Printf("failed to write file: %v\n", err)
+		os.Exit(1)
+	}
 }
