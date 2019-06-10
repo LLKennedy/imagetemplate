@@ -26,12 +26,32 @@
 			"properties": {
 				"content": "Braun",
 				"startX": "190",
-				"startY": "50",
-				"size": "24",
+				"startY": "75",
+				"size": "35",
 				"font": {
 					"fontFile": "Cabin-Regular.ttf"
 				},
-				"maxWidth": "100",
+				"maxWidth": "1000",
+				"alignment": "left",
+				"colour": {
+					"R": "0",
+					"G": "0",
+					"B": "0",
+					"A": "255"
+				}
+			}
+		},
+		{
+			"type": "text",
+			"properties": {
+				"content": "Lydia",
+				"startX": "190",
+				"startY": "110",
+				"size": "20",
+				"font": {
+					"fontFile": "Cabin-Regular.ttf"
+				},
+				"maxWidth": "1000",
 				"alignment": "left",
 				"colour": {
 					"R": "0",
