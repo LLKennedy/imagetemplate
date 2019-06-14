@@ -1,8 +1,8 @@
 package imagetemplate
 
 import (
+	"io"
 	"io/ioutil"
-	"os"
 
 	"github.com/LLKennedy/imagetemplate/v2/render"
 )
@@ -14,9 +14,23 @@ func LoadTemplate(path string) (render.NamedProperties, func(render.NamedPropert
 	if err != nil {
 		return nil, nil, err
 	}
+	return loadBuilder(builder)
+}
+
+func LoadReader(reader io.Reader) (render.NamedProperties, func(render.NamedProperties) ([]byte, error), error) {
+	bytes, err := ioutil.ReadAll(reader)
+	builder := NewBuilder()
+	builder, err = builder.LoadComponentsData(bytes)
+	if err != nil {
+		return nil, nil, err
+	}
+	return loadBuilder(builder)
+}
+
+func loadBuilder(builder Builder) (render.NamedProperties, func(render.NamedProperties) ([]byte, error), error) {
 	props := builder.GetNamedPropertiesList()
 	cont := func(inProps render.NamedProperties) ([]byte, error) {
-		builder, err = builder.SetNamedProperties(props)
+		builder, err := builder.SetNamedProperties(props)
 		if err != nil {
 			return nil, err
 		}
@@ -26,10 +40,6 @@ func LoadTemplate(path string) (render.NamedProperties, func(render.NamedPropert
 		}
 		var data []byte
 		data, err = builder.WriteToBMP()
-		if err != nil {
-			return nil, err
-		}
-		err = ioutil.WriteFile("simple-static.bmp", data, os.ModeExclusive)
 		if err != nil {
 			return nil, err
 		}
