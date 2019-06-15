@@ -11,6 +11,8 @@ import (
 	"image/draw"
 	_ "image/jpeg" // jpeg imported for image decoding
 	_ "image/png"  // png imported for image decoding
+	"io"
+	"io/ioutil"
 	"strconv"
 	"strings"
 
@@ -20,12 +22,12 @@ import (
 	_ "github.com/LLKennedy/imagetemplate/v2/components/image"     // add image component to registry by default
 	_ "github.com/LLKennedy/imagetemplate/v2/components/rectangle" // add rectangle component to registry by default
 	_ "github.com/LLKennedy/imagetemplate/v2/components/text"      // add text component to registry by default
-	fs "github.com/LLKennedy/imagetemplate/v2/internal/filesystem"
 	"github.com/LLKennedy/imagetemplate/v2/render"
 
 	"github.com/disintegration/imaging"
 	"golang.org/x/image/bmp"
 	_ "golang.org/x/image/tiff" // tiff imported for image decoding
+	"golang.org/x/tools/godoc/vfs"
 )
 
 // Builder manipulates Canvas objects and outputs to a bitmap
@@ -84,12 +86,12 @@ type ImageBuilder struct {
 	Canvas          render.Canvas
 	Components      []ToggleableComponent
 	NamedProperties render.NamedProperties
-	reader          fs.FileReader
+	fs          vfs.FileSystem
 }
 
 // NewBuilder generates a new ImageBuilder with an internal canvas of the specified width and height, and optionally the specified starting colour. No provided colour will result in defaults for Image.
 func NewBuilder() Builder {
-	return ImageBuilder{reader: fs.IoutilFileReader{}}
+	return ImageBuilder{fs: vfs.OS("")}
 }
 
 // WriteToBMP outputs the contents of the builder to a BMP byte array
@@ -106,7 +108,11 @@ func (builder ImageBuilder) WriteToBMP() ([]byte, error) {
 func (builder ImageBuilder) LoadComponentsFile(fileName string) (Builder, error) {
 	b := builder
 	// Load initial data into template object
-	fileData, err := builder.reader.ReadFile(fileName)
+	file, err := builder.fs.Open(fileName)
+	if err != nil {
+		return builder, err
+	}
+	fileData, err := ioutil.ReadAll(file)
 	if err != nil {
 		return builder, err
 	}
@@ -150,7 +156,7 @@ func (builder ImageBuilder) setBackgroundImage(template Template) (ImageBuilder,
 		return builder.SetCanvas(builder.GetCanvas()).(ImageBuilder), nil
 	}
 	// Get image data from string or file
-	var imageData []byte
+	var imageData io.Reader
 	var err error
 	var baseImage image.Image
 	if baseColourSet {
@@ -194,20 +200,15 @@ func (builder ImageBuilder) setBackgroundImage(template Template) (ImageBuilder,
 	} else {
 		if dataSet {
 			sReader := strings.NewReader(template.BaseImage.Data)
-			decoder := base64.NewDecoder(base64.StdEncoding, sReader)
-			_, err = decoder.Read(imageData)
-			if err != nil {
-				return builder, err
-			}
+			imageData = base64.NewDecoder(base64.StdEncoding, sReader)
 		} else {
-			imageData, err = builder.reader.ReadFile(template.BaseImage.FileName)
+			imageData, err = builder.fs.Open(fileName)
 			if err != nil {
 				return builder, err
 			}
 		}
 		// Decode image data
-		imageBuffer := bytes.NewBuffer(imageData)
-		baseImage, _, err = image.Decode(imageBuffer)
+		baseImage, _, err = image.Decode(imageData)
 		if err != nil {
 			return builder, err
 		}
