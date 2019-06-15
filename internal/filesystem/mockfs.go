@@ -1,17 +1,14 @@
 package filesystem
 
-// MockFile is some mock file data
-type MockFile struct {
-	Data []byte
-	Err  error
-}
+import "github.com/stretchr/testify/mock"
 
 // MockReader is a mock implementation of the Reader interface, for testing purposes
 type MockReader struct {
-	Files map[string]MockFile
+	mock.Mock
 }
 
 // ReadFile returns a pre-set data/error pair
 func (m MockReader) ReadFile(filename string) ([]byte, error) {
-	return m.Files[filename].Data, m.Files[filename].Err
+	args := m.Called(filename)
+	return []byte(args.Get(0)), args.Error(1)
 }
