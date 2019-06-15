@@ -86,7 +86,7 @@ type ImageBuilder struct {
 	Canvas          render.Canvas
 	Components      []ToggleableComponent
 	NamedProperties render.NamedProperties
-	fs          vfs.FileSystem
+	fs              vfs.FileSystem
 }
 
 // NewBuilder generates a new ImageBuilder with an internal canvas of the specified width and height, and optionally the specified starting colour. No provided colour will result in defaults for Image.
@@ -112,6 +112,7 @@ func (builder ImageBuilder) LoadComponentsFile(fileName string) (Builder, error)
 	if err != nil {
 		return builder, err
 	}
+	defer file.Close()
 	fileData, err := ioutil.ReadAll(file)
 	if err != nil {
 		return builder, err
@@ -202,10 +203,11 @@ func (builder ImageBuilder) setBackgroundImage(template Template) (ImageBuilder,
 			sReader := strings.NewReader(template.BaseImage.Data)
 			imageData = base64.NewDecoder(base64.StdEncoding, sReader)
 		} else {
-			imageData, err = builder.fs.Open(fileName)
+			imageData, err = builder.fs.Open(template.BaseImage.FileName)
 			if err != nil {
 				return builder, err
 			}
+			defer imageData.(io.Closer).Close()
 		}
 		// Decode image data
 		baseImage, _, err = image.Decode(imageData)

@@ -42,7 +42,7 @@ type Canvas interface {
 // ImageCanvas uses golang's native Image package to implement the Canvas interface
 type ImageCanvas struct {
 	Image         draw.Image
-	fs        vfs.FileSystem
+	fs            vfs.FileSystem
 	pixelsPerInch float64
 }
 

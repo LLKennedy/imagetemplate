@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/LLKennedy/imagetemplate/v2/render"
+	"golang.org/x/tools/godoc/vfs"
 )
 
 // Component implements the Component interface for rectangles
@@ -179,6 +180,6 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 
 func init() {
 	for _, name := range []string{"rect", "RECT", "Rect", "rectangle", "Rectangle", "RECTANGLE"} {
-		render.RegisterComponent(name, func() render.Component { return Component{} })
+		render.RegisterComponent(name, func(vfs.FileSystem) render.Component { return Component{} })
 	}
 }

@@ -2,10 +2,10 @@ package render
 
 import (
 	"fmt"
+	"golang.org/x/tools/godoc/vfs"
 	"strconv"
 	"strings"
 	"time"
-	"golang.org/x/tools/godoc/vfs"
 )
 
 var registry = map[string](func(vfs.FileSystem) Component){}
