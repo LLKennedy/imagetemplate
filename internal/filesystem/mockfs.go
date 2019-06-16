@@ -10,5 +10,5 @@ type MockReader struct {
 // ReadFile returns a pre-set data/error pair
 func (m MockReader) ReadFile(filename string) ([]byte, error) {
 	args := m.Called(filename)
-	return []byte(args.Get(0)), args.Error(1)
+	return (args.Get(0)).([]byte), args.Error(1)
 }
