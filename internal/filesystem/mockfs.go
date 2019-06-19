@@ -3,6 +3,7 @@ package filesystem
 import (
 	"bytes"
 	"fmt"
+	"os"
 
 	"github.com/stretchr/testify/mock"
 	"golang.org/x/tools/godoc/vfs"
@@ -24,6 +25,35 @@ func NewMockReader(files ...mockFile) *MockReader {
 func (m *MockReader) Open(filename string) (vfs.ReadSeekCloser, error) {
 	args := m.Called(filename)
 	return (args.Get(0)).(vfs.ReadSeekCloser), args.Error(1)
+}
+
+// Lstat does stat stuff
+func (m *MockReader) Lstat(path string) (os.FileInfo, error) {
+	args := m.Called(path)
+	return (args.Get(0)).(os.FileInfo), args.Error(1)
+}
+
+// Stat gets file stats
+func (m *MockReader) Stat(path string) (os.FileInfo, error) {
+	args := m.Called(path)
+	return (args.Get(0)).(os.FileInfo), args.Error(1)
+}
+
+// ReadDir walks the directory
+func (m *MockReader) ReadDir(path string) ([]os.FileInfo, error) {
+	args := m.Called(path)
+	return (args.Get(0)).([]os.FileInfo), args.Error(1)
+}
+
+// RootType returns the Root Type
+func (m *MockReader) RootType(path string) vfs.RootType {
+	args := m.Called(path)
+	return (args.Get(0)).(vfs.RootType)
+}
+
+func (m *MockReader) String() string {
+	args := m.Called()
+	return args.String(0)
 }
 
 // mockFile is the simple implementation of vfs.ReadSeekCloser
