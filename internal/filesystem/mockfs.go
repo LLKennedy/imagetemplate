@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/stretchr/testify/mock"
 	"golang.org/x/tools/godoc/vfs"
@@ -15,7 +16,7 @@ type MockReader struct {
 }
 
 // NewMockReader creates a new mock Reader
-func NewMockReader(files ...mockFile) *MockReader {
+func NewMockReader(files ...MockFile) *MockReader {
 	newReader := new(MockReader)
 	_ = vfs.FileSystem(newReader) // this will fail to compile if the interface isn't met
 	return newReader
@@ -56,35 +57,75 @@ func (m *MockReader) String() string {
 	return args.String(0)
 }
 
-// mockFile is the simple implementation of vfs.ReadSeekCloser
-type mockFile struct {
+// MockFile is the simple implementation of vfs.ReadSeekCloser
+type MockFile struct {
+	mock.Mock
 	buf *bytes.Reader
 }
 
 // NewMockFile creates a new mock file for use with the mock file system
-func NewMockFile(data []byte) vfs.ReadSeekCloser {
-	file := &mockFile{
+func NewMockFile(data []byte) *MockFile {
+	file := &MockFile{
 		buf: bytes.NewReader(data),
 	}
+	_ = vfs.ReadSeekCloser(file)
+	_ = os.FileInfo(file) // check interface conformation
 	return file
 }
 
 // Close does nothing
-func (m *mockFile) Close() error {
+func (m *MockFile) Close() error {
 	return nil
 }
 
 // Read reads from the buffer
-func (m *mockFile) Read(dst []byte) (int, error) {
+func (m *MockFile) Read(dst []byte) (int, error) {
 	if m == nil || m.buf == nil {
 		return 0, fmt.Errorf("cannot read from nil file")
 	}
 	return m.buf.Read(dst)
 }
 
-func (m *mockFile) Seek(offset int64, whence int) (int64, error) {
+// Seek sets the read/write header
+func (m *MockFile) Seek(offset int64, whence int) (int64, error) {
 	if m == nil || m.buf == nil {
 		return 0, fmt.Errorf("cannot seek in nil file")
 	}
 	return m.buf.Seek(offset, whence)
+}
+
+// Name returns the base name of the file
+func (m *MockFile) Name() string {
+	args := m.Called()
+	return args.String(0)
+}
+
+// Size returns the length in bytes for regular files; system-dependent for others
+func (m *MockFile) Size() int64 {
+	args := m.Called()
+	return (args.Get(0)).(int64)
+}
+
+// Mode returns the file mode bits
+func (m *MockFile) Mode() os.FileMode {
+	args := m.Called()
+	return (args.Get(0)).(os.FileMode)
+}
+
+// ModTime returns the modification time
+func (m *MockFile) ModTime() time.Time {
+	args := m.Called()
+	return (args.Get(0)).(time.Time)
+}
+
+// IsDir is an abbreviation for Mode().IsDir()
+func (m *MockFile) IsDir() bool {
+	args := m.Called()
+	return args.Bool(0)
+}
+
+// Sys returns the underlying data source (can return nil)
+func (m *MockFile) Sys() interface{} {
+	args := m.Called()
+	return args.Get(0)
 }

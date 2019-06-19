@@ -1,10 +1,11 @@
 package image
 
 import (
+	"testing"
+
 	fs "github.com/LLKennedy/imagetemplate/v2/internal/filesystem"
 	"github.com/LLKennedy/imagetemplate/v2/render"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestImageSetNamedPropertiesLoadRealFile(t *testing.T) {
@@ -20,7 +21,7 @@ func TestImageSetNamedPropertiesLoadRealFile(t *testing.T) {
 		NamedPropertiesMap: map[string][]string{
 			"aProp": {"fileName"},
 		},
-		reader: fs.IoutilFileReader{},
+		fs: fs.NewMockReader(),
 	}
 	expectedErr := "open !!!\\!!!!!!//\\//\\//\\/\\/!!!!//\\!!!\\\\\\////: The system cannot find the path specified."
 	res, err := c.SetNamedProperties(input)

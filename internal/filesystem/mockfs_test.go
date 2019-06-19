@@ -26,7 +26,7 @@ func TestMockFS(t *testing.T) {
 		assert.Equal(t, seekRes, int64(3))
 	})
 	t.Run("invalid read", func(t *testing.T) {
-		mFile, isMock := res.(*mockFile)
+		mFile, isMock := res.(*MockFile)
 		assert.True(t, isMock)
 		mFile.buf = nil
 		readRes, err := ioutil.ReadAll(res)
@@ -34,7 +34,7 @@ func TestMockFS(t *testing.T) {
 		assert.Empty(t, readRes)
 	})
 	t.Run("invalid seek", func(t *testing.T) {
-		mFile, isMock := res.(*mockFile)
+		mFile, isMock := res.(*MockFile)
 		assert.True(t, isMock)
 		mFile.buf = nil
 		seekRes, err := res.Seek(3, io.SeekStart)
@@ -43,5 +43,8 @@ func TestMockFS(t *testing.T) {
 	})
 	t.Run("close", func(t *testing.T) {
 		assert.NoError(t, res.Close())
+	})
+	t.Run("lstat", func(t *testing.T) {
+		m.On("Lstat", "a").Return()
 	})
 }
