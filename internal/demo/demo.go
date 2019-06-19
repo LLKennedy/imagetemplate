@@ -20,7 +20,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create canvas: %v", err)
 	}
-	builder = img.NewBuilder()
+	builder = img.NewBuilder(nil)
 	builder.SetCanvas(canvas)
 	// canvas, err = canvas.Rectangle(image.Point{X: 110, Y: 40}, 60, 87, color.NRGBA{R: 255, G: 100, B: 0, A: 255})
 	// if err != nil {
