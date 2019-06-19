@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/tools/godoc/vfs"
@@ -75,4 +76,39 @@ func TestMockFS(t *testing.T) {
 		assert.Equal(t, "hello", str)
 	})
 	m.AssertExpectations(t)
+}
+
+func TestMockFile(t *testing.T) {
+	file := NewMockFile(nil)
+	t.Run("name", func(t *testing.T) {
+		file.On("Name").Return("a file")
+		name := file.Name()
+		assert.Equal(t, "a file", name)
+	})
+	t.Run("size", func(t *testing.T) {
+		file.On("Size").Return(int64(100))
+		size := file.Size()
+		assert.Equal(t, int64(100), size)
+	})
+	t.Run("mode", func(t *testing.T) {
+		file.On("Mode").Return(os.ModeCharDevice)
+		mode := file.Mode()
+		assert.Equal(t, os.ModeCharDevice, mode)
+	})
+	t.Run("modtime", func(t *testing.T) {
+		orig := time.Now()
+		file.On("ModTime").Return(orig)
+		modTime := file.ModTime()
+		assert.Equal(t, orig, modTime)
+	})
+	t.Run("isdir", func(t *testing.T) {
+		file.On("IsDir").Return(true)
+		assert.True(t, file.IsDir())
+	})
+	t.Run("sys", func(t *testing.T) {
+		file.On("Sys").Return(struct{ a int }{a: 12})
+		sys := file.Sys()
+		assert.Equal(t, struct{ a int }{a: 12}, sys)
+	})
+	file.AssertExpectations(t)
 }
