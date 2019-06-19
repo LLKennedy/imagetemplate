@@ -1,7 +1,7 @@
 package image
 
 import (
-	"github.com/LLKennedy/imagetemplate/v2/render"
+	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"golang.org/x/tools/godoc/vfs"

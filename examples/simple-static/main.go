@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/LLKennedy/imagetemplate/v2"
+	"github.com/LLKennedy/imagetemplate/v3"
 )
 
 func main() {

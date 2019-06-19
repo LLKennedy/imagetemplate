@@ -6,7 +6,7 @@ import (
 	"image/color"
 	"strings"
 
-	"github.com/LLKennedy/imagetemplate/v2/render"
+	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/boombuler/barcode/qr"
 	"golang.org/x/tools/godoc/vfs"
 )

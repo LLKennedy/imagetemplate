@@ -6,9 +6,9 @@ import (
 	"image/color"
 	"testing"
 
-	fs "github.com/LLKennedy/imagetemplate/v2/internal/filesystem"
+	fs "github.com/LLKennedy/imagetemplate/v3/internal/filesystem"
 	"golang.org/x/tools/godoc/vfs"
-	"github.com/LLKennedy/imagetemplate/v2/render"
+	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -10,7 +10,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/LLKennedy/imagetemplate/v2/render"
+	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/disintegration/imaging"
 	_ "golang.org/x/image/bmp"  // bmp imported for image decoding
 	_ "golang.org/x/image/tiff" // tiff imported for image decoding

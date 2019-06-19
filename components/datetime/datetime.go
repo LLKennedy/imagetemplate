@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/LLKennedy/gosysfonts"
-	"github.com/LLKennedy/imagetemplate/v2/render"
+	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
 	"golang.org/x/tools/godoc/vfs"

@@ -3,7 +3,7 @@ package imagetemplate
 import (
 	"testing"
 
-	"github.com/LLKennedy/imagetemplate/v2/render"
+	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/stretchr/testify/assert"
 )
 

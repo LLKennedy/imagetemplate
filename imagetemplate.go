@@ -4,7 +4,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/LLKennedy/imagetemplate/v2/render"
+	"github.com/LLKennedy/imagetemplate/v3/render"
 )
 
 // LoadTemplate takes a file path and returns a Builder constructed from the template file
@@ -17,6 +17,7 @@ func LoadTemplate(path string) (render.NamedProperties, func(render.NamedPropert
 	return loadBuilder(builder)
 }
 
+// LoadReader loads JSON data from a reader, returns a list of named properties, and accepts a callback with updated properties to create BMP data
 func LoadReader(reader io.Reader) (render.NamedProperties, func(render.NamedProperties) ([]byte, error), error) {
 	bytes, err := ioutil.ReadAll(reader)
 	builder := NewBuilder()

@@ -8,8 +8,8 @@ import (
 	"image"
 	"testing"
 
-	fs "github.com/LLKennedy/imagetemplate/v2/internal/filesystem"
-	"github.com/LLKennedy/imagetemplate/v2/render"
+	fs "github.com/LLKennedy/imagetemplate/v3/internal/filesystem"
+	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/stretchr/testify/assert"
 	_ "golang.org/x/image/bmp" // bmp imported for image decoding
 	"golang.org/x/tools/godoc/vfs"
