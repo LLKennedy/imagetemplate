@@ -11,6 +11,8 @@ import (
 	"image/draw"
 	_ "image/jpeg" // jpeg imported for image decoding
 	_ "image/png"  // png imported for image decoding
+	"io"
+	"io/ioutil"
 	"strconv"
 	"strings"
 
@@ -20,12 +22,12 @@ import (
 	_ "github.com/LLKennedy/imagetemplate/v2/components/image"     // add image component to registry by default
 	_ "github.com/LLKennedy/imagetemplate/v2/components/rectangle" // add rectangle component to registry by default
 	_ "github.com/LLKennedy/imagetemplate/v2/components/text"      // add text component to registry by default
-	fs "github.com/LLKennedy/imagetemplate/v2/internal/filesystem"
 	"github.com/LLKennedy/imagetemplate/v2/render"
 
 	"github.com/disintegration/imaging"
 	"golang.org/x/image/bmp"
 	_ "golang.org/x/image/tiff" // tiff imported for image decoding
+	"golang.org/x/tools/godoc/vfs"
 )
 
 // Builder manipulates Canvas objects and outputs to a bitmap
@@ -55,6 +57,7 @@ type BaseImage struct {
 	BaseColour BaseColour `json:"baseColour"`
 	BaseWidth  string     `json:"width"`
 	BaseHeight string     `json:"height"`
+	PPI        string     `json:"ppi"`
 }
 
 // BaseColour is the template format of the base colour settings
@@ -83,12 +86,12 @@ type ImageBuilder struct {
 	Canvas          render.Canvas
 	Components      []ToggleableComponent
 	NamedProperties render.NamedProperties
-	reader          fs.FileReader
+	fs              vfs.FileSystem
 }
 
 // NewBuilder generates a new ImageBuilder with an internal canvas of the specified width and height, and optionally the specified starting colour. No provided colour will result in defaults for Image.
-func NewBuilder() ImageBuilder {
-	return ImageBuilder{reader: fs.IoutilFileReader{}}
+func NewBuilder() Builder {
+	return ImageBuilder{fs: vfs.OS("")}
 }
 
 // WriteToBMP outputs the contents of the builder to a BMP byte array
@@ -105,7 +108,12 @@ func (builder ImageBuilder) WriteToBMP() ([]byte, error) {
 func (builder ImageBuilder) LoadComponentsFile(fileName string) (Builder, error) {
 	b := builder
 	// Load initial data into template object
-	fileData, err := builder.reader.ReadFile(fileName)
+	file, err := builder.fs.Open(fileName)
+	if err != nil {
+		return builder, err
+	}
+	defer file.Close()
+	fileData, err := ioutil.ReadAll(file)
 	if err != nil {
 		return builder, err
 	}
@@ -149,7 +157,7 @@ func (builder ImageBuilder) setBackgroundImage(template Template) (ImageBuilder,
 		return builder.SetCanvas(builder.GetCanvas()).(ImageBuilder), nil
 	}
 	// Get image data from string or file
-	var imageData []byte
+	var imageData io.Reader
 	var err error
 	var baseImage image.Image
 	if baseColourSet {
@@ -193,20 +201,16 @@ func (builder ImageBuilder) setBackgroundImage(template Template) (ImageBuilder,
 	} else {
 		if dataSet {
 			sReader := strings.NewReader(template.BaseImage.Data)
-			decoder := base64.NewDecoder(base64.StdEncoding, sReader)
-			_, err = decoder.Read(imageData)
-			if err != nil {
-				return builder, err
-			}
+			imageData = base64.NewDecoder(base64.StdEncoding, sReader)
 		} else {
-			imageData, err = builder.reader.ReadFile(template.BaseImage.FileName)
+			imageData, err = builder.fs.Open(template.BaseImage.FileName)
 			if err != nil {
 				return builder, err
 			}
+			defer imageData.(io.Closer).Close()
 		}
 		// Decode image data
-		imageBuffer := bytes.NewBuffer(imageData)
-		baseImage, _, err = image.Decode(imageBuffer)
+		baseImage, _, err = image.Decode(imageData)
 		if err != nil {
 			return builder, err
 		}
@@ -223,6 +227,12 @@ func (builder ImageBuilder) setBackgroundImage(template Template) (ImageBuilder,
 		drawImage = image.NewNRGBA(baseImage.Bounds())
 		draw.Draw(drawImage, baseImage.Bounds(), baseImage, baseImage.Bounds().Min, draw.Over)
 		b = b.SetCanvas(render.ImageCanvas{Image: drawImage}).(ImageBuilder)
+		ppi, err := strconv.ParseFloat(template.BaseImage.PPI, 64)
+		if err != nil || ppi == 0 {
+			ppi = float64(72)
+		}
+		canvas := b.GetCanvas().SetPPI(ppi)
+		b = (b.SetCanvas(canvas)).(ImageBuilder)
 		return b, nil
 	}
 	// Check if resizing is necessary
@@ -246,11 +256,16 @@ func (builder ImageBuilder) setBackgroundImage(template Template) (ImageBuilder,
 		}
 		baseImage = imaging.Resize(baseImage, resizedWidth, resizedHeight, imaging.Lanczos)
 	}
-	canvas, err := b.GetCanvas().DrawImage(image.Point{X: 0, Y: 0}, baseImage)
+	ppi, err := strconv.ParseFloat(template.BaseImage.PPI, 64)
+	if err != nil || ppi == 0 {
+		ppi = float64(72)
+	}
+	canvas := b.GetCanvas().SetPPI(ppi)
+	canvas, err = canvas.DrawImage(image.Point{X: 0, Y: 0}, baseImage)
 	if err != nil {
 		return builder, err
 	}
-	b = b.SetCanvas(canvas).(ImageBuilder)
+	b = (b.SetCanvas(canvas)).(ImageBuilder)
 	return b, nil
 }
 
@@ -356,7 +371,7 @@ func (builder ImageBuilder) ApplyComponents() (Builder, error) {
 	for _, tComponent := range b.Components {
 		if tComponent.Conditional.Name == "" {
 			var err error
-			b.Canvas, err = tComponent.Component.Write(b.Canvas)
+			b.Canvas, err = tComponent.Component.Write(b.GetCanvas())
 			if err != nil {
 				return builder, err
 			}
@@ -366,7 +381,7 @@ func (builder ImageBuilder) ApplyComponents() (Builder, error) {
 				return builder, err
 			}
 			if valid {
-				b.Canvas, err = tComponent.Component.Write(b.Canvas)
+				b.Canvas, err = tComponent.Component.Write(b.GetCanvas())
 				if err != nil {
 					return builder, err
 				}

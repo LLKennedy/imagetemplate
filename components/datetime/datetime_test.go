@@ -9,6 +9,7 @@ import (
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
+	"golang.org/x/tools/godoc/vfs"
 
 	"github.com/LLKennedy/imagetemplate/v2/render"
 	"github.com/golang/freetype/truetype"
@@ -22,7 +23,6 @@ func TestDateTimeWrite(t *testing.T) {
 	}
 	t.Run("not all props set", func(t *testing.T) {
 		canvas := new(render.MockCanvas)
-		canvas.On("GetPPI").Return(float64(72))
 		c := Component{NamedPropertiesMap: map[string][]string{"not set": {"something"}}}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
@@ -277,5 +277,5 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 func TestInit(t *testing.T) {
 	c, err := render.Decode("date")
 	assert.NoError(t, err)
-	assert.Equal(t, Component{}, c)
+	assert.Equal(t, Component{fs: vfs.OS("")}, c)
 }

@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"io/ioutil"
 	"strings"
 
 	"github.com/LLKennedy/gosysfonts"
-	fs "github.com/LLKennedy/imagetemplate/v2/internal/filesystem"
 	"github.com/LLKennedy/imagetemplate/v2/render"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
+	"golang.org/x/tools/godoc/vfs"
 )
 
 // Component implements the Component interface for text
@@ -23,7 +24,7 @@ type Component struct {
 	Alignment          Alignment
 	Font               *truetype.Font
 	Colour             color.NRGBA
-	reader             fs.FileReader
+	fs                 vfs.FileSystem
 }
 
 type textFormat struct {
@@ -133,10 +134,15 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 			if !ok {
 				return fmt.Errorf("error converting %v to string", value)
 			}
-			if component.reader == nil {
-				component.reader = fs.IoutilFileReader{}
+			if component.fs == nil {
+				component.fs = vfs.OS("")
 			}
-			fontData, err := component.reader.ReadFile(stringVal)
+			fontReader, err := component.fs.Open(stringVal)
+			if err != nil {
+				return err
+			}
+			defer fontReader.Close()
+			fontData, err := ioutil.ReadAll(fontReader)
 			if err != nil {
 				return err
 			}
@@ -288,10 +294,15 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	}
 	if fFile != nil {
 		stringVal := fFile.(string)
-		if c.reader == nil {
-			c.reader = fs.IoutilFileReader{}
+		if c.fs == nil {
+			c.fs = vfs.OS("")
 		}
-		fontData, err := c.reader.ReadFile(stringVal)
+		fontReader, err := c.fs.Open(stringVal)
+		if err != nil {
+			return component, props, err
+		}
+		defer fontReader.Close()
+		fontData, err := ioutil.ReadAll(fontReader)
 		if err != nil {
 			return component, props, err
 		}
@@ -397,6 +408,6 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 
 func init() {
 	for _, name := range []string{"text", "Text", "TEXT", "words", "Words", "WORDS", "writing", "Writing", "WRITING"} {
-		render.RegisterComponent(name, func() render.Component { return Component{} })
+		render.RegisterComponent(name, func(fs vfs.FileSystem) render.Component { return Component{fs: fs} })
 	}
 }
