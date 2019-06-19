@@ -2,20 +2,20 @@ package filesystem
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"golang.org/x/tools/godoc/vfs"
 )
 
 func TestMockReadFile(t *testing.T) {
-	m := MockReader{
-		Files: map[string]MockFile{
-			"a file": {
-				Data: []byte("hello!"),
-				Err:  errors.New("an error"),
-			},
-		},
-	}
-	res, err := m.ReadFile("a file")
-	assert.Equal(t, []byte("hello!"), res)
+	m := new(MockReader)
+	buffer := vfs.ReadSeekCloser(NewMockFile([]byte("hello!")))
+	m.On("Open", "a file").Return(buffer, errors.New("an error"))
+	res, err := m.Open("a file")
 	assert.EqualError(t, err, "an error")
+	readRes, err := ioutil.ReadAll(res)
+	assert.NoError(t, err)
+	assert.Equal(t, []byte("hello!"), readRes)
 }
