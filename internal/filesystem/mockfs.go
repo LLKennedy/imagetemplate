@@ -16,7 +16,7 @@ type MockReader struct {
 // NewMockReader creates a new mock Reader
 func NewMockReader(files ...mockFile) *MockReader {
 	newReader := new(MockReader)
-	_ = vfs.Opener(newReader) // this will fail to compile if the interface isn't met
+	_ = vfs.FileSystem(newReader) // this will fail to compile if the interface isn't met
 	return newReader
 }
 
