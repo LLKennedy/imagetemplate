@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/tools/godoc/vfs"
 )
 
 type mockComponent struct{}
@@ -26,7 +27,7 @@ func (c mockComponent) VerifyAndSetJSONData(interface{}) (Component, NamedProper
 	return nil, nil, nil
 }
 
-func newMock() Component {
+func newMock(vfs.FileSystem) Component {
 	return &mockComponent{}
 }
 
@@ -46,7 +47,7 @@ func TestRegisterComponentAndDecode(t *testing.T) {
 	assert.Nil(t, c)
 	assert.EqualError(t, err, "component error: no component registered for name wrong")
 	c, err = Decode("newComponent")
-	assert.Equal(t, newMock(), c)
+	assert.Equal(t, newMock(vfs.OS("")), c)
 	assert.NoError(t, err)
 }
 

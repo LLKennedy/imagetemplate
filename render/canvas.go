@@ -7,7 +7,6 @@ import (
 	"image/color"
 	"image/draw"
 
-	fs "github.com/LLKennedy/imagetemplate/v2/internal/filesystem"
 	"github.com/boombuler/barcode"
 	"github.com/boombuler/barcode/aztec"
 	"github.com/boombuler/barcode/codabar"
@@ -21,6 +20,7 @@ import (
 	"github.com/boombuler/barcode/twooffive"
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
+	"golang.org/x/tools/godoc/vfs"
 )
 
 // Canvas holds the image struct and associated properties
@@ -42,7 +42,7 @@ type Canvas interface {
 // ImageCanvas uses golang's native Image package to implement the Canvas interface
 type ImageCanvas struct {
 	Image         draw.Image
-	reader        fs.FileReader
+	fs            vfs.FileSystem
 	pixelsPerInch float64
 }
 
@@ -60,7 +60,7 @@ func NewCanvas(width, height int) (ImageCanvas, error) {
 			Min: image.Point{X: 0, Y: 0},
 			Max: image.Point{X: width, Y: height},
 		}),
-		reader: fs.IoutilFileReader{},
+		fs: vfs.OS(""),
 	}, nil
 }
 

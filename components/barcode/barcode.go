@@ -8,6 +8,7 @@ import (
 
 	"github.com/LLKennedy/imagetemplate/v2/render"
 	"github.com/boombuler/barcode/qr"
+	"golang.org/x/tools/godoc/vfs"
 )
 
 // Component implements the Component interface for images
@@ -292,6 +293,6 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 
 func init() {
 	for _, name := range []string{"barcode", "bar", "code", "Barcode", "BARCODE", "BAR", "Bar Code", "bar code"} {
-		render.RegisterComponent(name, func() render.Component { return Component{} })
+		render.RegisterComponent(name, func(vfs.FileSystem) render.Component { return Component{} })
 	}
 }
