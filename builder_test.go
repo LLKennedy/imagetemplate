@@ -62,14 +62,23 @@ func TestLoadComponentsFile(t *testing.T) {
 	builder := ImageBuilder{}
 	t.Run("file error", func(t *testing.T) {
 		builder.fs = func () vfs.FileSystem { 
-			var rsc *fs.MockFile
 			reader := fs.NewMockReader()
-			reader.On("Open", "myfile.json").Return(rsc, fmt.Errorf("some file error")) 
+			reader.On("Open", "myfile.json").Return(fs.NilFile, fmt.Errorf("some file error")) 
 			return reader
 		}()
 		newBuilder, err := builder.LoadComponentsFile("myfile.json")
 		assert.Equal(t, builder, newBuilder)
 		assert.EqualError(t, err, "some file error")
+	})
+	t.Run("file read error", func(t *testing.T) {
+		builder.fs = func () vfs.FileSystem { 
+			reader := fs.NewMockReader()
+			reader.On("Open", "myfile.json").Return(fs.NilFile, nil) 
+			return reader
+		}()
+		newBuilder, err := builder.LoadComponentsFile("myfile.json")
+		assert.Equal(t, builder, newBuilder)
+		assert.EqualError(t, err, "cannot read from nil file")
 	})
 	t.Run("no file error", func(t *testing.T) {
 		builder.fs = func () vfs.FileSystem { reader := fs.NewMockReader(); reader.On("Open", "myfile.json").Return(fs.NewMockFile([]byte("hello")), nil); return reader}()
