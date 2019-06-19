@@ -10,6 +10,9 @@ import (
 	"golang.org/x/tools/godoc/vfs"
 )
 
+// NilFile is a nil mockfile for easy reference
+var NilFile *MockFile
+
 // MockReader is a mock implementation of the Opener interface, for testing purposes
 type MockReader struct {
 	mock.Mock

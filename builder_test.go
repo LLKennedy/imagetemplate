@@ -217,9 +217,9 @@ func TestSetBackgroundImageData(t *testing.T) {
 		},
 		{
 			name:     "file error",
-			builder:  ImageBuilder{fs: func () vfs.FileSystem { reader := fs.NewMockReader(); reader.On("Open", "somefile.jpg").Return(*fs.MockFile(nil), fmt.Errorf("some file error")); return reader}()},
+			builder:  ImageBuilder{fs: func () vfs.FileSystem { reader := fs.NewMockReader(); reader.On("Open", "somefile.jpg").Return(fs.NilFile, fmt.Errorf("some file error")); return reader}()},
 			template: Template{BaseImage: BaseImage{FileName: "somefile.jpg"}},
-			result:   ImageBuilder{fs: func () vfs.FileSystem { reader := fs.NewMockReader(); reader.On("Open", "somefile.jpg").Return(*fs.MockFile(nil), fmt.Errorf("some file error")); return reader}()},
+			result:   ImageBuilder{fs: func () vfs.FileSystem { reader := fs.NewMockReader(); reader.On("Open", "somefile.jpg").Return(fs.NilFile, fmt.Errorf("some file error")); return reader}()},
 			err:      fmt.Errorf("some file error"),
 		},
 	}
