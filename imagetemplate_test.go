@@ -1,6 +1,7 @@
 package imagetemplate
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"testing"
@@ -111,7 +112,28 @@ func TestLoadMethods(t *testing.T) {
 		assert.EqualError(t, err, "json error")
 	})
 	t.Run("FromReader", func(t *testing.T) {
-
+		t.Run("invalid reader", func(t *testing.T) {
+			reader := badReader{}
+			l2, props, err := l.FromReader(reader)
+			assert.Equal(t, l, l2)
+			assert.Nil(t, props)
+			assert.EqualError(t, err, "not a real reader")
+		})
+		t.Run("valid reader", func(t *testing.T) {
+			reader := bytes.NewReader([]byte("some data"))
+			b.On("LoadComponentsData", []byte("some data")).Return(b, fmt.Errorf("reader error"))
+			l2, props, err := l.FromReader(reader)
+			assert.Equal(t, l, l2)
+			assert.Equal(t, nilProps, props)
+			assert.EqualError(t, err, "reader error")
+		})
 	})
 	b.AssertExpectations(t)
+}
+
+type badReader struct {
+}
+
+func (r badReader) Read(p []byte) (n int, err error) {
+	return 0, fmt.Errorf("not a real reader")
 }
