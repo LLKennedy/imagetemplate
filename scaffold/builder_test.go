@@ -438,7 +438,6 @@ func TestLoadComponentsData(t *testing.T) {
 		assert.NoError(t, err)
 		newBuilder, err = newBuilder.ApplyComponents()
 		assert.NoError(t, err)
-		//TODO: output and check results
 	})
 	t.Run("failing on setbackgroundimage", func(t *testing.T) {
 		sampleData := `{
