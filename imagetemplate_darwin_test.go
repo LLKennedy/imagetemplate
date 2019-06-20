@@ -10,8 +10,8 @@ import (
 func TestLoadTemplate(t *testing.T) {
 	_, props, err := New().Load().FromFile("//\\/")
 	assert.Equal(t, render.NamedProperties(nil), props)
-	assert.EqualError(t, err, "open /\\: no such file or directory")
+	assert.EqualError(t, err, "open \\: no such file or directory")
 	_, props, err = NewUsing(nil).Load().FromFile("//\\/")
 	assert.Equal(t, render.NamedProperties(nil), props)
-	assert.EqualError(t, err, "open /\\: no such file or directory")
+	assert.EqualError(t, err, "open \\: no such file or directory")
 }
