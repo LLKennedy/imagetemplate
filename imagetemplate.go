@@ -43,13 +43,13 @@ type loader struct {
 
 // New returns a new loader with the default file system
 func New() Loader {
-	return NewUsing(vfs.OS(""))
+	return NewUsing(vfs.OS("."))
 }
 
 // NewUsing returns a new loader using a specified vfs
 func NewUsing(fs vfs.FileSystem) Loader {
 	if fs == nil {
-		fs = vfs.OS("")
+		fs = vfs.OS(".")
 	}
 	return loader{
 		fs:      fs,

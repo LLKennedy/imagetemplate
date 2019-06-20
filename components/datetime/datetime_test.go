@@ -277,5 +277,5 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 func TestInit(t *testing.T) {
 	c, err := render.Decode("date")
 	assert.NoError(t, err)
-	assert.Equal(t, Component{fs: vfs.OS("")}, c)
+	assert.Equal(t, Component{fs: vfs.OS(".")}, c)
 }

@@ -14,7 +14,7 @@ import (
 
 func TestNewBuilder(t *testing.T) {
 	newBuilder := NewBuilder(nil)
-	assert.Equal(t, ImageBuilder{fs: vfs.OS("")}, newBuilder)
+	assert.Equal(t, ImageBuilder{fs: vfs.OS(".")}, newBuilder)
 	img := newBuilder.GetCanvas().GetUnderlyingImage()
 	assert.Equal(t, 0, img.Bounds().Size().X)
 	assert.Equal(t, 0, img.Bounds().Size().Y)

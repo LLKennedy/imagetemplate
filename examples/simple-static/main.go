@@ -6,10 +6,11 @@ import (
 	"os"
 
 	"github.com/LLKennedy/imagetemplate/v3"
+	"golang.org/x/tools/godoc/vfs"
 )
 
 func main() {
-	loader, props, err := imagetemplate.New().Load().FromFile("template.json")
+	loader, props, err := imagetemplate.NewUsing(vfs.OS("./")).Load().FromFile("template.json")
 	if err != nil {
 		fmt.Printf("failed to load file: %v\n", err)
 		os.Exit(1)

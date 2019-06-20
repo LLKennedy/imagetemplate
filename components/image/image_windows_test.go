@@ -21,7 +21,7 @@ func TestImageSetNamedPropertiesLoadRealFile(t *testing.T) {
 		NamedPropertiesMap: map[string][]string{
 			"aProp": {"fileName"},
 		},
-		fs: vfs.OS(""),
+		fs: vfs.OS("."),
 	}
 	expectedErr := "open \\!!!\\!!!!!!\\!!!!\\!!!: The system cannot find the path specified."
 	res, err := c.SetNamedProperties(input)

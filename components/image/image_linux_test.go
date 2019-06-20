@@ -20,7 +20,7 @@ func TestImageSetNamedPropertiesLoadRealFile(t *testing.T) {
 		NamedPropertiesMap: map[string][]string{
 			"aProp": {"fileName"},
 		},
-		fs: vfs.OS(""),
+		fs: vfs.OS("."),
 	}
 	expectedErr := "open /!!!\\!!!!!!/\\/\\/\\/\\/!!!!/\\!!!\\\\\\: no such file or directory"
 	res, err := c.SetNamedProperties(input)
