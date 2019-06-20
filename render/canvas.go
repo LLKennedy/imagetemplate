@@ -230,6 +230,25 @@ const (
 	BarcodeType2of5Interleaved BarcodeType = barcode.Type2of5Interleaved
 )
 
+// ToBarcodeType attempts to convert a barcode type string to a defined BarcodeType constant
+func ToBarcodeType(raw string) (BarcodeType, error) {
+	switch raw {
+	case BarcodeTypeAztec: return BarcodeTypeAztec, nil
+	case BarcodeTypeCodabar: return BarcodeTypeCodabar, nil
+	case BarcodeTypeCode128: return BarcodeTypeCode128, nil
+	case BarcodeTypeCode39: return BarcodeTypeCode39, nil
+	case BarcodeTypeCode93: return BarcodeTypeCode93, nil
+	case BarcodeTypeDataMatrix: return BarcodeTypeDataMatrix, nil
+	case BarcodeTypeEAN8: return BarcodeTypeEAN8, nil
+	case BarcodeTypeEAN13: return BarcodeTypeEAN13, nil
+	case BarcodeTypePDF: return BarcodeTypePDF, nil
+	case BarcodeTypeQR: return BarcodeTypeQR, nil
+	case BarcodeType2of5: return BarcodeType2of5, nil
+	case BarcodeType2of5Interleaved: return BarcodeType2of5Interleaved, nil
+	default: return BarcodeType(""), errors.New("barcode type does not match defined constants")
+	}
+}
+
 // BarcodeExtraData contains additional data required for some barcode formats, leave any fields not named for the type in use alone
 type BarcodeExtraData struct {
 	// AztecMinECCPercent       is required for aztec barcodes
