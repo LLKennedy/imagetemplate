@@ -1,6 +1,8 @@
 package imagetemplate
 
 import (
+	"encoding/json"
+	"fmt"
 	"testing"
 
 	fs "github.com/LLKennedy/imagetemplate/v3/internal/filesystem"
@@ -61,16 +63,55 @@ func TestLoadWrite(t *testing.T) {
 	assert.Equal(t, l.Write(), l)
 }
 
-func TestFromBuilder(t *testing.T) {
+func TestLoadMethods(t *testing.T) {
 	b := new(mockBuilder)
+	nilProps := render.NamedProperties(nil)
+	b.On("GetNamedPropertiesList").Return(nilProps)
 	mfs := fs.NewMockFileSystem()
 	l := loader{
 		builder: b,
 		fs:      mfs,
 	}
-	b.On("GetNamedPropertiesList").Return(render.NamedProperties(nil))
-	l2, props, err := l.FromBuilder(b)
-	assert.Equal(t, l2, l)
-	assert.Equal(t, render.NamedProperties(nil), props)
-	assert.NoError(t, err)
+	t.Run("FromBuilder", func(t *testing.T) {
+		l2, props, err := l.FromBuilder(b)
+		assert.Equal(t, l, l2)
+		assert.Equal(t, nilProps, props)
+		assert.NoError(t, err)
+	})
+	t.Run("FromBytes", func(t *testing.T) {
+		b.On("LoadComponentsData", []byte("hello")).Return(b, fmt.Errorf("some error"))
+		l2, props, err := l.FromBytes([]byte("hello"))
+		assert.Equal(t, l, l2)
+		assert.Equal(t, nilProps, props)
+		assert.EqualError(t, err, "some error")
+	})
+	t.Run("FromFile", func(t *testing.T) {
+		b.On("LoadComponentsFile", "testfile").Return(b, fmt.Errorf("file load error"))
+		l2, props, err := l.FromFile("testfile")
+		assert.Equal(t, l, l2)
+		assert.Equal(t, nilProps, props)
+		assert.EqualError(t, err, "file load error")
+	})
+	t.Run("FromJSON", func(t *testing.T) {
+		jsonBytes := []byte(`
+		{
+			"testKey": "testVal"
+		}
+		`)
+		type rawStuff struct {
+			TestKey json.RawMessage `json:"testKey"`
+		}
+		newRaw := &rawStuff{}
+		err := json.Unmarshal(jsonBytes, newRaw)
+		assert.NoError(t, err)
+		b.On("LoadComponentsData", []byte(`"testVal"`)).Return(b, fmt.Errorf("json error"))
+		l2, props, err := l.FromJSON(newRaw.TestKey)
+		assert.Equal(t, l, l2)
+		assert.Equal(t, nilProps, props)
+		assert.EqualError(t, err, "json error")
+	})
+	t.Run("FromReader", func(t *testing.T) {
+
+	})
+	b.AssertExpectations(t)
 }
