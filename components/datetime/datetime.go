@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/LLKennedy/gosysfonts"
-	"github.com/LLKennedy/imagetemplate/v2/render"
+	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
 	"golang.org/x/tools/godoc/vfs"
@@ -165,7 +165,7 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 				return fmt.Errorf("error converting %v to string", value)
 			}
 			if component.fs == nil {
-				component.fs = vfs.OS("")
+				component.fs = vfs.OS(".")
 			}
 			fontReader, err := component.fs.Open(stringVal)
 			if err != nil {
@@ -325,7 +325,7 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	if fFile != nil {
 		stringVal := fFile.(string)
 		if c.fs == nil {
-			c.fs = vfs.OS("")
+			c.fs = vfs.OS(".")
 		}
 		fontReader, err := c.fs.Open(stringVal)
 		if err != nil {

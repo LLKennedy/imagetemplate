@@ -9,9 +9,10 @@ The main readme file for the repository provides code for a basic usage example,
 
 #### 1. [Terminology](#Terminology)
 #### 2. [Template Files](#Template-Files)
-#### 3. [Builder](#Builder)
-#### 4. [Default Components](#Default-Components)
-#### 5. [Example Results](#Example-Results)
+#### 3. [Loader](#Loader)
+#### 4. [Builder](#Builder)
+#### 5. [Default Components](#Default-Components)
+#### 6. [Example Results](#Example-Results)
 
 ## Terminology
 
@@ -26,6 +27,9 @@ A Component is an individual piece of the image, such as a rectangle, a text str
 
 ## Template Files
 See the main [Template File](TemplateFile.md) page for full detail.
+
+## Loader
+See the main [Loader](Loader.md) page for full detail.
 
 ## Builder
 See the main [Builder](Builder.md) page for full detail.

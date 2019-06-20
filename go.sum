@@ -1,5 +1,7 @@
 github.com/LLKennedy/gosysfonts v1.1.0 h1:7/urgvQHtGVhP1HLMDUTY+7g5rxr6CnmjXJKFxhV4Qw=
 github.com/LLKennedy/gosysfonts v1.1.0/go.mod h1:WA2ROkQwWtxbIGyoNyqPAYVChCNxALPXaUg9GnjE5zw=
+github.com/LLKennedy/imagetemplate/v2 v2.0.1 h1:SzjkUlaLSFUTqPok6lYRCrx5quKr13ke9PtxyZFnoO4=
+github.com/LLKennedy/imagetemplate/v2 v2.0.1/go.mod h1:8BQvhsQcsEz0S67wacAOibFj+KXsgJGJ+DjBKQglrw8=
 github.com/boombuler/barcode v1.0.0 h1:s1TvRnXwL2xJRaccrdcBQMZxq6X7DvsMogtmJeHDdrc=
 github.com/boombuler/barcode v1.0.0/go.mod h1:paBWMcWSl3LHKBqUq+rly7CNSldXjb2rDl3JlRe0mD8=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=

@@ -13,7 +13,7 @@ import (
 )
 
 func TestMockFS(t *testing.T) {
-	m := NewMockReader()
+	m := NewMockFileSystem()
 	buffer := NewMockFile([]byte("hello!"))
 	m.On("Open", "a file").Return(buffer, errors.New("an error"))
 	res, err := m.Open("a file")
