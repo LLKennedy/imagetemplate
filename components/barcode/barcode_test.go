@@ -240,6 +240,38 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			err: "",
 		},
 		{
+			name: "2of5",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"type": {"barcodeType"},
+				},
+			},
+			input: render.NamedProperties{
+				"type": render.BarcodeType2of5,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Type:               render.BarcodeType2of5,
+			},
+			err: "",
+		},
+		{
+			name: "2of5i",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"type": {"barcodeType"},
+				},
+			},
+			input: render.NamedProperties{
+				"type": render.BarcodeType2of5Interleaved,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Type:               render.BarcodeType2of5Interleaved,
+			},
+			err: "",
+		},
+		{
 			name: "aztec",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
@@ -253,6 +285,38 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 				NamedPropertiesMap: map[string][]string{},
 				Type:               render.BarcodeTypeAztec,
 				Extra:              render.BarcodeExtraData{AztecMinECCPercent: 50, AztecUserSpecifiedLayers: 4},
+			},
+			err: "",
+		},
+		{
+			name: "codabar",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"type": {"barcodeType"},
+				},
+			},
+			input: render.NamedProperties{
+				"type": render.BarcodeTypeCodabar,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Type:               render.BarcodeTypeCodabar,
+			},
+			err: "",
+		},
+		{
+			name: "code128",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"type": {"barcodeType"},
+				},
+			},
+			input: render.NamedProperties{
+				"type": render.BarcodeTypeCode128,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Type:               render.BarcodeTypeCode128,
 			},
 			err: "",
 		},
@@ -287,6 +351,38 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 				NamedPropertiesMap: map[string][]string{},
 				Type:               render.BarcodeTypeCode93,
 				Extra:              render.BarcodeExtraData{Code93IncludeChecksum: true, Code93FullASCIIMode: true},
+			},
+			err: "",
+		},
+		{
+			name: "ean13",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"type": {"barcodeType"},
+				},
+			},
+			input: render.NamedProperties{
+				"type": render.BarcodeTypeEAN13,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Type:               render.BarcodeTypeEAN13,
+			},
+			err: "",
+		},
+		{
+			name: "ean8",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"type": {"barcodeType"},
+				},
+			},
+			input: render.NamedProperties{
+				"type": render.BarcodeTypeEAN8,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Type:               render.BarcodeTypeEAN8,
 			},
 			err: "",
 		},
