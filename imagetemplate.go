@@ -41,14 +41,19 @@ type loader struct {
 	fs      vfs.FileSystem
 }
 
-// New returns a new loader
-func New(fs vfs.FileSystem) Loader {
+// New returns a new loader with the default file system
+func New() Loader {
+	return NewUsing(vfs.OS(""))
+}
+
+// NewUsing returns a new loader using a specified vfs
+func NewUsing(fs vfs.FileSystem) Loader {
 	if fs == nil {
 		fs = vfs.OS("")
 	}
 	return loader{
-		builder: scaffold.NewBuilder(fs),
 		fs:      fs,
+		builder: scaffold.NewBuilder(fs),
 	}
 }
 
