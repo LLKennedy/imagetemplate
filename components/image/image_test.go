@@ -8,8 +8,8 @@ import (
 	"image"
 	"testing"
 
-	fs "github.com/LLKennedy/imagetemplate/v2/internal/filesystem"
-	"github.com/LLKennedy/imagetemplate/v2/render"
+	fs "github.com/LLKennedy/imagetemplate/v3/internal/filesystem"
+	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/stretchr/testify/assert"
 	_ "golang.org/x/image/bmp" // bmp imported for image decoding
 	"golang.org/x/tools/godoc/vfs"
@@ -171,8 +171,8 @@ func TestImageSetNamedProperties(t *testing.T) {
 				NamedPropertiesMap: map[string][]string{
 					"aProp": {"fileName"},
 				},
-				fs: func () vfs.FileSystem {
-					reader := fs.NewMockReader()
+				fs: func() vfs.FileSystem {
+					reader := fs.NewMockFileSystem()
 					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile(sampleTinyImageData), errors.New("file not found"))
 					return reader
 				}(),
@@ -184,8 +184,8 @@ func TestImageSetNamedProperties(t *testing.T) {
 				NamedPropertiesMap: map[string][]string{
 					"aProp": {"fileName"},
 				},
-				fs: func () vfs.FileSystem {
-					reader := fs.NewMockReader()
+				fs: func() vfs.FileSystem {
+					reader := fs.NewMockFileSystem()
 					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile(sampleTinyImageData), errors.New("file not found"))
 					return reader
 				}(),
@@ -198,8 +198,8 @@ func TestImageSetNamedProperties(t *testing.T) {
 				NamedPropertiesMap: map[string][]string{
 					"aProp": {"fileName"},
 				},
-				fs: func () vfs.FileSystem {
-					reader := fs.NewMockReader()
+				fs: func() vfs.FileSystem {
+					reader := fs.NewMockFileSystem()
 					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile([]byte{0x00, 0x00, 0x00, 0x00}), nil)
 					return reader
 				}(),
@@ -211,8 +211,8 @@ func TestImageSetNamedProperties(t *testing.T) {
 				NamedPropertiesMap: map[string][]string{
 					"aProp": {"fileName"},
 				},
-				fs: func () vfs.FileSystem {
-					reader := fs.NewMockReader()
+				fs: func() vfs.FileSystem {
+					reader := fs.NewMockFileSystem()
 					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile([]byte{0x00, 0x00, 0x00, 0x00}), nil)
 					return reader
 				}(),
@@ -225,8 +225,8 @@ func TestImageSetNamedProperties(t *testing.T) {
 				NamedPropertiesMap: map[string][]string{
 					"aProp": {"fileName"},
 				},
-				fs: func () vfs.FileSystem {
-					reader := fs.NewMockReader()
+				fs: func() vfs.FileSystem {
+					reader := fs.NewMockFileSystem()
 					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile(sampleTinyImageData), nil)
 					return reader
 				}(),
@@ -237,8 +237,8 @@ func TestImageSetNamedProperties(t *testing.T) {
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
 				Image:              sampleTinyImage,
-				fs: func () vfs.FileSystem {
-					reader := fs.NewMockReader()
+				fs: func() vfs.FileSystem {
+					reader := fs.NewMockFileSystem()
 					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile(sampleTinyImageData), nil)
 					return reader
 				}(),
@@ -378,7 +378,7 @@ func TestImageSetNamedProperties(t *testing.T) {
 				if r := recover(); r != nil {
 					assert.NoError(t, r.(error))
 				}
-			} ()
+			}()
 			res, err := test.start.SetNamedProperties(test.input)
 			test.res.fs = nil
 			ICres := res.(Component)
@@ -436,5 +436,5 @@ func TestImageVerifyAndTestImageJSONData(t *testing.T) {
 func TestInit(t *testing.T) {
 	c, err := render.Decode("image")
 	assert.NoError(t, err)
-	assert.Equal(t, Component{fs: vfs.OS("")}, c)
+	assert.Equal(t, Component{fs: vfs.OS(".")}, c)
 }

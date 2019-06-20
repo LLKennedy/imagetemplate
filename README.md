@@ -10,16 +10,16 @@ An image templating library for golang. Builder provides the templating engine, 
 Several default components are included, see their documentation as well as detailed usage guidelines for the template files and Builder in [the documentation pages](/doc/Home.md).
 
 ## Installation
-`go get "github.com/LLKennedy/imagetemplate/v2"`
+`go get "github.com/LLKennedy/imagetemplate/v3"`
 
 ## Basic Usage
 ```
-props, callback, err := imagetemplate.LoadTemplate("template.json")
+loader, props, err := imagetemplate.New().Load().FromFile("template.json")
 
 // Check props here, set any discovered variables with real values
 
-data, err := callback(props)
-err = ioutil.WriteFile("simple-static.bmp", data, os.ModeExclusive)
+data, err := loader.Write().ToBMP(props)
+err = ioutil.WriteFile("output.bmp", data, os.ModeExclusive)
 ```
 
 ## Testing
@@ -29,4 +29,4 @@ On windows, the simplest way to test is to use the powershell script.
 
 To emulate the testing which occurs in build pipelines for linux and mac, run the following:
 
-`go test . ./components/... ./internal/filesystem ./render/... -race -coverprofile=coverage.out;`
+`go test . ./components/... ./render/... ./scaffold/... ./internal/filesystem -race -coverprofile=coverage.out;`
