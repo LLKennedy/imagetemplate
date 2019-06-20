@@ -7,8 +7,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/LLKennedy/imagetemplate/v3/scaffold"
 	"github.com/LLKennedy/imagetemplate/v3/render"
+	"github.com/LLKennedy/imagetemplate/v3/scaffold"
 	"github.com/boombuler/barcode/qr"
 )
 
