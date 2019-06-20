@@ -172,7 +172,7 @@ func TestImageSetNamedProperties(t *testing.T) {
 					"aProp": {"fileName"},
 				},
 				fs: func() vfs.FileSystem {
-					reader := fs.NewMockReader()
+					reader := fs.NewMockFileSystem()
 					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile(sampleTinyImageData), errors.New("file not found"))
 					return reader
 				}(),
@@ -185,7 +185,7 @@ func TestImageSetNamedProperties(t *testing.T) {
 					"aProp": {"fileName"},
 				},
 				fs: func() vfs.FileSystem {
-					reader := fs.NewMockReader()
+					reader := fs.NewMockFileSystem()
 					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile(sampleTinyImageData), errors.New("file not found"))
 					return reader
 				}(),
@@ -199,7 +199,7 @@ func TestImageSetNamedProperties(t *testing.T) {
 					"aProp": {"fileName"},
 				},
 				fs: func() vfs.FileSystem {
-					reader := fs.NewMockReader()
+					reader := fs.NewMockFileSystem()
 					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile([]byte{0x00, 0x00, 0x00, 0x00}), nil)
 					return reader
 				}(),
@@ -212,7 +212,7 @@ func TestImageSetNamedProperties(t *testing.T) {
 					"aProp": {"fileName"},
 				},
 				fs: func() vfs.FileSystem {
-					reader := fs.NewMockReader()
+					reader := fs.NewMockFileSystem()
 					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile([]byte{0x00, 0x00, 0x00, 0x00}), nil)
 					return reader
 				}(),
@@ -226,7 +226,7 @@ func TestImageSetNamedProperties(t *testing.T) {
 					"aProp": {"fileName"},
 				},
 				fs: func() vfs.FileSystem {
-					reader := fs.NewMockReader()
+					reader := fs.NewMockFileSystem()
 					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile(sampleTinyImageData), nil)
 					return reader
 				}(),
@@ -238,7 +238,7 @@ func TestImageSetNamedProperties(t *testing.T) {
 				NamedPropertiesMap: map[string][]string{},
 				Image:              sampleTinyImage,
 				fs: func() vfs.FileSystem {
-					reader := fs.NewMockReader()
+					reader := fs.NewMockFileSystem()
 					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile(sampleTinyImageData), nil)
 					return reader
 				}(),

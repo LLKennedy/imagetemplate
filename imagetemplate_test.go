@@ -3,6 +3,7 @@ package imagetemplate
 import (
 	"testing"
 
+	fs "github.com/LLKennedy/imagetemplate/v3/internal/filesystem"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/LLKennedy/imagetemplate/v3/scaffold"
 	"github.com/stretchr/testify/assert"
@@ -61,5 +62,15 @@ func TestLoadWrite(t *testing.T) {
 }
 
 func TestFromBuilder(t *testing.T) {
-
+	b := new(mockBuilder)
+	mfs := fs.NewMockFileSystem()
+	l := loader{
+		builder: b,
+		fs:      mfs,
+	}
+	b.On("GetNamedPropertiesList").Return(render.NamedProperties(nil))
+	l2, props, err := l.FromBuilder(b)
+	assert.Equal(t, l2, l)
+	assert.Equal(t, render.NamedProperties(nil), props)
+	assert.NoError(t, err)
 }
