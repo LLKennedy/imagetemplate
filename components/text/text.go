@@ -267,7 +267,7 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 		},
 	}
 	var extractedVal interface{}
-	validIndex := -1
+	var validIndex int
 	c.NamedPropertiesMap, extractedVal, validIndex, err = render.ExtractExclusiveProp(propData, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
