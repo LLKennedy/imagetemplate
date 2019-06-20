@@ -191,7 +191,7 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	if newVal != nil {
 		c.Type, err = render.ToBarcodeType(newVal.(string))
 		if err != nil {
-			return component, props, fmt.Errorf("for barcode type %s: %v", newVal, props)
+			return component, props, fmt.Errorf("for barcode type %s: %v", newVal, err)
 		}
 	}
 	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Content, "content", render.StringType, c.NamedPropertiesMap)
@@ -285,11 +285,8 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	if newVal != nil {
 		c.BackgroundColour.A = newVal.(uint8)
 	}
-	type invalidStruct struct {
-		Message string
-	}
 	for key := range c.NamedPropertiesMap {
-		props[key] = invalidStruct{Message: "Please replace me with real data"}
+		props[key] = struct{ Message string }{Message: "Please replace me with real data"}
 	}
 	return c, props, nil
 }
