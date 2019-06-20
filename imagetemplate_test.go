@@ -137,3 +137,68 @@ type badReader struct {
 func (r badReader) Read(p []byte) (n int, err error) {
 	return 0, fmt.Errorf("not a real reader")
 }
+
+func TestWriteMethods(t *testing.T) {
+	b := new(mockBuilder)
+	badProps := render.NamedProperties{"a": 1}
+	//nilProps := render.NamedProperties(nil)
+	//b.On("SetNamedProperties", nilProps).Return(b, nil)
+	//b.On("AplyComponents").Return(b, nil)
+	b.On("SetNamedProperties", badProps).Return(b, fmt.Errorf("bad props"))
+	mfs := fs.NewMockFileSystem()
+	l := loader{
+		builder: b,
+		fs:      mfs,
+	}
+	t.Run("ToBuilder", func(t *testing.T) {
+		t.Run("invalid props", func(t *testing.T) {
+			res, err := l.Write().ToBuilder(badProps)
+			assert.Equal(t, b, res)
+			assert.EqualError(t, err, "bad props")
+		})
+		t.Run("valid props", func(t *testing.T) {
+
+		})
+	})
+	t.Run("ToBMP", func(t *testing.T) {
+		t.Run("invalid props", func(t *testing.T) {
+			res, err := l.Write().ToBMP(badProps)
+			assert.Nil(t, res)
+			assert.EqualError(t, err, "bad props")
+		})
+		t.Run("valid props", func(t *testing.T) {
+
+		})
+	})
+	t.Run("ToCanvas", func(t *testing.T) {
+		t.Run("invalid props", func(t *testing.T) {
+			res, err := l.Write().ToCanvas(badProps)
+			assert.Nil(t, res)
+			assert.EqualError(t, err, "bad props")
+		})
+		t.Run("valid props", func(t *testing.T) {
+
+		})
+	})
+	t.Run("ToImage", func(t *testing.T) {
+		t.Run("invalid props", func(t *testing.T) {
+			res, err := l.Write().ToImage(badProps)
+			assert.Nil(t, res)
+			assert.EqualError(t, err, "bad props")
+		})
+		t.Run("valid props", func(t *testing.T) {
+
+		})
+	})
+	t.Run("ToBMPReader", func(t *testing.T) {
+		t.Run("invalid props", func(t *testing.T) {
+			res, err := l.Write().ToBMPReader(badProps)
+			assert.Nil(t, res)
+			assert.EqualError(t, err, "bad props")
+		})
+		t.Run("valid props", func(t *testing.T) {
+
+		})
+	})
+	b.AssertExpectations(t)
+}

@@ -23,7 +23,7 @@ func TestImageSetNamedPropertiesLoadRealFile(t *testing.T) {
 		},
 		fs: vfs.OS("."),
 	}
-	expectedErr := "open \\!!!\\!!!!!!\\!!!!\\!!!: The system cannot find the path specified."
+	expectedErr := "open !!!\\!!!!!!\\!!!!\\!!!: The system cannot find the path specified."
 	res, err := c.SetNamedProperties(input)
 	assert.Equal(t, expected, res)
 	assert.EqualError(t, err, expectedErr)
