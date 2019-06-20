@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"image"
 	"testing"
 
 	fs "github.com/LLKennedy/imagetemplate/v3/internal/filesystem"
@@ -141,10 +142,15 @@ func (r badReader) Read(p []byte) (n int, err error) {
 func TestWriteMethods(t *testing.T) {
 	b := new(mockBuilder)
 	badProps := render.NamedProperties{"a": 1}
-	//nilProps := render.NamedProperties(nil)
-	//b.On("SetNamedProperties", nilProps).Return(b, nil)
-	//b.On("AplyComponents").Return(b, nil)
+	nilProps := render.NamedProperties(nil)
+	b.On("SetNamedProperties", nilProps).Return(b, nil)
+	b.On("ApplyComponents").Return(b, nil)
 	b.On("SetNamedProperties", badProps).Return(b, fmt.Errorf("bad props"))
+	mockCanvas := new(render.MockCanvas)
+	baseImage := image.NewNRGBA(image.Rect(0, 0, 2, 2))
+	mockCanvas.On("GetUnderlyingImage").Return(baseImage)
+	b.On("GetCanvas").Return(mockCanvas)
+	b.On("WriteToBMP").Return([]byte("a bmp"), fmt.Errorf("bmp error"))
 	mfs := fs.NewMockFileSystem()
 	l := loader{
 		builder: b,
@@ -157,7 +163,9 @@ func TestWriteMethods(t *testing.T) {
 			assert.EqualError(t, err, "bad props")
 		})
 		t.Run("valid props", func(t *testing.T) {
-
+			res, err := l.Write().ToBuilder(nilProps)
+			assert.Equal(t, b, res)
+			assert.NoError(t, err)
 		})
 	})
 	t.Run("ToBMP", func(t *testing.T) {
@@ -167,7 +175,9 @@ func TestWriteMethods(t *testing.T) {
 			assert.EqualError(t, err, "bad props")
 		})
 		t.Run("valid props", func(t *testing.T) {
-
+			res, err := l.Write().ToBMP(nilProps)
+			assert.Equal(t, []byte("a bmp"), res)
+			assert.EqualError(t, err, "bmp error")
 		})
 	})
 	t.Run("ToCanvas", func(t *testing.T) {
@@ -177,7 +187,9 @@ func TestWriteMethods(t *testing.T) {
 			assert.EqualError(t, err, "bad props")
 		})
 		t.Run("valid props", func(t *testing.T) {
-
+			res, err := l.Write().ToCanvas(nilProps)
+			assert.Equal(t, mockCanvas, res)
+			assert.NoError(t, err)
 		})
 	})
 	t.Run("ToImage", func(t *testing.T) {
@@ -187,7 +199,9 @@ func TestWriteMethods(t *testing.T) {
 			assert.EqualError(t, err, "bad props")
 		})
 		t.Run("valid props", func(t *testing.T) {
-
+			res, err := l.Write().ToImage(nilProps)
+			assert.Equal(t, baseImage, res)
+			assert.NoError(t, err)
 		})
 	})
 	t.Run("ToBMPReader", func(t *testing.T) {
@@ -197,7 +211,24 @@ func TestWriteMethods(t *testing.T) {
 			assert.EqualError(t, err, "bad props")
 		})
 		t.Run("valid props", func(t *testing.T) {
-
+			t.Run("error writing to BMP", func(t *testing.T) {
+				res, err := l.Write().ToBMPReader(nilProps)
+				assert.Nil(t, res)
+				assert.EqualError(t, err, "bmp error")
+			})
+			t.Run("success", func(t *testing.T) {
+				b := new(mockBuilder)
+				nilProps := render.NamedProperties(nil)
+				b.On("SetNamedProperties", nilProps).Return(b, nil)
+				b.On("ApplyComponents").Return(b, nil)
+				b.On("WriteToBMP").Return([]byte("a new bmp"), nil)
+				l := loader{
+					builder: b,
+				}
+				res, err := l.Write().ToBMPReader(nilProps)
+				assert.Equal(t, bytes.NewReader([]byte("a new bmp")), res)
+				assert.NoError(t, err)
+			})
 		})
 	})
 	b.AssertExpectations(t)
