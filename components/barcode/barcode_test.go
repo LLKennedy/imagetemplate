@@ -398,6 +398,9 @@ func TestBarcodeVerifyAndTestBarcodeJSONData(t *testing.T) {
 			props: render.NamedProperties{},
 			err:   "failed to convert returned data to component properties",
 		},
+		// {
+		// 	name: "",
+		// },
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {

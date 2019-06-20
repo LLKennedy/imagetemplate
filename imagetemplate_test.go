@@ -233,3 +233,63 @@ func TestWriteMethods(t *testing.T) {
 	})
 	b.AssertExpectations(t)
 }
+
+func TestPanics(t *testing.T) {
+	l := loader{}
+	nilProps := render.NamedProperties(nil)
+	t.Run("FromBuilder", func(t *testing.T) {
+		l2, props, err := l.FromBuilder(nil)
+		assert.Nil(t, l2)
+		assert.Equal(t, nilProps, props)
+		assert.Error(t, err)
+	})
+	t.Run("FromBytes", func(t *testing.T) {
+		l2, props, err := l.FromBytes(nil)
+		assert.Nil(t, l2)
+		assert.Equal(t, nilProps, props)
+		assert.Error(t, err)
+	})
+	t.Run("FromFile", func(t *testing.T) {
+		l2, props, err := l.FromFile("")
+		assert.Nil(t, l2)
+		assert.Equal(t, nilProps, props)
+		assert.Error(t, err)
+	})
+	t.Run("FromJSON", func(t *testing.T) {
+		l2, props, err := l.FromJSON(nil)
+		assert.Nil(t, l2)
+		assert.Equal(t, nilProps, props)
+		assert.Error(t, err)
+	})
+	t.Run("FromReader", func(t *testing.T) {
+		l2, props, err := l.FromReader(nil)
+		assert.Nil(t, l2)
+		assert.Equal(t, nilProps, props)
+		assert.Error(t, err)
+	})
+	t.Run("ToBuilder", func(t *testing.T) {
+		b, err := l.ToBuilder(nil)
+		assert.Nil(t, b)
+		assert.Error(t, err)
+	})
+	t.Run("ToBMP", func(t *testing.T) {
+		raw, err := l.ToBMP(nil)
+		assert.Nil(t, raw)
+		assert.Error(t, err)
+	})
+	t.Run("ToCanvas", func(t *testing.T) {
+		c, err := l.ToCanvas(nil)
+		assert.Nil(t, c)
+		assert.Error(t, err)
+	})
+	t.Run("ToImage", func(t *testing.T) {
+		img, err := l.ToImage(nil)
+		assert.Nil(t, img)
+		assert.Error(t, err)
+	})
+	t.Run("ToBMPReader", func(t *testing.T) {
+		rdr, err := l.ToBMPReader(nil)
+		assert.Nil(t, rdr)
+		assert.Error(t, err)
+	})
+}

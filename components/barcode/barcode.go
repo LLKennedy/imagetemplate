@@ -100,7 +100,7 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 				c.Extra.QRLevel = qr.Q
 				c.Extra.QRMode = qr.Unicode
 			}
-			c.Type = render.BarcodeType(stringVal)
+			c.Type = stringVal
 			return nil
 		}
 		if strings.Contains("dRdGdBdAbRbGbBbA", name) && len(name) == 2 {
@@ -189,7 +189,10 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 		return component, props, err
 	}
 	if newVal != nil {
-		c.Type = render.BarcodeType(newVal.(string))
+		c.Type, err = render.ToBarcodeType(newVal.(string))
+		if err != nil {
+			return component, props, fmt.Errorf("for barcode type %s: %v", newVal, props)
+		}
 	}
 	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Content, "content", render.StringType, c.NamedPropertiesMap)
 	if err != nil {
