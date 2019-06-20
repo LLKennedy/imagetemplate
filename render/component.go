@@ -27,7 +27,7 @@ func Decode(name string) (Component, error) {
 	if registry == nil || registry[name] == nil {
 		return nil, fmt.Errorf("component error: no component registered for name %v", name)
 	}
-	return registry[name](vfs.OS("")), nil
+	return registry[name](vfs.OS(".")), nil
 }
 
 // NamedProperties is a map of property names to property values - application variables to be set

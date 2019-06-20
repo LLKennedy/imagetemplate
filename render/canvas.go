@@ -60,7 +60,7 @@ func NewCanvas(width, height int) (ImageCanvas, error) {
 			Min: image.Point{X: 0, Y: 0},
 			Max: image.Point{X: width, Y: height},
 		}),
-		fs: vfs.OS(""),
+		fs: vfs.OS("."),
 	}, nil
 }
 

@@ -47,7 +47,7 @@ func TestRegisterComponentAndDecode(t *testing.T) {
 	assert.Nil(t, c)
 	assert.EqualError(t, err, "component error: no component registered for name wrong")
 	c, err = Decode("newComponent")
-	assert.Equal(t, newMock(vfs.OS("")), c)
+	assert.Equal(t, newMock(vfs.OS(".")), c)
 	assert.NoError(t, err)
 }
 

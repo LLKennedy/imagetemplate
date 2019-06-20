@@ -10,7 +10,7 @@ An image templating library for golang. Builder provides the templating engine, 
 Several default components are included, see their documentation as well as detailed usage guidelines for the template files and Builder in [the documentation pages](/doc/Home.md).
 
 ## Installation
-`go get "github.com/LLKennedy/imagetemplate/v2"`
+`go get "github.com/LLKennedy/imagetemplate/v3"`
 
 ## Basic Usage
 ```

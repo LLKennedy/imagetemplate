@@ -10,7 +10,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/LLKennedy/imagetemplate/v2/render"
+	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/disintegration/imaging"
 	_ "golang.org/x/image/bmp"  // bmp imported for image decoding
 	_ "golang.org/x/image/tiff" // tiff imported for image decoding
@@ -84,7 +84,7 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 				return fmt.Errorf("error converting %v to string", value)
 			}
 			if component.fs == nil {
-				component.fs = vfs.OS("")
+				component.fs = vfs.OS(".")
 			}
 			bytesVal, err := component.fs.Open(stringVal)
 			if err != nil {
@@ -183,7 +183,7 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	if file != nil {
 		stringVal := file.(string)
 		if component.fs == nil {
-			component.fs = vfs.OS("")
+			component.fs = vfs.OS(".")
 		}
 		bytesVal, err := component.fs.Open(stringVal)
 		if err != nil {

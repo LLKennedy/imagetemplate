@@ -3,7 +3,7 @@ package image
 import (
 	"testing"
 
-	"github.com/LLKennedy/imagetemplate/v2/render"
+	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/tools/godoc/vfs"
 )
@@ -21,9 +21,9 @@ func TestImageSetNamedPropertiesLoadRealFile(t *testing.T) {
 		NamedPropertiesMap: map[string][]string{
 			"aProp": {"fileName"},
 		},
-		fs: vfs.OS(""),
+		fs: vfs.OS("."),
 	}
-	expectedErr := "open \\!!!\\!!!!!!\\!!!!\\!!!: The system cannot find the path specified."
+	expectedErr := "open !!!\\!!!!!!\\!!!!\\!!!: The system cannot find the path specified."
 	res, err := c.SetNamedProperties(input)
 	assert.Equal(t, expected, res)
 	assert.EqualError(t, err, expectedErr)

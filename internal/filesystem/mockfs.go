@@ -18,8 +18,8 @@ type MockReader struct {
 	mock.Mock
 }
 
-// NewMockReader creates a new mock Reader
-func NewMockReader(files ...MockFile) *MockReader {
+// NewMockFileSystem creates a new mock Reader
+func NewMockFileSystem(files ...MockFile) *MockReader {
 	newReader := new(MockReader)
 	_ = vfs.FileSystem(newReader) // this will fail to compile if the interface isn't met
 	return newReader

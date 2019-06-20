@@ -1,5 +1,5 @@
-// Package imagetemplate defines a template for drawing custom images from pre-defined components, and provides to tools to load and implement that template.
-package imagetemplate
+// Package scaffold defines a template for drawing custom images from pre-defined components, and provides to tools to load and implement that template.
+package scaffold
 
 import (
 	"bytes"
@@ -16,13 +16,13 @@ import (
 	"strconv"
 	"strings"
 
-	_ "github.com/LLKennedy/imagetemplate/v2/components/barcode"   // add barcode component to registry by default
-	_ "github.com/LLKennedy/imagetemplate/v2/components/circle"    // add circle component to registry by default
-	_ "github.com/LLKennedy/imagetemplate/v2/components/datetime"  // add datetime component to registry by default
-	_ "github.com/LLKennedy/imagetemplate/v2/components/image"     // add image component to registry by default
-	_ "github.com/LLKennedy/imagetemplate/v2/components/rectangle" // add rectangle component to registry by default
-	_ "github.com/LLKennedy/imagetemplate/v2/components/text"      // add text component to registry by default
-	"github.com/LLKennedy/imagetemplate/v2/render"
+	_ "github.com/LLKennedy/imagetemplate/v3/components/barcode"   // add barcode component to registry by default
+	_ "github.com/LLKennedy/imagetemplate/v3/components/circle"    // add circle component to registry by default
+	_ "github.com/LLKennedy/imagetemplate/v3/components/datetime"  // add datetime component to registry by default
+	_ "github.com/LLKennedy/imagetemplate/v3/components/image"     // add image component to registry by default
+	_ "github.com/LLKennedy/imagetemplate/v3/components/rectangle" // add rectangle component to registry by default
+	_ "github.com/LLKennedy/imagetemplate/v3/components/text"      // add text component to registry by default
+	"github.com/LLKennedy/imagetemplate/v3/render"
 
 	"github.com/disintegration/imaging"
 	"golang.org/x/image/bmp"
@@ -90,8 +90,11 @@ type ImageBuilder struct {
 }
 
 // NewBuilder generates a new ImageBuilder with an internal canvas of the specified width and height, and optionally the specified starting colour. No provided colour will result in defaults for Image.
-func NewBuilder() Builder {
-	return ImageBuilder{fs: vfs.OS("")}
+func NewBuilder(fs vfs.FileSystem) Builder {
+	if fs == nil {
+		fs = vfs.OS(".")
+	}
+	return ImageBuilder{fs: fs}
 }
 
 // WriteToBMP outputs the contents of the builder to a BMP byte array
