@@ -10,11 +10,11 @@ import (
 	"io"
 	"strings"
 
-	fs "github.com/LLKennedy/imagetemplate/v2/internal/filesystem"
-	"github.com/LLKennedy/imagetemplate/v2/render"
+	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/disintegration/imaging"
 	_ "golang.org/x/image/bmp"  // bmp imported for image decoding
 	_ "golang.org/x/image/tiff" // tiff imported for image decoding
+	"golang.org/x/tools/godoc/vfs"
 )
 
 // Component implements the Component interface for images
@@ -24,7 +24,7 @@ type Component struct {
 	TopLeft            image.Point
 	Width              int
 	Height             int
-	reader             fs.FileReader
+	fs                 vfs.FileSystem
 }
 
 type imageFormat struct {
@@ -83,15 +83,15 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 			if !ok {
 				return fmt.Errorf("error converting %v to string", value)
 			}
-			if component.reader == nil {
-				component.reader = fs.IoutilFileReader{}
+			if component.fs == nil {
+				component.fs = vfs.OS(".")
 			}
-			bytesVal, err := component.reader.ReadFile(stringVal)
+			bytesVal, err := component.fs.Open(stringVal)
 			if err != nil {
 				return err
 			}
-			buf := bytes.NewBuffer(bytesVal)
-			img, _, err := image.Decode(buf)
+			defer bytesVal.Close()
+			img, _, err := image.Decode(bytesVal)
 			if err != nil {
 				return err
 			}
@@ -182,15 +182,15 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	}
 	if file != nil {
 		stringVal := file.(string)
-		if component.reader == nil {
-			component.reader = fs.IoutilFileReader{}
+		if component.fs == nil {
+			component.fs = vfs.OS(".")
 		}
-		bytesVal, err := component.reader.ReadFile(stringVal)
+		bytesVal, err := component.fs.Open(stringVal)
 		if err != nil {
 			return component, props, err
 		}
-		buf := bytes.NewBuffer(bytesVal)
-		img, _, err := image.Decode(buf)
+		defer bytesVal.Close()
+		img, _, err := image.Decode(bytesVal)
 		if err != nil {
 			return component, props, err
 		}
@@ -237,6 +237,6 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 
 func init() {
 	for _, name := range []string{"image", "img", "photo", "Image", "IMG", "Photo", "picture", "Picture", "IMAGE", "PHOTO", "PICTURE"} {
-		render.RegisterComponent(name, func() render.Component { return Component{} })
+		render.RegisterComponent(name, func(fs vfs.FileSystem) render.Component { return Component{fs: fs} })
 	}
 }

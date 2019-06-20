@@ -1,9 +1,9 @@
 package image
 
 import (
-	fs "github.com/LLKennedy/imagetemplate/v2/internal/filesystem"
-	"github.com/LLKennedy/imagetemplate/v2/render"
+	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/tools/godoc/vfs"
 	"testing"
 )
 
@@ -20,9 +20,9 @@ func TestImageSetNamedPropertiesLoadRealFile(t *testing.T) {
 		NamedPropertiesMap: map[string][]string{
 			"aProp": {"fileName"},
 		},
-		reader: fs.IoutilFileReader{},
+		fs: vfs.OS("."),
 	}
-	expectedErr := "open !!!\\!!!!!!//\\//\\//\\/\\/!!!!//\\!!!\\\\\\////: no such file or directory"
+	expectedErr := "open !!!\\!!!!!!/\\/\\/\\/\\/!!!!/\\!!!\\\\\\: no such file or directory"
 	res, err := c.SetNamedProperties(input)
 	assert.Equal(t, expected, res)
 	assert.EqualError(t, err, expectedErr)

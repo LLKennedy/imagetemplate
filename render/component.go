@@ -2,17 +2,18 @@ package render
 
 import (
 	"fmt"
+	"golang.org/x/tools/godoc/vfs"
 	"strconv"
 	"strings"
 	"time"
 )
 
-var registry = map[string](func() Component){}
+var registry = map[string](func(vfs.FileSystem) Component){}
 
 // RegisterComponent adds a new component to the registry, returning an error if duplicate names exist
-func RegisterComponent(name string, generator func() Component) error {
+func RegisterComponent(name string, generator func(vfs.FileSystem) Component) error {
 	if registry == nil {
-		registry = map[string](func() Component){}
+		registry = map[string](func(vfs.FileSystem) Component){}
 	}
 	if registry[name] != nil {
 		return fmt.Errorf("cannot register component, %v is already registered", name)
@@ -26,7 +27,7 @@ func Decode(name string) (Component, error) {
 	if registry == nil || registry[name] == nil {
 		return nil, fmt.Errorf("component error: no component registered for name %v", name)
 	}
-	return registry[name](), nil
+	return registry[name](vfs.OS(".")), nil
 }
 
 // NamedProperties is a map of property names to property values - application variables to be set

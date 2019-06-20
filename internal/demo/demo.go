@@ -7,20 +7,20 @@ import (
 	"log"
 	"os"
 
-	img "github.com/LLKennedy/imagetemplate/v2"
-	"github.com/LLKennedy/imagetemplate/v2/render"
+	"github.com/LLKennedy/imagetemplate/v3/render"
+	"github.com/LLKennedy/imagetemplate/v3/scaffold"
 	"github.com/boombuler/barcode/qr"
 )
 
 func main() {
 	log.Println("Starting imagetemplate demo")
-	var builder img.Builder
+	var builder scaffold.Builder
 	var canvas render.Canvas
 	canvas, err := render.NewCanvas(1600, 1600)
 	if err != nil {
 		log.Fatalf("Failed to create canvas: %v", err)
 	}
-	builder = img.NewBuilder()
+	builder = scaffold.NewBuilder(nil)
 	builder.SetCanvas(canvas)
 	// canvas, err = canvas.Rectangle(image.Point{X: 110, Y: 40}, 60, 87, color.NRGBA{R: 255, G: 100, B: 0, A: 255})
 	// if err != nil {
