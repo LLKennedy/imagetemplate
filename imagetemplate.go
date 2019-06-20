@@ -3,9 +3,11 @@ package imagetemplate
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"image"
 	"io"
 	"io/ioutil"
+	"runtime/debug"
 
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/LLKennedy/imagetemplate/v3/scaffold"
@@ -68,54 +70,85 @@ func (l loader) Write() WriteOptions {
 }
 
 // FromBuilder constructs a loader using a pre-existing builder
-func (l loader) FromBuilder(builder scaffold.Builder) (Loader, render.NamedProperties, error) {
+func (l loader) FromBuilder(builder scaffold.Builder) (newLoader Loader, props render.NamedProperties, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("caught panic in FromBuilder: %v\n%s", r, debug.Stack())
+		}
+	}()
 	l.builder = builder
-	props := l.builder.GetNamedPropertiesList()
+	props = l.builder.GetNamedPropertiesList()
 	return l, props, nil
 }
 
 // FromBytes constructs a loader from the bytes of a template file
-func (l loader) FromBytes(bytes []byte) (Loader, render.NamedProperties, error) {
-	var err error
+func (l loader) FromBytes(bytes []byte) (newLoader Loader, props render.NamedProperties, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("caught panic in FromBytes: %v\n%s", r, debug.Stack())
+		}
+	}()
 	l.builder, err = l.builder.LoadComponentsData(bytes)
 	return l, l.builder.GetNamedPropertiesList(), err
 }
 
 // FromFile constructs a loader from the template file located at the provided path
-func (l loader) FromFile(path string) (Loader, render.NamedProperties, error) {
-	var err error
+func (l loader) FromFile(path string) (newLoader Loader, props render.NamedProperties, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("caught panic in FromFile: %v\n%s", r, debug.Stack())
+		}
+	}()
 	l.builder, err = l.builder.LoadComponentsFile(path)
 	return l, l.builder.GetNamedPropertiesList(), err
 }
 
 // FromJSON constructs a loader from the raw JSON template data provided
-func (l loader) FromJSON(raw json.RawMessage) (Loader, render.NamedProperties, error) {
+func (l loader) FromJSON(raw json.RawMessage) (newLoader Loader, props render.NamedProperties, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("caught panic in FromJSON: %v\n%s", r, debug.Stack())
+		}
+	}()
 	rawData, _ := raw.MarshalJSON() //This function literally cannot error, so ignore the error output
-	var err error
 	l.builder, err = l.builder.LoadComponentsData(rawData)
 	return l, l.builder.GetNamedPropertiesList(), err
 }
 
 // FromReader constructs a loader from the streamed bytes of a template file
-func (l loader) FromReader(reader io.Reader) (Loader, render.NamedProperties, error) {
-	bytes, err := ioutil.ReadAll(reader)
+func (l loader) FromReader(reader io.Reader) (newLoader Loader, props render.NamedProperties, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("caught panic in FromReader: %v\n%s", r, debug.Stack())
+		}
+	}()
+	var raw []byte
+	raw, err = ioutil.ReadAll(reader)
 	if err != nil {
 		return l, nil, err
 	}
-	l.builder, err = l.builder.LoadComponentsData(bytes)
+	l.builder, err = l.builder.LoadComponentsData(raw)
 	return l, l.builder.GetNamedPropertiesList(), err
 }
 
 // ToBuilder returns the finished render contained within its builder
-func (l loader) ToBuilder(props render.NamedProperties) (scaffold.Builder, error) {
-	var err error
+func (l loader) ToBuilder(props render.NamedProperties) (newBuilder scaffold.Builder, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("caught panic in ToBuilder: %v\n%s", r, debug.Stack())
+		}
+	}()
 	l.builder, err = applyProps(l.builder, props)
 	return l.builder, err
 }
 
 // ToBMP returns the finished render as the bytes of a bitmap file
-func (l loader) ToBMP(props render.NamedProperties) ([]byte, error) {
-	var err error
+func (l loader) ToBMP(props render.NamedProperties) (raw []byte, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("caught panic in ToBMP: %v\n%s", r, debug.Stack())
+		}
+	}()
 	l.builder, err = applyProps(l.builder, props)
 	if err != nil {
 		return nil, err
@@ -124,8 +157,12 @@ func (l loader) ToBMP(props render.NamedProperties) ([]byte, error) {
 }
 
 // ToCanvas returns the finished render as a canvas object
-func (l loader) ToCanvas(props render.NamedProperties) (render.Canvas, error) {
-	var err error
+func (l loader) ToCanvas(props render.NamedProperties) (c render.Canvas, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("caught panic in ToCanvas: %v\n%s", r, debug.Stack())
+		}
+	}()
 	l.builder, err = applyProps(l.builder, props)
 	if err != nil {
 		return nil, err
@@ -134,8 +171,12 @@ func (l loader) ToCanvas(props render.NamedProperties) (render.Canvas, error) {
 }
 
 // ToImage returns the finished render as an image.Image object
-func (l loader) ToImage(props render.NamedProperties) (image.Image, error) {
-	var err error
+func (l loader) ToImage(props render.NamedProperties) (img image.Image, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("caught panic in ToImage: %v\n%s", r, debug.Stack())
+		}
+	}()
 	l.builder, err = applyProps(l.builder, props)
 	if err != nil {
 		return nil, err
@@ -144,8 +185,12 @@ func (l loader) ToImage(props render.NamedProperties) (image.Image, error) {
 }
 
 // ToBMPReader returns the finished render as streamed bytes of a bitmap file
-func (l loader) ToBMPReader(props render.NamedProperties) (io.Reader, error) {
-	var err error
+func (l loader) ToBMPReader(props render.NamedProperties) (rdr io.Reader, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("caught panic in ToBMPReader: %v\n%s", r, debug.Stack())
+		}
+	}()
 	l.builder, err = applyProps(l.builder, props)
 	if err != nil {
 		return nil, err
@@ -157,8 +202,8 @@ func (l loader) ToBMPReader(props render.NamedProperties) (io.Reader, error) {
 	return bytes.NewReader(rawData), nil
 }
 
-func applyProps(builder scaffold.Builder, props render.NamedProperties) (scaffold.Builder, error) {
-	builder, err := builder.SetNamedProperties(props)
+func applyProps(builder scaffold.Builder, props render.NamedProperties) (newBuilder scaffold.Builder, err error) {
+	builder, err = builder.SetNamedProperties(props)
 	if err != nil {
 		return builder, err
 	}

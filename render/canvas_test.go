@@ -831,6 +831,48 @@ func TestBarcode(t *testing.T) {
 
 }
 
+func TestToBarcodeType(t *testing.T) {
+	foundType, err := ToBarcodeType(string(BarcodeTypeAztec))
+	assert.Equal(t, foundType, BarcodeTypeAztec)
+	assert.NoError(t, err)
+	foundType, err = ToBarcodeType(string(BarcodeTypeCodabar))
+	assert.Equal(t, foundType, BarcodeTypeCodabar)
+	assert.NoError(t, err)
+	foundType, err = ToBarcodeType(string(BarcodeTypeCode128))
+	assert.Equal(t, foundType, BarcodeTypeCode128)
+	assert.NoError(t, err)
+	foundType, err = ToBarcodeType(string(BarcodeTypeCode39))
+	assert.Equal(t, foundType, BarcodeTypeCode39)
+	assert.NoError(t, err)
+	foundType, err = ToBarcodeType(string(BarcodeTypeCode93))
+	assert.Equal(t, foundType, BarcodeTypeCode93)
+	assert.NoError(t, err)
+	foundType, err = ToBarcodeType(string(BarcodeTypeDataMatrix))
+	assert.Equal(t, foundType, BarcodeTypeDataMatrix)
+	assert.NoError(t, err)
+	foundType, err = ToBarcodeType(string(BarcodeTypeEAN8))
+	assert.Equal(t, foundType, BarcodeTypeEAN8)
+	assert.NoError(t, err)
+	foundType, err = ToBarcodeType(string(BarcodeTypeEAN13))
+	assert.Equal(t, foundType, BarcodeTypeEAN13)
+	assert.NoError(t, err)
+	foundType, err = ToBarcodeType(string(BarcodeTypePDF))
+	assert.Equal(t, foundType, BarcodeTypePDF)
+	assert.NoError(t, err)
+	foundType, err = ToBarcodeType(string(BarcodeTypeQR))
+	assert.Equal(t, foundType, BarcodeTypeQR)
+	assert.NoError(t, err)
+	foundType, err = ToBarcodeType(string(BarcodeType2of5))
+	assert.Equal(t, foundType, BarcodeType2of5)
+	assert.NoError(t, err)
+	foundType, err = ToBarcodeType(string(BarcodeType2of5Interleaved))
+	assert.Equal(t, foundType, BarcodeType2of5Interleaved)
+	assert.NoError(t, err)
+	foundType, err = ToBarcodeType("gibberish")
+	assert.Equal(t, foundType, BarcodeType(""))
+	assert.EqualError(t, err, "barcode type does not match defined constants")
+}
+
 func TestBWMask(t *testing.T) {
 	mask := blackAndWhiteMask{}
 	assert.Equal(t, color.AlphaModel, mask.ColorModel())
