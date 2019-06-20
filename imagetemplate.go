@@ -1,6 +1,7 @@
 package imagetemplate
 
 import (
+	"bytes"
 	"encoding/json"
 	"image"
 	"io"
@@ -13,28 +14,26 @@ import (
 
 // Loader creates image builders from several input options and writes the finished product to several output formats.
 type Loader interface {
-	LoadFrom() LoadOptions
-	WriteTo() WriteOptions
+	Load() LoadOptions
+	Write() WriteOptions
 }
 
 // LoadOptions chooses the input format for Loader
 type LoadOptions interface {
-	Builder(builder scaffold.Builder) (Loader, render.NamedProperties, error)
-	Bytes(bytes []byte) (Loader, render.NamedProperties, error)
-	File(path string) (Loader, render.NamedProperties, error)
-	JSON(raw json.RawMessage) (Loader, render.NamedProperties, error)
-	Reader(reader io.Reader) (Loader, render.NamedProperties, error)
+	FromBuilder(builder scaffold.Builder) (Loader, render.NamedProperties, error)
+	FromBytes(bytes []byte) (Loader, render.NamedProperties, error)
+	FromFile(path string) (Loader, render.NamedProperties, error)
+	FromJSON(raw json.RawMessage) (Loader, render.NamedProperties, error)
+	FromReader(reader io.Reader) (Loader, render.NamedProperties, error)
 }
 
 // WriteOptions chooses the output format for Loader
 type WriteOptions interface {
-	Builder(render.NamedProperties) (scaffold.Builder, error)
-	BMP(render.NamedProperties) ([]byte, error)
-	BMPFile(props render.NamedProperties, path string) error
-	Bytes(render.NamedProperties) ([]byte, error)
-	Canvas(render.NamedProperties) (render.Canvas, error)
-	Image(render.NamedProperties) (image.Image, error)
-	Reader(render.NamedProperties) (io.Reader, error)
+	ToBuilder(props render.NamedProperties) (scaffold.Builder, error)
+	ToBMP(props render.NamedProperties) ([]byte, error)
+	ToCanvas(props render.NamedProperties) (render.Canvas, error)
+	ToImage(props render.NamedProperties) (image.Image, error)
+	ToBMPReader(props render.NamedProperties) (io.Reader, error)
 }
 
 type loader struct {
@@ -42,8 +41,8 @@ type loader struct {
 	fs      vfs.FileSystem
 }
 
-// NewLoader returns a new loader
-func NewLoader(fs vfs.FileSystem) Loader {
+// New returns a new loader
+func New(fs vfs.FileSystem) Loader {
 	if fs == nil {
 		fs = vfs.OS("")
 	}
@@ -53,54 +52,113 @@ func NewLoader(fs vfs.FileSystem) Loader {
 	}
 }
 
-// LoadFrom returns the load options for a loader
-func (l loader) LoadFrom() LoadOptions {
-	return nil
+// Load returns the load options for a loader
+func (l loader) Load() LoadOptions {
+	return l
 }
 
-// WriteTo returns the write options for a loader
-func (l loader) WriteTo() WriteOptions {
-	return nil
+// Write returns the write options for a loader
+func (l loader) Write() WriteOptions {
+	return l
 }
 
-// LoadTemplate takes a file path and returns a Builder constructed from the template file
-func LoadTemplate(path string) (render.NamedProperties, func(render.NamedProperties) ([]byte, error), error) {
-	builder := scaffold.NewBuilder(nil)
-	builder, err := builder.LoadComponentsFile(path)
+// FromBuilder constructs a loader using a pre-existing builder
+func (l loader) FromBuilder(builder scaffold.Builder) (Loader, render.NamedProperties, error) {
+	l.builder = builder
+	props := l.builder.GetNamedPropertiesList()
+	return l, props, nil
+}
+
+// FromBytes constructs a loader from the bytes of a template file
+func (l loader) FromBytes(bytes []byte) (Loader, render.NamedProperties, error) {
+	var err error
+	l.builder, err = l.builder.LoadComponentsData(bytes)
+	return l, l.builder.GetNamedPropertiesList(), err
+}
+
+// FromFile constructs a loader from the template file located at the provided path
+func (l loader) FromFile(path string) (Loader, render.NamedProperties, error) {
+	var err error
+	l.builder, err = l.builder.LoadComponentsFile(path)
+	return l, l.builder.GetNamedPropertiesList(), err
+}
+
+// FromJSON constructs a loader from the raw JSON template data provided
+func (l loader) FromJSON(raw json.RawMessage) (Loader, render.NamedProperties, error) {
+	rawData, err := raw.MarshalJSON()
 	if err != nil {
-		return nil, nil, err
+		return l, nil, err
 	}
-	return loadBuilder(builder)
+	l.builder, err = l.builder.LoadComponentsData(rawData)
+	return l, l.builder.GetNamedPropertiesList(), err
 }
 
-// LoadReader loads JSON data from a reader, returns a list of named properties, and accepts a callback with updated properties to create BMP data
-func LoadReader(reader io.Reader) (render.NamedProperties, func(render.NamedProperties) ([]byte, error), error) {
+// FromReader constructs a loader from the streamed bytes of a template file
+func (l loader) FromReader(reader io.Reader) (Loader, render.NamedProperties, error) {
 	bytes, err := ioutil.ReadAll(reader)
-	builder := scaffold.NewBuilder(nil)
-	builder, err = builder.LoadComponentsData(bytes)
 	if err != nil {
-		return nil, nil, err
+		return l, nil, err
 	}
-	return loadBuilder(builder)
+	l.builder, err = l.builder.LoadComponentsData(bytes)
+	return l, l.builder.GetNamedPropertiesList(), err
 }
 
-func loadBuilder(builder scaffold.Builder) (render.NamedProperties, func(render.NamedProperties) ([]byte, error), error) {
-	props := builder.GetNamedPropertiesList()
-	cont := func(inProps render.NamedProperties) ([]byte, error) {
-		builder, err := builder.SetNamedProperties(props)
-		if err != nil {
-			return nil, err
-		}
-		builder, err = builder.ApplyComponents()
-		if err != nil {
-			return nil, err
-		}
-		var data []byte
-		data, err = builder.WriteToBMP()
-		if err != nil {
-			return nil, err
-		}
-		return data, nil
+// ToBuilder returns the finished render contained within its builder
+func (l loader) ToBuilder(props render.NamedProperties) (scaffold.Builder, error) {
+	var err error
+	l.builder, err = applyProps(l.builder, props)
+	return l.builder, err
+}
+
+// ToBMP returns the finished render as the bytes of a bitmap file
+func (l loader) ToBMP(props render.NamedProperties) ([]byte, error) {
+	var err error
+	l.builder, err = applyProps(l.builder, props)
+	if err != nil {
+		return nil, err
 	}
-	return props, cont, nil
+	return l.builder.WriteToBMP()
+}
+
+// ToCanvas returns the finished render as a canvas object
+func (l loader) ToCanvas(props render.NamedProperties) (render.Canvas, error) {
+	var err error
+	l.builder, err = applyProps(l.builder, props)
+	if err != nil {
+		return nil, err
+	}
+	return l.builder.GetCanvas(), nil
+}
+
+// ToImage returns the finished render as an image.Image object
+func (l loader) ToImage(props render.NamedProperties) (image.Image, error) {
+	var err error
+	l.builder, err = applyProps(l.builder, props)
+	if err != nil {
+		return nil, err
+	}
+	return l.builder.GetCanvas().GetUnderlyingImage(), nil
+}
+
+// ToBMPReader returns the finished render as streamed bytes of a bitmap file
+func (l loader) ToBMPReader(props render.NamedProperties) (io.Reader, error) {
+	var err error
+	l.builder, err = applyProps(l.builder, props)
+	if err != nil {
+		return nil, err
+	}
+	rawData, err := l.builder.WriteToBMP()
+	if err != nil {
+		return nil, err
+	}
+	return bytes.NewReader(rawData), nil
+}
+
+func applyProps(builder scaffold.Builder, props render.NamedProperties) (scaffold.Builder, error) {
+	builder, err := builder.SetNamedProperties(props)
+	if err != nil {
+		return builder, err
+	}
+	builder, err = builder.ApplyComponents()
+	return builder, err
 }
