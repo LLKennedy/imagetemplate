@@ -22,7 +22,7 @@ func TestImageSetNamedPropertiesLoadRealFile(t *testing.T) {
 		},
 		fs: vfs.OS("."),
 	}
-	expectedErr := "open /!!!\\!!!!!!/\\/\\/\\/\\/!!!!/\\!!!\\\\\\: no such file or directory"
+	expectedErr := "open !!!\\!!!!!!/\\/\\/\\/\\/!!!!/\\!!!\\\\\\: no such file or directory"
 	res, err := c.SetNamedProperties(input)
 	assert.Equal(t, expected, res)
 	assert.EqualError(t, err, expectedErr)

@@ -90,10 +90,8 @@ func (l loader) FromFile(path string) (Loader, render.NamedProperties, error) {
 
 // FromJSON constructs a loader from the raw JSON template data provided
 func (l loader) FromJSON(raw json.RawMessage) (Loader, render.NamedProperties, error) {
-	rawData, err := raw.MarshalJSON()
-	if err != nil {
-		return l, nil, err
-	}
+	rawData, _ := raw.MarshalJSON() //This function literally cannot error, so ignore the error output
+	var err error
 	l.builder, err = l.builder.LoadComponentsData(rawData)
 	return l, l.builder.GetNamedPropertiesList(), err
 }
