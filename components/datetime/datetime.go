@@ -114,7 +114,7 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 	return c, nil
 }
 
-// SetNamedProperties proceses the named properties and sets them into the datetime properties
+// SetNamedProperties processes the named properties and sets them into the datetime properties
 func (component Component) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
 	c := component
 	setFunc := func(name string, value interface{}) error {
