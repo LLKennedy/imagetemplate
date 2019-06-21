@@ -206,9 +206,6 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 			case "A":
 				c.Colour.A = colourVal
 				return nil
-			default:
-				//What? How did you get here?
-				return fmt.Errorf("name was a string inside RGBA and Value was a valid uint8, but Name wasn't R, G, B, or A. Name was: %v", name)
 			}
 		}
 		numberVal, ok := value.(int)
