@@ -27,6 +27,7 @@ type Component struct {
 	Font               *truetype.Font
 	Colour             color.NRGBA
 	fs                 vfs.FileSystem
+	fontPool           gosysfonts.Pool
 }
 
 type datetimeFormat struct {
@@ -152,8 +153,7 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 			if !ok {
 				return fmt.Errorf("error converting %v to string", value)
 			}
-			pool := gosysfonts.New()
-			rawFont, err := pool.GetFont(stringVal)
+			rawFont, err := c.getFontPool().GetFont(stringVal)
 			if err != nil {
 				return err
 			}
@@ -316,8 +316,7 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	}
 	if fName != nil {
 		stringVal := fName.(string)
-		pool := gosysfonts.New()
-		rawFont, err := pool.GetFont(stringVal)
+		rawFont, err := c.getFontPool().GetFont(stringVal)
 		if err != nil {
 			return component, props, err
 		}
@@ -444,8 +443,15 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	return c, props, nil
 }
 
+func (component Component) getFontPool() gosysfonts.Pool {
+	if component.fontPool == nil {
+		return gosysfonts.New()
+	}
+	return component.fontPool
+}
+
 func init() {
 	for _, name := range []string{"datetime", "DateTime", "DATETIME", "Datetime", "Date/Time", "date/time", "date", "DATE", "Date"} {
-		render.RegisterComponent(name, func(fs vfs.FileSystem) render.Component { return Component{fs: fs} })
+		render.RegisterComponent(name, func(fs vfs.FileSystem) render.Component { return Component{fs: fs, fontPool: gosysfonts.New()} })
 	}
 }
