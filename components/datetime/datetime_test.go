@@ -153,7 +153,7 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Alignment: AlignmentLeft,
+				Alignment:          AlignmentLeft,
 			},
 			err: "",
 		},
@@ -169,7 +169,7 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Alignment: AlignmentLeft,
+				Alignment:          AlignmentLeft,
 			},
 			err: "",
 		},
@@ -185,7 +185,7 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Alignment: AlignmentRight,
+				Alignment:          AlignmentRight,
 			},
 			err: "",
 		},
@@ -201,7 +201,7 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Alignment: AlignmentCentre,
+				Alignment:          AlignmentCentre,
 			},
 			err: "",
 		},
@@ -217,7 +217,7 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Alignment: AlignmentLeft,
+				Alignment:          AlignmentLeft,
 			},
 			err: "",
 		},
