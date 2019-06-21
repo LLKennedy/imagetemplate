@@ -9,6 +9,7 @@ import (
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
 
+	"github.com/LLKennedy/gosysfonts"
 	"github.com/LLKennedy/imagetemplate/v3/internal/filesystem"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/golang/freetype/truetype"
@@ -604,4 +605,8 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestGetFontPool(t *testing.T) {
+	assert.Equal(t, gosysfonts.New(), Component{}.getFontPool())
 }
