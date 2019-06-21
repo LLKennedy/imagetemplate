@@ -10,7 +10,6 @@ import (
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
-	"golang.org/x/tools/godoc/vfs"
 
 	"github.com/LLKennedy/imagetemplate/v3/internal/filesystem"
 	"github.com/LLKennedy/imagetemplate/v3/render"
@@ -28,7 +27,7 @@ func TestDateTimeWrite(t *testing.T) {
 		c := Component{NamedPropertiesMap: map[string][]string{"not set": {"something"}}}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
-		assert.EqualError(t, err, "failed to write to canvas: runtime error: invalid memory address or nil pointer dereference")
+		assert.Error(t, err)
 		canvas.AssertExpectations(t)
 	})
 	t.Run("datetime error", func(t *testing.T) {
@@ -623,10 +622,4 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestInit(t *testing.T) {
-	c, err := render.Decode("date")
-	assert.NoError(t, err)
-	assert.Equal(t, Component{fs: vfs.OS(".")}, c)
 }

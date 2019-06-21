@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"io/ioutil"
+	"runtime/debug"
 	"strings"
 
 	"github.com/LLKennedy/gosysfonts"
@@ -66,7 +67,7 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 	defer func() {
 		p := recover()
 		if p != nil {
-			err = fmt.Errorf("failed to write to canvas: %v", p)
+			err = fmt.Errorf("failed to write to canvas: %v\n%s", p, debug.Stack())
 		}
 	}()
 	fontSize := component.Size
@@ -169,17 +170,21 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 			}
 			if isAlignment {
 				c.Alignment = alignmentVal
-			} else {
-				switch stringVal {
-				case "left":
-					c.Alignment = AlignmentLeft
-				case "right":
-					c.Alignment = AlignmentRight
-				case "centre":
-					c.Alignment = AlignmentCentre
-				default:
-					c.Alignment = AlignmentLeft
-				}
+				return nil
+			}
+			switch stringVal {
+			case "left":
+				c.Alignment = AlignmentLeft
+				return nil
+			case "right":
+				c.Alignment = AlignmentRight
+				return nil
+			case "centre":
+				c.Alignment = AlignmentCentre
+				return nil
+			default:
+				c.Alignment = AlignmentLeft
+				return nil
 			}
 		}
 		if strings.Contains("RGBA", name) && len(name) == 1 {

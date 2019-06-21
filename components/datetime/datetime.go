@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"io/ioutil"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -73,7 +74,7 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 	defer func() {
 		p := recover()
 		if p != nil {
-			err = fmt.Errorf("failed to write to canvas: %v", p)
+			err = fmt.Errorf("failed to write to canvas: %v\n%s", p, debug.Stack())
 		}
 	}()
 	fontSize := component.Size

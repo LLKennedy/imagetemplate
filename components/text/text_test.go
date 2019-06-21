@@ -8,7 +8,6 @@ import (
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
-	"golang.org/x/tools/godoc/vfs"
 
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/golang/freetype/truetype"
@@ -22,36 +21,23 @@ func TestTextWrite(t *testing.T) {
 	}
 	t.Run("not all props set", func(t *testing.T) {
 		canvas := new(render.MockCanvas)
-		canvas.On("GetPPI").Return(float64(72))
 		c := Component{NamedPropertiesMap: map[string][]string{"not set": {"something"}}}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
-		assert.EqualError(t, err, "failed to write to canvas: runtime error: invalid memory address or nil pointer dereference")
+		assert.Error(t, err)
 		canvas.AssertExpectations(t)
 	})
-	t.Run("text error", func(t *testing.T) {
+	t.Run("datetime error", func(t *testing.T) {
+		expectedFont := truetype.NewFace(goreg, &truetype.Options{Size: 14, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
 		canvas := new(render.MockCanvas)
 		canvas.On("GetPPI").Return(float64(72))
-		expectedFont := truetype.NewFace(goreg, &truetype.Options{Size: 14, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
 		canvas.On("TryText", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(true, 10)
 		canvas.On("Text", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(canvas, fmt.Errorf("some error"))
 		c := Component{Font: goreg, Size: 14, MaxWidth: 100}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.EqualError(t, err, "some error")
-		//canvas.AssertExpectations(t)
-	})
-	t.Run("passing", func(t *testing.T) {
-		canvas := new(render.MockCanvas)
-		canvas.On("GetPPI").Return(float64(72))
-		expectedFont := truetype.NewFace(goreg, &truetype.Options{Size: 14, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
-		canvas.On("TryText", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(true, 10)
-		canvas.On("Text", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
-		c := Component{Font: goreg, Size: 14, MaxWidth: 100}
-		modifiedCanvas, err := c.Write(canvas)
-		assert.Equal(t, canvas, modifiedCanvas)
-		assert.NoError(t, err)
-		//canvas.AssertExpectations(t)
+		canvas.AssertExpectations(t)
 	})
 	t.Run("multiple passes required", func(t *testing.T) {
 		expectedFont := truetype.NewFace(goreg, &truetype.Options{Size: float64(24), Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
@@ -67,6 +53,51 @@ func TestTextWrite(t *testing.T) {
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.NoError(t, err)
+		canvas.AssertExpectations(t)
+	})
+	t.Run("can't ever fit", func(t *testing.T) {
+		expectedFont := truetype.NewFace(goreg, &truetype.Options{Size: float64(24), Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
+		canvas := new(render.MockCanvas)
+		canvas.On("GetPPI").Return(float64(72))
+		canvas.On("TryText", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(false, 100)
+		c := Component{Font: goreg, Size: 24, MaxWidth: 100}
+		modifiedCanvas, err := c.Write(canvas)
+		assert.Equal(t, canvas, modifiedCanvas)
+		assert.EqualError(t, err, "unable to fit text  into maxWidth 100 after 10 tries")
+		canvas.AssertExpectations(t)
+	})
+	t.Run("different alignments", func(t *testing.T) {
+		expectedFont := truetype.NewFace(goreg, &truetype.Options{Size: float64(24), Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
+		canvas := new(render.MockCanvas)
+		canvas.On("GetPPI").Return(float64(72))
+		canvas.On("TryText", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(true, 50)
+		canvas.On("Text", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
+		canvas.On("Text", "", image.Pt(25, 0), expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
+		canvas.On("Text", "", image.Pt(50, 0), expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
+		t.Run("left", func(t *testing.T) {
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Alignment: AlignmentLeft}
+			modifiedCanvas, err := c.Write(canvas)
+			assert.Equal(t, canvas, modifiedCanvas)
+			assert.NoError(t, err)
+		})
+		t.Run("right", func(t *testing.T) {
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Alignment: AlignmentRight}
+			modifiedCanvas, err := c.Write(canvas)
+			assert.Equal(t, canvas, modifiedCanvas)
+			assert.NoError(t, err)
+		})
+		t.Run("centre", func(t *testing.T) {
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Alignment: AlignmentCentre}
+			modifiedCanvas, err := c.Write(canvas)
+			assert.Equal(t, canvas, modifiedCanvas)
+			assert.NoError(t, err)
+		})
+		t.Run("default", func(t *testing.T) {
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Alignment: Alignment(12)}
+			modifiedCanvas, err := c.Write(canvas)
+			assert.Equal(t, canvas, modifiedCanvas)
+			assert.NoError(t, err)
+		})
 		canvas.AssertExpectations(t)
 	})
 }
@@ -282,10 +313,4 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestInit(t *testing.T) {
-	c, err := render.Decode("text")
-	assert.NoError(t, err)
-	assert.Equal(t, Component{fs: vfs.OS(".")}, c)
 }
