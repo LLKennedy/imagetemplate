@@ -200,21 +200,20 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 			if isAlignment {
 				c.Alignment = alignmentVal
 				return nil
-			} else {
-				switch stringVal {
-				case "left":
-					c.Alignment = AlignmentLeft
-					return nil
-				case "right":
-					c.Alignment = AlignmentRight
-					return nil
-				case "centre":
-					c.Alignment = AlignmentCentre
-					return nil
-				default:
-					c.Alignment = AlignmentLeft
-					return nil
-				}
+			}
+			switch stringVal {
+			case "left":
+				c.Alignment = AlignmentLeft
+				return nil
+			case "right":
+				c.Alignment = AlignmentRight
+				return nil
+			case "centre":
+				c.Alignment = AlignmentCentre
+				return nil
+			default:
+				c.Alignment = AlignmentLeft
+				return nil
 			}
 		}
 		if strings.Contains("RGBA", name) && len(name) == 1 {
