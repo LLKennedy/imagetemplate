@@ -13,11 +13,9 @@ import (
 )
 
 func TestMockFS(t *testing.T) {
-	m := NewMockFileSystem()
-	buffer := NewMockFile([]byte("hello!"))
-	m.On("Open", "a file").Return(buffer, errors.New("an error"))
+	m := NewMockFileSystem(NewMockFile("a file", []byte("hello!")))
 	res, err := m.Open("a file")
-	assert.EqualError(t, err, "an error")
+	assert.NoError(t, err)
 	t.Run("valid read", func(t *testing.T) {
 		readRes, err := ioutil.ReadAll(res)
 		assert.NoError(t, err)
@@ -48,22 +46,22 @@ func TestMockFS(t *testing.T) {
 		assert.NoError(t, res.Close())
 	})
 	t.Run("lstat", func(t *testing.T) {
-		m.On("Lstat", "a").Return(NewMockFile(nil), nil)
+		m.On("Lstat", "a").Return(NewMockFile("", nil), nil)
 		stats, err := m.Lstat("a")
-		assert.Equal(t, NewMockFile(nil), stats)
+		assert.Equal(t, NewMockFile("", nil), stats)
 		assert.NoError(t, err)
 	})
 	t.Run("stat", func(t *testing.T) {
-		m.On("Stat", "b").Return(NewMockFile([]byte{}), errors.New("some error"))
+		m.On("Stat", "b").Return(NewMockFile("", []byte{}), errors.New("some error"))
 		stats, err := m.Stat("b")
-		assert.Equal(t, NewMockFile([]byte{}), stats)
+		assert.Equal(t, NewMockFile("", []byte{}), stats)
 		assert.EqualError(t, err, "some error")
 	})
 	t.Run("readdir", func(t *testing.T) {
-		m.On("ReadDir", "c").Return([]os.FileInfo{NewMockFile(nil)}, nil)
+		m.On("ReadDir", "c").Return([]os.FileInfo{NewMockFile("", nil)}, nil)
 		files, err := m.ReadDir("c")
 		assert.NoError(t, err)
-		assert.Equal(t, []os.FileInfo{NewMockFile(nil)}, files)
+		assert.Equal(t, []os.FileInfo{NewMockFile("", nil)}, files)
 	})
 	t.Run("roottype", func(t *testing.T) {
 		m.On("RootType", "d").Return(vfs.RootTypeGoPath)
@@ -79,7 +77,7 @@ func TestMockFS(t *testing.T) {
 }
 
 func TestMockFile(t *testing.T) {
-	file := NewMockFile(nil)
+	file := NewMockFile("", nil)
 	t.Run("name", func(t *testing.T) {
 		file.On("Name").Return("a file")
 		name := file.Name()

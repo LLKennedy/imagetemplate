@@ -40,7 +40,7 @@ func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 	return canvas.Rectangle(component.TopLeft, component.Width, component.Height, component.Colour)
 }
 
-// SetNamedProperties proceses the named properties and sets them into the rectangle properties
+// SetNamedProperties processes the named properties and sets them into the rectangle properties
 func (component Component) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
 	c := component
 	setFunc := func(name string, value interface{}) error {
