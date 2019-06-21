@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"runtime/debug"
 	"testing"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/tools/godoc/vfs"
 
+	"github.com/LLKennedy/imagetemplate/v3/internal/filesystem"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/golang/freetype/truetype"
 	"github.com/stretchr/testify/assert"
@@ -116,6 +118,7 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 		res   Component
 		err   string
 	}
+	ttfFS := filesystem.NewMockFileSystem(filesystem.NewMockFile("myFont.ttf", goregular.TTF))
 	tests := []testSet{
 		{
 			name:  "no props",
@@ -123,6 +126,59 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			input: render.NamedProperties{},
 			res:   Component{},
 			err:   "",
+		},
+		{
+			name: "invalid font file",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontFile"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 12,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontFile"},
+				},
+			},
+			err: "error converting 12 to string",
+		},
+		{
+			name: "valid font file",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontFile"},
+				},
+				fs: ttfFS,
+			},
+			input: render.NamedProperties{
+				"aProp": "myFont.ttf",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Alignment:          AlignmentLeft,
+				fs:                 ttfFS,
+				Font:               func() *truetype.Font { f, _ := truetype.Parse(goregular.TTF); return f }(),
+			},
+			err: "",
+		},
+		{
+			name: "invalid font url",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontURL"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 12,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontURL"},
+				},
+			},
+			err: "fontURL not implemented",
 		},
 		{
 			name: "invalid alignment type",
@@ -400,12 +456,20 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			defer func() {
+				if r := recover(); r != nil {
+					assert.Failf(t, "caught panic", "%v\n%s", r, debug.Stack())
+				}
+			}()
 			res, err := test.start.SetNamedProperties(test.input)
 			assert.Equal(t, test.res, res)
 			if test.err == "" {
 				assert.NoError(t, err)
 			} else {
 				assert.EqualError(t, err, test.err)
+			}
+			if mockFs, isMock := test.start.fs.(*filesystem.MockFileSystem); isMock {
+				mockFs.AssertExpectations(t)
 			}
 		})
 	}
