@@ -77,8 +77,8 @@ func TestDateTimeWrite(t *testing.T) {
 		canvas.On("GetPPI").Return(float64(72))
 		canvas.On("TryText", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(true, 50)
 		canvas.On("Text", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
-		canvas.On("Text", "", image.Pt(25,0), expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
-		canvas.On("Text", "", image.Pt(50,0), expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
+		canvas.On("Text", "", image.Pt(25, 0), expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
+		canvas.On("Text", "", image.Pt(50, 0), expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
 		timeVal := time.Now()
 		t.Run("left", func(t *testing.T) {
 			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Time: &timeVal, Alignment: AlignmentLeft}
@@ -123,6 +123,103 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			input: render.NamedProperties{},
 			res:   Component{},
 			err:   "",
+		},
+		{
+			name: "invalid alignment type",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"alignment"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 12,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"alignment"},
+				},
+			},
+			err: "could not convert 12 to datetime alignment or string",
+		},
+		{
+			name: "alignment constant valid",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"alignment"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": AlignmentLeft,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Alignment: AlignmentLeft,
+			},
+			err: "",
+		},
+		{
+			name: "alignment string left",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"alignment"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "left",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Alignment: AlignmentLeft,
+			},
+			err: "",
+		},
+		{
+			name: "alignment string right",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"alignment"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "right",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Alignment: AlignmentRight,
+			},
+			err: "",
+		},
+		{
+			name: "alignment string centre",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"alignment"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "centre",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Alignment: AlignmentCentre,
+			},
+			err: "",
+		},
+		{
+			name: "alignment string default",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"alignment"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "gibberish",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Alignment: AlignmentLeft,
+			},
+			err: "",
 		},
 		{
 			name: "RGBA invalid",
@@ -224,6 +321,22 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			err: "",
 		},
 		{
+			name: "maxWidth",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"maxWidth"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 15,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				MaxWidth:           15,
+			},
+			err: "",
+		},
+		{
 			name: "size",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
@@ -238,6 +351,23 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 				Size:               15,
 			},
 			err: "",
+		},
+		{
+			name: "invalid size",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"size"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "a",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"size"},
+				},
+			},
+			err: "error converting a to float64",
 		},
 		{
 			name: "full prop set, multiple sources, unused props",
