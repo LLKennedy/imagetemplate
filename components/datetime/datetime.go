@@ -105,7 +105,7 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 		}
 	}
 	if !fits {
-		return canvas, fmt.Errorf("unable to fit datetime %v into maxWidth %d after %d tries", formattedTime, component.MaxWidth, tries)
+		return canvas, fmt.Errorf("unable to fit datetime %s into maxWidth %d after %d tries", formattedTime, component.MaxWidth, tries)
 	}
 	c, err = c.Text(formattedTime, image.Pt(component.Start.X+alignmentOffset, component.Start.Y), face, component.Colour, component.MaxWidth)
 	if err != nil {

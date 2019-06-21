@@ -59,6 +59,53 @@ func TestDateTimeWrite(t *testing.T) {
 		assert.NoError(t, err)
 		canvas.AssertExpectations(t)
 	})
+	t.Run("can't ever fit", func(t *testing.T) {
+		expectedFont := truetype.NewFace(goreg, &truetype.Options{Size: float64(24), Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
+		canvas := new(render.MockCanvas)
+		canvas.On("GetPPI").Return(float64(72))
+		timeVal := time.Now()
+		canvas.On("TryText", timeVal.Format(time.RFC822), image.Point{}, expectedFont, color.NRGBA{}, 100).Return(false, 100)
+		c := Component{Font: goreg, Size: 24, MaxWidth: 100, Time: &timeVal, TimeFormat: time.RFC822}
+		modifiedCanvas, err := c.Write(canvas)
+		assert.Equal(t, canvas, modifiedCanvas)
+		assert.EqualError(t, err, fmt.Sprintf("unable to fit datetime %s into maxWidth 100 after 10 tries", timeVal.Format(time.RFC822)))
+		canvas.AssertExpectations(t)
+	})
+	t.Run("different alignments", func(t *testing.T) {
+		expectedFont := truetype.NewFace(goreg, &truetype.Options{Size: float64(24), Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
+		canvas := new(render.MockCanvas)
+		canvas.On("GetPPI").Return(float64(72))
+		canvas.On("TryText", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(true, 50)
+		canvas.On("Text", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
+		canvas.On("Text", "", image.Pt(25,0), expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
+		canvas.On("Text", "", image.Pt(50,0), expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
+		timeVal := time.Now()
+		t.Run("left", func(t *testing.T) {
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Time: &timeVal, Alignment: AlignmentLeft}
+			modifiedCanvas, err := c.Write(canvas)
+			assert.Equal(t, canvas, modifiedCanvas)
+			assert.NoError(t, err)
+		})
+		t.Run("right", func(t *testing.T) {
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Time: &timeVal, Alignment: AlignmentRight}
+			modifiedCanvas, err := c.Write(canvas)
+			assert.Equal(t, canvas, modifiedCanvas)
+			assert.NoError(t, err)
+		})
+		t.Run("centre", func(t *testing.T) {
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Time: &timeVal, Alignment: AlignmentCentre}
+			modifiedCanvas, err := c.Write(canvas)
+			assert.Equal(t, canvas, modifiedCanvas)
+			assert.NoError(t, err)
+		})
+		t.Run("default", func(t *testing.T) {
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Time: &timeVal, Alignment: Alignment(12)}
+			modifiedCanvas, err := c.Write(canvas)
+			assert.Equal(t, canvas, modifiedCanvas)
+			assert.NoError(t, err)
+		})
+		canvas.AssertExpectations(t)
+	})
 }
 
 func TestDateTimeSetNamedProperties(t *testing.T) {
