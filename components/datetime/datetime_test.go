@@ -110,6 +110,15 @@ func TestDateTimeWrite(t *testing.T) {
 	})
 }
 
+type fakeSysFonts struct{}
+
+func (f fakeSysFonts) GetFont(req string) (*truetype.Font, error) {
+	if req == "good" {
+		return truetype.Parse(goregular.TTF)
+	}
+	return nil, fmt.Errorf("bad font requested")
+}
+
 func TestDateTimeSetNamedProperties(t *testing.T) {
 	type testSet struct {
 		name  string
@@ -130,6 +139,59 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			input: render.NamedProperties{},
 			res:   Component{},
 			err:   "",
+		},
+		{
+			name: "invalid font name",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontName"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 12,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontName"},
+				},
+			},
+			err: "error converting 12 to string",
+		},
+		{
+			name: "error requesting font",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontName"},
+				},
+				fontPool: fakeSysFonts{},
+			},
+			input: render.NamedProperties{
+				"aProp": "bad",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontName"},
+				},
+				fontPool: fakeSysFonts{},
+			},
+			err: "bad font requested",
+		},
+		{
+			name: "valid font name",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontName"},
+				},
+				fontPool: fakeSysFonts{},
+			},
+			input: render.NamedProperties{
+				"aProp": "good",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				fontPool:           fakeSysFonts{},
+				Font:               func() *truetype.Font { f, _ := truetype.Parse(goregular.TTF); return f }(),
+			},
 		},
 		{
 			name: "invalid font file",
