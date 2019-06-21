@@ -118,7 +118,11 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 		res   Component
 		err   string
 	}
-	ttfFS := filesystem.NewMockFileSystem(filesystem.NewMockFile("myFont.ttf", goregular.TTF))
+	ttfFS := filesystem.NewMockFileSystem(
+		filesystem.NewMockFile("myFont.ttf", goregular.TTF),
+		filesystem.NewMockFile("badfont.TTF", []byte("hello")),
+	)
+	ttfFS.On("Open", "nilfont.TTF").Return(filesystem.NilFile, nil)
 	tests := []testSet{
 		{
 			name:  "no props",
@@ -162,6 +166,46 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 				Font:               func() *truetype.Font { f, _ := truetype.Parse(goregular.TTF); return f }(),
 			},
 			err: "",
+		},
+		{
+			name: "error parsing font file",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontFile"},
+				},
+				fs: ttfFS,
+			},
+			input: render.NamedProperties{
+				"aProp": "badfont.TTF",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontFile"},
+				},
+				Alignment: AlignmentLeft,
+				fs:        ttfFS,
+			},
+			err: "freetype: invalid TrueType format: TTF data is too short",
+		},
+		{
+			name: "error reading font data",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontFile"},
+				},
+				fs: ttfFS,
+			},
+			input: render.NamedProperties{
+				"aProp": "nilfont.TTF",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontFile"},
+				},
+				Alignment: AlignmentLeft,
+				fs:        ttfFS,
+			},
+			err: "cannot read from nil file",
 		},
 		{
 			name: "invalid font url",
@@ -454,6 +498,7 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			err: "",
 		},
 	}
+	fileSystemsToCheck := []*filesystem.MockFileSystem{}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			defer func() {
@@ -469,9 +514,12 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 				assert.EqualError(t, err, test.err)
 			}
 			if mockFs, isMock := test.start.fs.(*filesystem.MockFileSystem); isMock {
-				mockFs.AssertExpectations(t)
+				fileSystemsToCheck = append(fileSystemsToCheck, mockFs)
 			}
 		})
+	}
+	for _, fs := range fileSystemsToCheck {
+		fs.AssertExpectations(t)
 	}
 }
 
