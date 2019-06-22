@@ -8,8 +8,9 @@ import (
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
-	"golang.org/x/tools/godoc/vfs"
 
+	"github.com/LLKennedy/gosysfonts"
+	"github.com/LLKennedy/imagetemplate/v3/internal/filesystem"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/golang/freetype/truetype"
 	"github.com/stretchr/testify/assert"
@@ -22,36 +23,23 @@ func TestTextWrite(t *testing.T) {
 	}
 	t.Run("not all props set", func(t *testing.T) {
 		canvas := new(render.MockCanvas)
-		canvas.On("GetPPI").Return(float64(72))
 		c := Component{NamedPropertiesMap: map[string][]string{"not set": {"something"}}}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
-		assert.EqualError(t, err, "failed to write to canvas: runtime error: invalid memory address or nil pointer dereference")
+		assert.Error(t, err)
 		canvas.AssertExpectations(t)
 	})
 	t.Run("text error", func(t *testing.T) {
+		expectedFont := truetype.NewFace(goreg, &truetype.Options{Size: 14, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
 		canvas := new(render.MockCanvas)
 		canvas.On("GetPPI").Return(float64(72))
-		expectedFont := truetype.NewFace(goreg, &truetype.Options{Size: 14, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
 		canvas.On("TryText", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(true, 10)
 		canvas.On("Text", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(canvas, fmt.Errorf("some error"))
 		c := Component{Font: goreg, Size: 14, MaxWidth: 100}
 		modifiedCanvas, err := c.Write(canvas)
 		assert.Equal(t, canvas, modifiedCanvas)
 		assert.EqualError(t, err, "some error")
-		//canvas.AssertExpectations(t)
-	})
-	t.Run("passing", func(t *testing.T) {
-		canvas := new(render.MockCanvas)
-		canvas.On("GetPPI").Return(float64(72))
-		expectedFont := truetype.NewFace(goreg, &truetype.Options{Size: 14, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
-		canvas.On("TryText", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(true, 10)
-		canvas.On("Text", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
-		c := Component{Font: goreg, Size: 14, MaxWidth: 100}
-		modifiedCanvas, err := c.Write(canvas)
-		assert.Equal(t, canvas, modifiedCanvas)
-		assert.NoError(t, err)
-		//canvas.AssertExpectations(t)
+		canvas.AssertExpectations(t)
 	})
 	t.Run("multiple passes required", func(t *testing.T) {
 		expectedFont := truetype.NewFace(goreg, &truetype.Options{Size: float64(24), Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
@@ -69,6 +57,60 @@ func TestTextWrite(t *testing.T) {
 		assert.NoError(t, err)
 		canvas.AssertExpectations(t)
 	})
+	t.Run("can't ever fit", func(t *testing.T) {
+		expectedFont := truetype.NewFace(goreg, &truetype.Options{Size: float64(24), Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
+		canvas := new(render.MockCanvas)
+		canvas.On("GetPPI").Return(float64(72))
+		canvas.On("TryText", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(false, 100)
+		c := Component{Font: goreg, Size: 24, MaxWidth: 100}
+		modifiedCanvas, err := c.Write(canvas)
+		assert.Equal(t, canvas, modifiedCanvas)
+		assert.EqualError(t, err, "unable to fit text  into maxWidth 100 after 10 tries")
+		canvas.AssertExpectations(t)
+	})
+	t.Run("different alignments", func(t *testing.T) {
+		expectedFont := truetype.NewFace(goreg, &truetype.Options{Size: float64(24), Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: float64(72)})
+		canvas := new(render.MockCanvas)
+		canvas.On("GetPPI").Return(float64(72))
+		canvas.On("TryText", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(true, 50)
+		canvas.On("Text", "", image.Point{}, expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
+		canvas.On("Text", "", image.Pt(25, 0), expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
+		canvas.On("Text", "", image.Pt(50, 0), expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
+		t.Run("left", func(t *testing.T) {
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Alignment: AlignmentLeft}
+			modifiedCanvas, err := c.Write(canvas)
+			assert.Equal(t, canvas, modifiedCanvas)
+			assert.NoError(t, err)
+		})
+		t.Run("right", func(t *testing.T) {
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Alignment: AlignmentRight}
+			modifiedCanvas, err := c.Write(canvas)
+			assert.Equal(t, canvas, modifiedCanvas)
+			assert.NoError(t, err)
+		})
+		t.Run("centre", func(t *testing.T) {
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Alignment: AlignmentCentre}
+			modifiedCanvas, err := c.Write(canvas)
+			assert.Equal(t, canvas, modifiedCanvas)
+			assert.NoError(t, err)
+		})
+		t.Run("default", func(t *testing.T) {
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Alignment: Alignment(12)}
+			modifiedCanvas, err := c.Write(canvas)
+			assert.Equal(t, canvas, modifiedCanvas)
+			assert.NoError(t, err)
+		})
+		canvas.AssertExpectations(t)
+	})
+}
+
+type fakeSysFonts struct{}
+
+func (f fakeSysFonts) GetFont(req string) (*truetype.Font, error) {
+	if req == "good" {
+		return truetype.Parse(goregular.TTF)
+	}
+	return nil, fmt.Errorf("bad font requested")
 }
 
 func TestTextSetNamedProperties(t *testing.T) {
@@ -79,6 +121,11 @@ func TestTextSetNamedProperties(t *testing.T) {
 		res   Component
 		err   string
 	}
+	ttfFS := filesystem.NewMockFileSystem(
+		filesystem.NewMockFile("myFont.ttf", goregular.TTF),
+		filesystem.NewMockFile("badfont.TTF", []byte("hello")),
+	)
+	ttfFS.On("Open", "nilfont.TTF").Return(filesystem.NilFile, nil)
 	tests := []testSet{
 		{
 			name:  "no props",
@@ -86,6 +133,249 @@ func TestTextSetNamedProperties(t *testing.T) {
 			input: render.NamedProperties{},
 			res:   Component{},
 			err:   "",
+		},
+		{
+			name: "invalid font name",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontName"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 12,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontName"},
+				},
+			},
+			err: "error converting 12 to string",
+		},
+		{
+			name: "error requesting font",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontName"},
+				},
+				fontPool: fakeSysFonts{},
+			},
+			input: render.NamedProperties{
+				"aProp": "bad",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontName"},
+				},
+				fontPool: fakeSysFonts{},
+			},
+			err: "bad font requested",
+		},
+		{
+			name: "valid font name",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontName"},
+				},
+				fontPool: fakeSysFonts{},
+			},
+			input: render.NamedProperties{
+				"aProp": "good",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				fontPool:           fakeSysFonts{},
+				Font:               func() *truetype.Font { f, _ := truetype.Parse(goregular.TTF); return f }(),
+			},
+		},
+		{
+			name: "invalid font file",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontFile"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 12,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontFile"},
+				},
+			},
+			err: "error converting 12 to string",
+		},
+		{
+			name: "valid font file",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontFile"},
+				},
+				fs: ttfFS,
+			},
+			input: render.NamedProperties{
+				"aProp": "myFont.ttf",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Alignment:          AlignmentLeft,
+				fs:                 ttfFS,
+				Font:               func() *truetype.Font { f, _ := truetype.Parse(goregular.TTF); return f }(),
+			},
+			err: "",
+		},
+		{
+			name: "error parsing font file",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontFile"},
+				},
+				fs: ttfFS,
+			},
+			input: render.NamedProperties{
+				"aProp": "badfont.TTF",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontFile"},
+				},
+				Alignment: AlignmentLeft,
+				fs:        ttfFS,
+			},
+			err: "freetype: invalid TrueType format: TTF data is too short",
+		},
+		{
+			name: "error reading font data",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontFile"},
+				},
+				fs: ttfFS,
+			},
+			input: render.NamedProperties{
+				"aProp": "nilfont.TTF",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontFile"},
+				},
+				Alignment: AlignmentLeft,
+				fs:        ttfFS,
+			},
+			err: "cannot read from nil file",
+		},
+		{
+			name: "invalid font url",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontURL"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 12,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"fontURL"},
+				},
+			},
+			err: "fontURL not implemented",
+		},
+		{
+			name: "invalid alignment type",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"alignment"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 12,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"alignment"},
+				},
+			},
+			err: "could not convert 12 to text alignment or string",
+		},
+		{
+			name: "alignment constant valid",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"alignment"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": AlignmentLeft,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Alignment:          AlignmentLeft,
+			},
+			err: "",
+		},
+		{
+			name: "alignment string left",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"alignment"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "left",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Alignment:          AlignmentLeft,
+			},
+			err: "",
+		},
+		{
+			name: "alignment string right",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"alignment"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "right",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Alignment:          AlignmentRight,
+			},
+			err: "",
+		},
+		{
+			name: "alignment string centre",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"alignment"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "centre",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Alignment:          AlignmentCentre,
+			},
+			err: "",
+		},
+		{
+			name: "alignment string default",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"alignment"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "gibberish",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Alignment:          AlignmentLeft,
+			},
+			err: "",
 		},
 		{
 			name: "RGBA invalid",
@@ -187,6 +477,22 @@ func TestTextSetNamedProperties(t *testing.T) {
 			err: "",
 		},
 		{
+			name: "maxWidth",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"maxWidth"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 15,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				MaxWidth:           15,
+			},
+			err: "",
+		},
+		{
 			name: "size",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
@@ -201,6 +507,23 @@ func TestTextSetNamedProperties(t *testing.T) {
 				Size:               15,
 			},
 			err: "",
+		},
+		{
+			name: "invalid size",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"size"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "a",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"size"},
+				},
+			},
+			err: "error converting a to float64",
 		},
 		{
 			name: "full prop set, multiple sources, unused props",
@@ -284,8 +607,6 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 	}
 }
 
-func TestInit(t *testing.T) {
-	c, err := render.Decode("text")
-	assert.NoError(t, err)
-	assert.Equal(t, Component{fs: vfs.OS(".")}, c)
+func TestGetFontPool(t *testing.T) {
+	assert.Equal(t, gosysfonts.New(), Component{}.getFontPool())
 }
