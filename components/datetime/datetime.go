@@ -125,7 +125,7 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 			stringVal, isStrings := value.([]string)
 			timePointer, isTimePointer := value.(*time.Time)
 			timeVal, isTime := value.(time.Time)
-			if (!isStrings && !isTimePointer && !isTime) || (isTime && len(stringVal) != 2) {
+			if (!isStrings && !isTimePointer && !isTime) || (isStrings && len(stringVal) != 2) {
 				return fmt.Errorf("error converting %v to []string, *time.Time or time.Time", value)
 			}
 			if isTime {

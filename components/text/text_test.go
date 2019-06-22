@@ -135,6 +135,38 @@ func TestTextSetNamedProperties(t *testing.T) {
 			err:   "",
 		},
 		{
+			name: "valid content",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"content"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "good",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Content: "good",
+			},
+		},
+		{
+			name: "invalid content",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"content"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 12,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"content"},
+				},
+			},
+			err: "error converting 12 to string",
+		},
+		{
 			name: "invalid font name",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{

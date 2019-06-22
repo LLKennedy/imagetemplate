@@ -127,6 +127,7 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 		res   Component
 		err   string
 	}
+	timestamp, _ := time.Parse(time.RFC822, time.Now().Format(time.RFC822))
 	ttfFS := filesystem.NewMockFileSystem(
 		filesystem.NewMockFile("myFont.ttf", goregular.TTF),
 		filesystem.NewMockFile("badfont.TTF", []byte("hello")),
@@ -139,6 +140,134 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			input: render.NamedProperties{},
 			res:   Component{},
 			err:   "",
+		},
+		{
+			name: "invalid time (not valid type)",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"time"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 12,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"time"},
+				},
+			},
+			err: "error converting 12 to []string, *time.Time or time.Time",
+		},
+		{
+			name: "invalid time (bad string slice)",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"time"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": []string{"hello"},
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"time"},
+				},
+			},
+			err: "error converting [hello] to []string, *time.Time or time.Time",
+		},
+		{
+			name: "invalid time (bad string slice contents)",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"time"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": []string{"hello", "there"},
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"time"},
+				},
+			},
+			err: "cannot convert time string there to time format hello",
+		},
+		{
+			name: "valid time (time.Time)",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"time"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": timestamp,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Time: &timestamp,
+			},
+		},
+		{
+			name: "valid time (*time.Time)",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"time"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": &timestamp,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Time: &timestamp,
+			},
+		},
+		{
+			name: "valid time ([]string)",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"time"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": []string{time.RFC822, timestamp.Format(time.RFC822)},
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Time: &timestamp,
+			},
+		},
+		{
+			name: "invalid time format",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"timeFormat"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 12,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"timeFormat"},
+				},
+			},
+			err: "error converting 12 to string",
+		},
+		{
+			name: "valid time format",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"timeFormat"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": time.RFC822,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				TimeFormat: time.RFC822,
+			},
 		},
 		{
 			name: "invalid font name",
