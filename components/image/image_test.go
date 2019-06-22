@@ -173,7 +173,7 @@ func TestImageSetNamedProperties(t *testing.T) {
 				},
 				fs: func() vfs.FileSystem {
 					reader := fs.NewMockFileSystem()
-					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile(sampleTinyImageData), errors.New("file not found"))
+					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile("", sampleTinyImageData), errors.New("file not found"))
 					return reader
 				}(),
 			},
@@ -186,7 +186,7 @@ func TestImageSetNamedProperties(t *testing.T) {
 				},
 				fs: func() vfs.FileSystem {
 					reader := fs.NewMockFileSystem()
-					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile(sampleTinyImageData), errors.New("file not found"))
+					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile("", sampleTinyImageData), errors.New("file not found"))
 					return reader
 				}(),
 			},
@@ -200,7 +200,7 @@ func TestImageSetNamedProperties(t *testing.T) {
 				},
 				fs: func() vfs.FileSystem {
 					reader := fs.NewMockFileSystem()
-					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile([]byte{0x00, 0x00, 0x00, 0x00}), nil)
+					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile("", []byte{0x00, 0x00, 0x00, 0x00}), nil)
 					return reader
 				}(),
 			},
@@ -213,7 +213,7 @@ func TestImageSetNamedProperties(t *testing.T) {
 				},
 				fs: func() vfs.FileSystem {
 					reader := fs.NewMockFileSystem()
-					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile([]byte{0x00, 0x00, 0x00, 0x00}), nil)
+					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile("", []byte{0x00, 0x00, 0x00, 0x00}), nil)
 					return reader
 				}(),
 			},
@@ -227,7 +227,7 @@ func TestImageSetNamedProperties(t *testing.T) {
 				},
 				fs: func() vfs.FileSystem {
 					reader := fs.NewMockFileSystem()
-					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile(sampleTinyImageData), nil)
+					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile("", sampleTinyImageData), nil)
 					return reader
 				}(),
 			},
@@ -239,7 +239,7 @@ func TestImageSetNamedProperties(t *testing.T) {
 				Image:              sampleTinyImage,
 				fs: func() vfs.FileSystem {
 					reader := fs.NewMockFileSystem()
-					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile(sampleTinyImageData), nil)
+					reader.On("Open", "somefile.jpg").Return(fs.NewMockFile("", sampleTinyImageData), nil)
 					return reader
 				}(),
 			},

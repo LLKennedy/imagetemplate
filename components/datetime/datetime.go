@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"io/ioutil"
+	"runtime/debug"
 	"strings"
 	"time"
 
@@ -27,6 +28,7 @@ type Component struct {
 	Font               *truetype.Font
 	Colour             color.NRGBA
 	fs                 vfs.FileSystem
+	fontPool           gosysfonts.Pool
 }
 
 type datetimeFormat struct {
@@ -72,7 +74,7 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 	defer func() {
 		p := recover()
 		if p != nil {
-			err = fmt.Errorf("failed to write to canvas: %v", p)
+			err = fmt.Errorf("failed to write to canvas: %v\n%s", p, debug.Stack())
 		}
 	}()
 	fontSize := component.Size
@@ -105,7 +107,7 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 		}
 	}
 	if !fits {
-		return canvas, fmt.Errorf("unable to fit datetime %v into maxWidth %d after %d tries", formattedTime, component.MaxWidth, tries)
+		return canvas, fmt.Errorf("unable to fit datetime %s into maxWidth %d after %d tries", formattedTime, component.MaxWidth, tries)
 	}
 	c, err = c.Text(formattedTime, image.Pt(component.Start.X+alignmentOffset, component.Start.Y), face, component.Colour, component.MaxWidth)
 	if err != nil {
@@ -114,7 +116,7 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 	return c, nil
 }
 
-// SetNamedProperties proceses the named properties and sets them into the datetime properties
+// SetNamedProperties processes the named properties and sets them into the datetime properties
 func (component Component) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
 	c := component
 	setFunc := func(name string, value interface{}) error {
@@ -152,8 +154,7 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 			if !ok {
 				return fmt.Errorf("error converting %v to string", value)
 			}
-			pool := gosysfonts.New()
-			rawFont, err := pool.GetFont(stringVal)
+			rawFont, err := c.getFontPool().GetFont(stringVal)
 			if err != nil {
 				return err
 			}
@@ -199,17 +200,21 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 			}
 			if isAlignment {
 				c.Alignment = alignmentVal
-			} else {
-				switch stringVal {
-				case "left":
-					c.Alignment = AlignmentLeft
-				case "right":
-					c.Alignment = AlignmentRight
-				case "centre":
-					c.Alignment = AlignmentCentre
-				default:
-					c.Alignment = AlignmentLeft
-				}
+				return nil
+			}
+			switch stringVal {
+			case "left":
+				c.Alignment = AlignmentLeft
+				return nil
+			case "right":
+				c.Alignment = AlignmentRight
+				return nil
+			case "centre":
+				c.Alignment = AlignmentCentre
+				return nil
+			default:
+				c.Alignment = AlignmentLeft
+				return nil
 			}
 		}
 		if strings.Contains("RGBA", name) && len(name) == 1 {
@@ -231,9 +236,6 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 			case "A":
 				c.Colour.A = colourVal
 				return nil
-			default:
-				//What? How did you get here?
-				return fmt.Errorf("name was a string inside RGBA and Value was a valid uint8, but Name wasn't R, G, B, or A. Name was: %v", name)
 			}
 		}
 		numberVal, ok := value.(int)
@@ -315,8 +317,7 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	}
 	if fName != nil {
 		stringVal := fName.(string)
-		pool := gosysfonts.New()
-		rawFont, err := pool.GetFont(stringVal)
+		rawFont, err := c.getFontPool().GetFont(stringVal)
 		if err != nil {
 			return component, props, err
 		}
@@ -443,8 +444,15 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	return c, props, nil
 }
 
+func (component Component) getFontPool() gosysfonts.Pool {
+	if component.fontPool == nil {
+		return gosysfonts.New()
+	}
+	return component.fontPool
+}
+
 func init() {
 	for _, name := range []string{"datetime", "DateTime", "DATETIME", "Datetime", "Date/Time", "date/time", "date", "DATE", "Date"} {
-		render.RegisterComponent(name, func(fs vfs.FileSystem) render.Component { return Component{fs: fs} })
+		render.RegisterComponent(name, func(fs vfs.FileSystem) render.Component { return Component{fs: fs, fontPool: gosysfonts.New()} })
 	}
 }
