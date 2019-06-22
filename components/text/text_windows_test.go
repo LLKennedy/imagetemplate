@@ -60,6 +60,52 @@ func TestDateTimeSetNamedPropertiesOS(t *testing.T) {
 	}
 }
 
+
+func TestTextVerifyAndTestTextJSONDataOS(t *testing.T) {
+	type testSet struct {
+		name  string
+		start Component
+		input interface{}
+		res   Component
+		props render.NamedProperties
+		err   string
+	}
+	tests := []testSet{
+		{
+			name: "gibberish font file",
+			start: Component{
+				fontPool: fakeSysFonts{},
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "gibberish file that doesn't exist",
+				},
+			},
+			res: Component{
+				fontPool: fakeSysFonts{},
+			},
+			props: render.NamedProperties{},
+			err: "open gibberish file that doesn't exist: The system cannot find the file specified.",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			res, props, err := test.start.VerifyAndSetJSONData(test.input)
+			assert.Equal(t, test.res, res)
+			assert.Equal(t, test.props, props)
+			if test.err == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.EqualError(t, err, test.err)
+			}
+		})
+	}
+}
+
 func TestInit(t *testing.T) {
 	c, err := render.Decode("text")
 	assert.NoError(t, err)

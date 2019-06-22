@@ -597,6 +597,7 @@ func TestTextSetNamedProperties(t *testing.T) {
 			}
 		})
 	}
+	ttfFS.AssertExpectations(t)
 }
 
 func TestTextGetJSONFormat(t *testing.T) {
@@ -618,11 +619,63 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 	tests := []testSet{
 		{
 			name:  "incorrect format data",
-			start: Component{},
 			input: "hello",
-			res:   Component{},
 			props: render.NamedProperties{},
 			err:   "failed to convert returned data to component properties",
+		},
+		{
+			name: "error extracting font",
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					
+				},
+			},
+			props: render.NamedProperties{},
+			err: "exactly one of (fontName,fontFile,fontURL) must be set",
+		},
+		{
+			name: "bad font name",
+			start: Component{
+				fontPool: fakeSysFonts{},
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontName: "bad",
+				},
+			},
+			res: Component{
+				fontPool: fakeSysFonts{},
+			},
+			props: render.NamedProperties{},
+			err: "bad font requested",
+		},
+		{
+			name: "valid font name",
+			start: Component{
+				fontPool: fakeSysFonts{},
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontName: "good",
+				},
+			},
+			res: Component{
+				fontPool: fakeSysFonts{},
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property content: could not parse empty property",
 		},
 	}
 	for _, test := range tests {
