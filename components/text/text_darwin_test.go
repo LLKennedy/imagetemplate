@@ -88,7 +88,7 @@ func TestTextVerifyAndTestTextJSONDataOS(t *testing.T) {
 				fontPool: fakeSysFonts{},
 			},
 			props: render.NamedProperties{},
-			err: "open gibberish file that doesn't exist: no such file or directory",
+			err:   "open gibberish file that doesn't exist: no such file or directory",
 		},
 	}
 	for _, test := range tests {

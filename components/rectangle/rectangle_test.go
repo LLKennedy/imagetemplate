@@ -171,6 +171,22 @@ func TestRectangleSetNamedProperties(t *testing.T) {
 			err: "",
 		},
 		{
+			name: "height",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"height"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 15,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Height:             15,
+			},
+			err: "",
+		},
+		{
 			name: "full prop set, multiple sources, unused props",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
@@ -231,11 +247,157 @@ func TestRectangleVerifyAndTestRectangleJSONData(t *testing.T) {
 	tests := []testSet{
 		{
 			name:  "incorrect format data",
-			start: Component{},
 			input: "hello",
-			res:   Component{},
 			props: render.NamedProperties{},
 			err:   "failed to convert returned data to component properties",
+		},
+		{
+			name:  "invalid topLeftX",
+			start: Component{},
+			input: &rectangleFormat{},
+			res:   Component{},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property topLeftX: could not parse empty property",
+		},
+		{
+			name:  "valid topLeftX",
+			start: Component{},
+			input: &rectangleFormat{
+				TopLeftX: "180",
+			},
+			res:   Component{},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property topLeftY: could not parse empty property",
+		},
+		{
+			name:  "valid topLeftY",
+			start: Component{},
+			input: &rectangleFormat{
+				TopLeftX: "180",
+				TopLeftY: "37",
+			},
+			res:   Component{},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property width: could not parse empty property",
+		},
+		{
+			name:  "valid width",
+			start: Component{},
+			input: &rectangleFormat{
+				TopLeftX: "180",
+				TopLeftY: "37",
+				Width:    "300",
+			},
+			res:   Component{},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property height: could not parse empty property",
+		},
+		{
+			name:  "valid height",
+			start: Component{},
+			input: &rectangleFormat{
+				TopLeftX: "180",
+				TopLeftY: "37",
+				Width:    "300",
+				Height:   "150",
+			},
+			res:   Component{},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property R: could not parse empty property",
+		},
+		{
+			name:  "valid R",
+			start: Component{},
+			input: &rectangleFormat{
+				TopLeftX: "180",
+				TopLeftY: "37",
+				Width:    "300",
+				Height:   "150",
+				Colour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red: "192",
+				},
+			},
+			res:   Component{},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property G: could not parse empty property",
+		},
+		{
+			name:  "valid G",
+			start: Component{},
+			input: &rectangleFormat{
+				TopLeftX: "180",
+				TopLeftY: "37",
+				Width:    "300",
+				Height:   "150",
+				Colour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "192",
+					Green: "1",
+				},
+			},
+			res:   Component{},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property B: could not parse empty property",
+		},
+		{
+			name:  "valid B",
+			start: Component{},
+			input: &rectangleFormat{
+				TopLeftX: "180",
+				TopLeftY: "37",
+				Width:    "300",
+				Height:   "150",
+				Colour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "192",
+					Green: "1",
+					Blue:  "66",
+				},
+			},
+			res:   Component{},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property A: could not parse empty property",
+		},
+		{
+			name:  "valid everything",
+			start: Component{},
+			input: &rectangleFormat{
+				TopLeftX: "180",
+				TopLeftY: "37",
+				Width:    "$myWidth$",
+				Height:   "150",
+				Colour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "192",
+					Green: "1",
+					Blue:  "66",
+					Alpha: "201",
+				},
+			},
+			res: Component{
+				TopLeft:            image.Pt(180, 37),
+				Height:             150,
+				Colour:             color.NRGBA{R: 192, G: 1, B: 66, A: 201},
+				NamedPropertiesMap: map[string][]string{"myWidth": {"width"}},
+			},
+			props: render.NamedProperties{"myWidth": struct{ Message string }{Message: "Please replace me with real data"}},
 		},
 	}
 	for _, test := range tests {

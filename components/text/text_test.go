@@ -147,7 +147,7 @@ func TestTextSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Content: "good",
+				Content:            "good",
 			},
 		},
 		{
@@ -636,12 +636,10 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 					FontName string `json:"fontName"`
 					FontFile string `json:"fontFile"`
 					FontURL  string `json:"fontURL"`
-				}{
-					
-				},
+				}{},
 			},
 			props: render.NamedProperties{},
-			err: "exactly one of (fontName,fontFile,fontURL) must be set",
+			err:   "exactly one of (fontName,fontFile,fontURL) must be set",
 		},
 		{
 			name: "bad font name",
@@ -661,7 +659,7 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				fontPool: fakeSysFonts{},
 			},
 			props: render.NamedProperties{},
-			err: "bad font requested",
+			err:   "bad font requested",
 		},
 		{
 			name: "valid font name",
@@ -681,7 +679,7 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				fontPool: fakeSysFonts{},
 			},
 			props: render.NamedProperties{},
-			err: "error parsing data for property content: could not parse empty property",
+			err:   "error parsing data for property content: could not parse empty property",
 		},
 		{
 			name: "bad font reader returned from filesystem",
@@ -701,7 +699,7 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				fs: ttfFS,
 			},
 			props: render.NamedProperties{},
-			err: "cannot read from nil file",
+			err:   "cannot read from nil file",
 		},
 		{
 			name: "bad font TTF data",
@@ -721,7 +719,7 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				fs: ttfFS,
 			},
 			props: render.NamedProperties{},
-			err: "freetype: invalid TrueType format: TTF data is too short",
+			err:   "freetype: invalid TrueType format: TTF data is too short",
 		},
 		{
 			name: "working font file",
@@ -741,12 +739,11 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				fs: ttfFS,
 			},
 			props: render.NamedProperties{},
-			err: "error parsing data for property content: could not parse empty property",
+			err:   "error parsing data for property content: could not parse empty property",
 		},
 		{
-			name: "font URL not implemented",
-			start: Component{
-			},
+			name:  "font URL not implemented",
+			start: Component{},
 			input: &textFormat{
 				Font: struct {
 					FontName string `json:"fontName"`
@@ -756,10 +753,9 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 					FontURL: "anything",
 				},
 			},
-			res: Component{
-			},
+			res:   Component{},
 			props: render.NamedProperties{},
-			err: "fontURL not implemented",
+			err:   "fontURL not implemented",
 		},
 		{
 			name: "valid content",
@@ -780,7 +776,7 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				fs: ttfFS,
 			},
 			props: render.NamedProperties{},
-			err: "error parsing data for property startX: could not parse empty property",
+			err:   "error parsing data for property startX: could not parse empty property",
 		},
 		{
 			name: "valid startX",
@@ -796,13 +792,13 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 					FontFile: "myFont.ttf",
 				},
 				Content: "hello",
-				StartX: "12",
+				StartX:  "12",
 			},
 			res: Component{
 				fs: ttfFS,
 			},
 			props: render.NamedProperties{},
-			err: "error parsing data for property startY: could not parse empty property",
+			err:   "error parsing data for property startY: could not parse empty property",
 		},
 		{
 			name: "valid startY",
@@ -818,14 +814,14 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 					FontFile: "myFont.ttf",
 				},
 				Content: "hello",
-				StartX: "12",
-				StartY: "12",
+				StartX:  "12",
+				StartY:  "12",
 			},
 			res: Component{
 				fs: ttfFS,
 			},
 			props: render.NamedProperties{},
-			err: "error parsing data for property maxWidth: could not parse empty property",
+			err:   "error parsing data for property maxWidth: could not parse empty property",
 		},
 		{
 			name: "valid maxWidth",
@@ -840,16 +836,16 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content: "hello",
-				StartX: "12",
-				StartY: "12",
+				Content:  "hello",
+				StartX:   "12",
+				StartY:   "12",
 				MaxWidth: "12",
 			},
 			res: Component{
 				fs: ttfFS,
 			},
 			props: render.NamedProperties{},
-			err: "error parsing data for property size: could not parse empty property",
+			err:   "error parsing data for property size: could not parse empty property",
 		},
 		{
 			name: "valid size",
@@ -864,17 +860,17 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content: "hello",
-				StartX: "12",
-				StartY: "12",
+				Content:  "hello",
+				StartX:   "12",
+				StartY:   "12",
 				MaxWidth: "12",
-				Size: "12",
+				Size:     "12",
 			},
 			res: Component{
 				fs: ttfFS,
 			},
 			props: render.NamedProperties{},
-			err: "error parsing data for property alignment: could not parse empty property",
+			err:   "error parsing data for property alignment: could not parse empty property",
 		},
 		{
 			name: "valid alignment (left)",
@@ -889,18 +885,18 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content: "hello",
-				StartX: "12",
-				StartY: "12",
-				MaxWidth: "12",
-				Size: "12",
+				Content:   "hello",
+				StartX:    "12",
+				StartY:    "12",
+				MaxWidth:  "12",
+				Size:      "12",
 				Alignment: "left",
 			},
 			res: Component{
 				fs: ttfFS,
 			},
 			props: render.NamedProperties{},
-			err: "error parsing data for property R: could not parse empty property",
+			err:   "error parsing data for property R: could not parse empty property",
 		},
 		{
 			name: "valid alignment (right)",
@@ -915,18 +911,18 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content: "hello",
-				StartX: "12",
-				StartY: "12",
-				MaxWidth: "12",
-				Size: "12",
+				Content:   "hello",
+				StartX:    "12",
+				StartY:    "12",
+				MaxWidth:  "12",
+				Size:      "12",
 				Alignment: "right",
 			},
 			res: Component{
 				fs: ttfFS,
 			},
 			props: render.NamedProperties{},
-			err: "error parsing data for property R: could not parse empty property",
+			err:   "error parsing data for property R: could not parse empty property",
 		},
 		{
 			name: "valid alignment (centre)",
@@ -941,18 +937,18 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content: "hello",
-				StartX: "12",
-				StartY: "12",
-				MaxWidth: "12",
-				Size: "12",
+				Content:   "hello",
+				StartX:    "12",
+				StartY:    "12",
+				MaxWidth:  "12",
+				Size:      "12",
 				Alignment: "centre",
 			},
 			res: Component{
 				fs: ttfFS,
 			},
 			props: render.NamedProperties{},
-			err: "error parsing data for property R: could not parse empty property",
+			err:   "error parsing data for property R: could not parse empty property",
 		},
 		{
 			name: "valid alignment (default)",
@@ -967,18 +963,18 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content: "hello",
-				StartX: "12",
-				StartY: "12",
-				MaxWidth: "12",
-				Size: "12",
+				Content:   "hello",
+				StartX:    "12",
+				StartY:    "12",
+				MaxWidth:  "12",
+				Size:      "12",
 				Alignment: "something else",
 			},
 			res: Component{
 				fs: ttfFS,
 			},
 			props: render.NamedProperties{},
-			err: "error parsing data for property R: could not parse empty property",
+			err:   "error parsing data for property R: could not parse empty property",
 		},
 		{
 			name: "valid red",
@@ -993,11 +989,11 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content: "hello",
-				StartX: "12",
-				StartY: "12",
-				MaxWidth: "12",
-				Size: "12",
+				Content:   "hello",
+				StartX:    "12",
+				StartY:    "12",
+				MaxWidth:  "12",
+				Size:      "12",
 				Alignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
@@ -1012,7 +1008,7 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				fs: ttfFS,
 			},
 			props: render.NamedProperties{},
-			err: "error parsing data for property G: could not parse empty property",
+			err:   "error parsing data for property G: could not parse empty property",
 		},
 		{
 			name: "valid green",
@@ -1027,11 +1023,11 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content: "hello",
-				StartX: "12",
-				StartY: "12",
-				MaxWidth: "12",
-				Size: "12",
+				Content:   "hello",
+				StartX:    "12",
+				StartY:    "12",
+				MaxWidth:  "12",
+				Size:      "12",
 				Alignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
@@ -1039,7 +1035,7 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 					Blue  string `json:"B"`
 					Alpha string `json:"A"`
 				}{
-					Red: "6",
+					Red:   "6",
 					Green: "53",
 				},
 			},
@@ -1047,7 +1043,7 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				fs: ttfFS,
 			},
 			props: render.NamedProperties{},
-			err: "error parsing data for property B: could not parse empty property",
+			err:   "error parsing data for property B: could not parse empty property",
 		},
 		{
 			name: "valid blue",
@@ -1062,11 +1058,11 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content: "hello",
-				StartX: "12",
-				StartY: "12",
-				MaxWidth: "12",
-				Size: "12",
+				Content:   "hello",
+				StartX:    "12",
+				StartY:    "12",
+				MaxWidth:  "12",
+				Size:      "12",
 				Alignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
@@ -1074,16 +1070,16 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 					Blue  string `json:"B"`
 					Alpha string `json:"A"`
 				}{
-					Red: "6",
+					Red:   "6",
 					Green: "53",
-					Blue: "197",
+					Blue:  "197",
 				},
 			},
 			res: Component{
 				fs: ttfFS,
 			},
 			props: render.NamedProperties{},
-			err: "error parsing data for property A: could not parse empty property",
+			err:   "error parsing data for property A: could not parse empty property",
 		},
 		{
 			name: "valid everything",
@@ -1098,11 +1094,11 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content: "$set me$",
-				StartX: "123",
-				StartY: "45",
-				MaxWidth: "67",
-				Size: "89",
+				Content:   "$set me$",
+				StartX:    "123",
+				StartY:    "45",
+				MaxWidth:  "67",
+				Size:      "89",
 				Alignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
@@ -1110,24 +1106,24 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 					Blue  string `json:"B"`
 					Alpha string `json:"A"`
 				}{
-					Red: "6",
+					Red:   "6",
 					Green: "53",
-					Blue: "197",
+					Blue:  "197",
 					Alpha: "244",
 				},
 			},
 			res: Component{
-				fs: ttfFS,
-				Font: func() *truetype.Font {f, _ := truetype.Parse(goregular.TTF); return f}(),
-				Start: image.Pt(123, 45),
-				MaxWidth: 67,
-				Size: 89,
-				Alignment: AlignmentLeft,
-				Colour: color.NRGBA{R: 6, G: 53, B: 197, A: 244},
-				NamedPropertiesMap: map[string][]string{"set me": []string{"content"}},
+				fs:                 ttfFS,
+				Font:               func() *truetype.Font { f, _ := truetype.Parse(goregular.TTF); return f }(),
+				Start:              image.Pt(123, 45),
+				MaxWidth:           67,
+				Size:               89,
+				Alignment:          AlignmentLeft,
+				Colour:             color.NRGBA{R: 6, G: 53, B: 197, A: 244},
+				NamedPropertiesMap: map[string][]string{"set me": {"content"}},
 			},
-			props: render.NamedProperties{"set me": struct{Message string}{Message: "Please replace me with real data"}},
-			err: "",
+			props: render.NamedProperties{"set me": struct{ Message string }{Message: "Please replace me with real data"}},
+			err:   "",
 		},
 	}
 	for _, test := range tests {
