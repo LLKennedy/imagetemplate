@@ -125,7 +125,7 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 			stringVal, isStrings := value.([]string)
 			timePointer, isTimePointer := value.(*time.Time)
 			timeVal, isTime := value.(time.Time)
-			if (!isStrings && !isTimePointer && !isTime) || (isTime && len(stringVal) != 2) {
+			if (!isStrings && !isTimePointer && !isTime) || (isStrings && len(stringVal) != 2) {
 				return fmt.Errorf("error converting %v to []string, *time.Time or time.Time", value)
 			}
 			if isTime {
@@ -271,6 +271,7 @@ func (component Component) GetJSONFormat() interface{} {
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set datetime properties and fill the named properties map
 func (component Component) VerifyAndSetJSONData(data interface{}) (render.Component, render.NamedProperties, error) {
+	startTime := time.Now()
 	c := component
 	props := make(render.NamedProperties)
 	stringStruct, ok := data.(*datetimeFormat)
@@ -304,47 +305,37 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	if err != nil {
 		return component, props, err
 	}
-	var fName, fFile, fURL interface{}
-	switch validIndex {
-	case 0:
-		fName = extractedVal
-	case 1:
-		fFile = extractedVal
-	case 2:
-		fURL = extractedVal
-	default:
-		return component, props, fmt.Errorf("failed to extract font")
-	}
-	if fName != nil {
-		stringVal := fName.(string)
-		rawFont, err := c.getFontPool().GetFont(stringVal)
-		if err != nil {
-			return component, props, err
+	if extractedVal != nil {
+		switch validIndex {
+		case 0:
+			stringVal := extractedVal.(string)
+			rawFont, err := c.getFontPool().GetFont(stringVal)
+			if err != nil {
+				return component, props, err
+			}
+			c.Font = rawFont
+		case 1:
+			stringVal := extractedVal.(string)
+			if c.fs == nil {
+				c.fs = vfs.OS(".")
+			}
+			fontReader, err := c.fs.Open(stringVal)
+			if err != nil {
+				return component, props, err
+			}
+			defer fontReader.Close()
+			fontData, err := ioutil.ReadAll(fontReader)
+			if err != nil {
+				return component, props, err
+			}
+			rawFont, err := truetype.Parse(fontData)
+			if err != nil {
+				return component, props, err
+			}
+			c.Font = rawFont
+		case 2:
+			return component, props, fmt.Errorf("fontURL not implemented")
 		}
-		c.Font = rawFont
-	}
-	if fFile != nil {
-		stringVal := fFile.(string)
-		if c.fs == nil {
-			c.fs = vfs.OS(".")
-		}
-		fontReader, err := c.fs.Open(stringVal)
-		if err != nil {
-			return component, props, err
-		}
-		defer fontReader.Close()
-		fontData, err := ioutil.ReadAll(fontReader)
-		if err != nil {
-			return component, props, err
-		}
-		rawFont, err := truetype.Parse(fontData)
-		if err != nil {
-			return component, props, err
-		}
-		c.Font = rawFont
-	}
-	if fURL != nil {
-		return component, props, fmt.Errorf("fontURL not implemented")
 	}
 
 	// All other props
@@ -353,7 +344,8 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 		return component, props, err
 	}
 	if newVal != nil {
-		c.Time = newVal.(*time.Time)
+		timeVal := startTime.Add(newVal.(time.Duration))
+		c.Time = &timeVal
 	}
 	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TimeFormat, "timeFormat", render.StringType, c.NamedPropertiesMap)
 	if err != nil {
