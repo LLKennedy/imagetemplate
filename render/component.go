@@ -143,8 +143,7 @@ func ExtractSingleProp(inputVal, propName string, typeName PropType, namedPropsM
 		if err != nil {
 			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to time.Duration: %v", propName, err)
 		}
-		timeVal := time.Now().Add(durationVal)
-		return npm, &timeVal, nil
+		return npm, durationVal, nil
 	}
 	return namedPropsMap, nil, fmt.Errorf("cannot convert property %v to unsupported type %v", propName, typeName)
 }

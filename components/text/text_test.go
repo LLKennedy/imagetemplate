@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"runtime/debug"
 	"testing"
 
 	"golang.org/x/image/font"
@@ -133,6 +134,38 @@ func TestTextSetNamedProperties(t *testing.T) {
 			input: render.NamedProperties{},
 			res:   Component{},
 			err:   "",
+		},
+		{
+			name: "valid content",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"content"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "good",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Content: "good",
+			},
+		},
+		{
+			name: "invalid content",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"content"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 12,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"content"},
+				},
+			},
+			err: "error converting 12 to string",
 		},
 		{
 			name: "invalid font name",
@@ -565,6 +598,7 @@ func TestTextSetNamedProperties(t *testing.T) {
 			}
 		})
 	}
+	ttfFS.AssertExpectations(t)
 }
 
 func TestTextGetJSONFormat(t *testing.T) {
@@ -583,18 +617,526 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 		props render.NamedProperties
 		err   string
 	}
+	ttfFS := filesystem.NewMockFileSystem(
+		filesystem.NewMockFile("myFont.ttf", goregular.TTF),
+		filesystem.NewMockFile("badfont.TTF", []byte("hello")),
+	)
+	ttfFS.On("Open", "nilfont.TTF").Return(filesystem.NilFile, nil)
 	tests := []testSet{
 		{
 			name:  "incorrect format data",
-			start: Component{},
 			input: "hello",
-			res:   Component{},
 			props: render.NamedProperties{},
 			err:   "failed to convert returned data to component properties",
+		},
+		{
+			name: "error extracting font",
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					
+				},
+			},
+			props: render.NamedProperties{},
+			err: "exactly one of (fontName,fontFile,fontURL) must be set",
+		},
+		{
+			name: "bad font name",
+			start: Component{
+				fontPool: fakeSysFonts{},
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontName: "bad",
+				},
+			},
+			res: Component{
+				fontPool: fakeSysFonts{},
+			},
+			props: render.NamedProperties{},
+			err: "bad font requested",
+		},
+		{
+			name: "valid font name",
+			start: Component{
+				fontPool: fakeSysFonts{},
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontName: "good",
+				},
+			},
+			res: Component{
+				fontPool: fakeSysFonts{},
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property content: could not parse empty property",
+		},
+		{
+			name: "bad font reader returned from filesystem",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "nilfont.TTF",
+				},
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "cannot read from nil file",
+		},
+		{
+			name: "bad font TTF data",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "badfont.TTF",
+				},
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "freetype: invalid TrueType format: TTF data is too short",
+		},
+		{
+			name: "working font file",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property content: could not parse empty property",
+		},
+		{
+			name: "font URL not implemented",
+			start: Component{
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontURL: "anything",
+				},
+			},
+			res: Component{
+			},
+			props: render.NamedProperties{},
+			err: "fontURL not implemented",
+		},
+		{
+			name: "valid content",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Content: "hello",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property startX: could not parse empty property",
+		},
+		{
+			name: "valid startX",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Content: "hello",
+				StartX: "12",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property startY: could not parse empty property",
+		},
+		{
+			name: "valid startY",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Content: "hello",
+				StartX: "12",
+				StartY: "12",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property maxWidth: could not parse empty property",
+		},
+		{
+			name: "valid maxWidth",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Content: "hello",
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property size: could not parse empty property",
+		},
+		{
+			name: "valid size",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Content: "hello",
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+				Size: "12",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property alignment: could not parse empty property",
+		},
+		{
+			name: "valid alignment (left)",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Content: "hello",
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+				Size: "12",
+				Alignment: "left",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property R: could not parse empty property",
+		},
+		{
+			name: "valid alignment (right)",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Content: "hello",
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+				Size: "12",
+				Alignment: "right",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property R: could not parse empty property",
+		},
+		{
+			name: "valid alignment (centre)",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Content: "hello",
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+				Size: "12",
+				Alignment: "centre",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property R: could not parse empty property",
+		},
+		{
+			name: "valid alignment (default)",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Content: "hello",
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+				Size: "12",
+				Alignment: "something else",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property R: could not parse empty property",
+		},
+		{
+			name: "valid red",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Content: "hello",
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+				Size: "12",
+				Alignment: "something else",
+				Colour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red: "6",
+				},
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property G: could not parse empty property",
+		},
+		{
+			name: "valid green",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Content: "hello",
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+				Size: "12",
+				Alignment: "something else",
+				Colour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red: "6",
+					Green: "53",
+				},
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property B: could not parse empty property",
+		},
+		{
+			name: "valid blue",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Content: "hello",
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+				Size: "12",
+				Alignment: "something else",
+				Colour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red: "6",
+					Green: "53",
+					Blue: "197",
+				},
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property A: could not parse empty property",
+		},
+		{
+			name: "valid everything",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Content: "$set me$",
+				StartX: "123",
+				StartY: "45",
+				MaxWidth: "67",
+				Size: "89",
+				Alignment: "something else",
+				Colour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red: "6",
+					Green: "53",
+					Blue: "197",
+					Alpha: "244",
+				},
+			},
+			res: Component{
+				fs: ttfFS,
+				Font: func() *truetype.Font {f, _ := truetype.Parse(goregular.TTF); return f}(),
+				Start: image.Pt(123, 45),
+				MaxWidth: 67,
+				Size: 89,
+				Alignment: AlignmentLeft,
+				Colour: color.NRGBA{R: 6, G: 53, B: 197, A: 244},
+				NamedPropertiesMap: map[string][]string{"set me": []string{"content"}},
+			},
+			props: render.NamedProperties{"set me": struct{Message string}{Message: "Please replace me with real data"}},
+			err: "",
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			defer func() {
+				if r := recover(); r != nil {
+					assert.Failf(t, "caught panic", "%v\n%s", r, debug.Stack())
+				}
+			}()
 			res, props, err := test.start.VerifyAndSetJSONData(test.input)
 			assert.Equal(t, test.res, res)
 			assert.Equal(t, test.props, props)
@@ -605,6 +1147,7 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 			}
 		})
 	}
+	ttfFS.AssertExpectations(t)
 }
 
 func TestGetFontPool(t *testing.T) {

@@ -31,7 +31,18 @@ func NewMockFileSystem(files ...*MockFile) *MockFileSystem {
 // Open returns a pre-set data/error pair
 func (m *MockFileSystem) Open(filename string) (vfs.ReadSeekCloser, error) {
 	args := m.Called(filename)
-	return (args.Get(0)).(vfs.ReadSeekCloser), args.Error(1)
+	mFile := args.Get(0).(*MockFile)
+	var newMFile *MockFile
+	if mFile != nil {
+		newMFile = &MockFile{
+			name: mFile.name,
+		}
+		if mFile.raw != nil {
+			newMFile.raw = mFile.raw
+			newMFile.buf = bytes.NewReader(newMFile.raw)
+		}
+	}
+	return newMFile, args.Error(1)
 }
 
 // Lstat does stat stuff
@@ -68,6 +79,7 @@ type MockFile struct {
 	name string
 	mock.Mock
 	buf *bytes.Reader
+	raw []byte
 }
 
 // NewMockFile creates a new mock file for use with the mock file system
@@ -75,6 +87,7 @@ func NewMockFile(name string, data []byte) *MockFile {
 	file := &MockFile{
 		name: name,
 		buf:  bytes.NewReader(data),
+		raw:  data,
 	}
 	_ = vfs.ReadSeekCloser(file)
 	_ = os.FileInfo(file) // check interface conformation
