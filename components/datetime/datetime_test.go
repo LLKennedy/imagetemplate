@@ -919,6 +919,366 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 			props: render.NamedProperties{},
 			err: "error parsing data for property startX: could not parse empty property",
 		},
+		{
+			name: "valid startX",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Time: "3h",
+				TimeFormat: time.RFC822,
+				StartX: "12",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property startY: could not parse empty property",
+		},
+		{
+			name: "valid startY",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Time: "3h",
+				TimeFormat: time.RFC822,
+				StartX: "12",
+				StartY: "12",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property maxWidth: could not parse empty property",
+		},
+		{
+			name: "valid maxWidth",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Time: "3h",
+				TimeFormat: time.RFC822,
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property size: could not parse empty property",
+		},
+		{
+			name: "valid size",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Time: "3h",
+				TimeFormat: time.RFC822,
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+				Size: "12",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property alignment: could not parse empty property",
+		},
+		{
+			name: "valid alignment (left)",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Time: "3h",
+				TimeFormat: time.RFC822,
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+				Size: "12",
+				Alignment: "left",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property R: could not parse empty property",
+		},
+		{
+			name: "valid alignment (right)",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Time: "3h",
+				TimeFormat: time.RFC822,
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+				Size: "12",
+				Alignment: "right",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property R: could not parse empty property",
+		},
+		{
+			name: "valid alignment (centre)",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Time: "3h",
+				TimeFormat: time.RFC822,
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+				Size: "12",
+				Alignment: "centre",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property R: could not parse empty property",
+		},
+		{
+			name: "valid alignment (default)",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Time: "3h",
+				TimeFormat: time.RFC822,
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+				Size: "12",
+				Alignment: "something else",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property R: could not parse empty property",
+		},
+		{
+			name: "valid red",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Time: "3h",
+				TimeFormat: time.RFC822,
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+				Size: "12",
+				Alignment: "something else",
+				Colour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red: "6",
+				},
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property G: could not parse empty property",
+		},
+		{
+			name: "valid green",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Time: "3h",
+				TimeFormat: time.RFC822,
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+				Size: "12",
+				Alignment: "something else",
+				Colour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red: "6",
+					Green: "53",
+				},
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property B: could not parse empty property",
+		},
+		{
+			name: "valid blue",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Time: "3h",
+				TimeFormat: time.RFC822,
+				StartX: "12",
+				StartY: "12",
+				MaxWidth: "12",
+				Size: "12",
+				Alignment: "something else",
+				Colour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red: "6",
+					Green: "53",
+					Blue: "197",
+				},
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property A: could not parse empty property",
+		},
+		{
+			name: "valid everything",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Time: "$some time$",
+				TimeFormat: time.RFC822,
+				StartX: "123",
+				StartY: "45",
+				MaxWidth: "67",
+				Size: "89",
+				Alignment: "something else",
+				Colour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red: "6",
+					Green: "53",
+					Blue: "197",
+					Alpha: "244",
+				},
+			},
+			res: Component{
+				fs: ttfFS,
+				Font: func() *truetype.Font {f, _ := truetype.Parse(goregular.TTF); return f}(),
+				TimeFormat: time.RFC822,
+				Start: image.Pt(123, 45),
+				MaxWidth: 67,
+				Size: 89,
+				Alignment: AlignmentLeft,
+				Colour: color.NRGBA{R: 6, G: 53, B: 197, A: 244},
+				NamedPropertiesMap: map[string][]string{"some time": []string{"time"}},
+			},
+			props: render.NamedProperties{"some time": struct{Message string}{Message: "Please replace me with real data"}},
+			err: "",
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
