@@ -125,7 +125,7 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 			stringVal, isStrings := value.([]string)
 			timePointer, isTimePointer := value.(*time.Time)
 			timeVal, isTime := value.(time.Time)
-			if (!isStrings && !isTimePointer && !isTime) || (isTime && len(stringVal) != 2) {
+			if (!isStrings && !isTimePointer && !isTime) || (isStrings && len(stringVal) != 2) {
 				return fmt.Errorf("error converting %v to []string, *time.Time or time.Time", value)
 			}
 			if isTime {
@@ -304,47 +304,39 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	if err != nil {
 		return component, props, err
 	}
-	var fName, fFile, fURL interface{}
-	switch validIndex {
-	case 0:
-		fName = extractedVal
-	case 1:
-		fFile = extractedVal
-	case 2:
-		fURL = extractedVal
-	default:
-		return component, props, fmt.Errorf("failed to extract font")
-	}
-	if fName != nil {
-		stringVal := fName.(string)
-		rawFont, err := c.getFontPool().GetFont(stringVal)
-		if err != nil {
-			return component, props, err
+	if extractedVal != nil {
+		switch validIndex {
+		case 0:
+			stringVal := extractedVal.(string)
+			rawFont, err := c.getFontPool().GetFont(stringVal)
+			if err != nil {
+				return component, props, err
+			}
+			c.Font = rawFont
+		case 1:
+			stringVal := extractedVal.(string)
+			if c.fs == nil {
+				c.fs = vfs.OS(".")
+			}
+			fontReader, err := c.fs.Open(stringVal)
+			if err != nil {
+				return component, props, err
+			}
+			defer fontReader.Close()
+			fontData, err := ioutil.ReadAll(fontReader)
+			if err != nil {
+				return component, props, err
+			}
+			rawFont, err := truetype.Parse(fontData)
+			if err != nil {
+				return component, props, err
+			}
+			c.Font = rawFont
+		case 2:
+			return component, props, fmt.Errorf("fontURL not implemented")
+		default:
+			return component, props, fmt.Errorf("failed to extract font")
 		}
-		c.Font = rawFont
-	}
-	if fFile != nil {
-		stringVal := fFile.(string)
-		if c.fs == nil {
-			c.fs = vfs.OS(".")
-		}
-		fontReader, err := c.fs.Open(stringVal)
-		if err != nil {
-			return component, props, err
-		}
-		defer fontReader.Close()
-		fontData, err := ioutil.ReadAll(fontReader)
-		if err != nil {
-			return component, props, err
-		}
-		rawFont, err := truetype.Parse(fontData)
-		if err != nil {
-			return component, props, err
-		}
-		c.Font = rawFont
-	}
-	if fURL != nil {
-		return component, props, fmt.Errorf("fontURL not implemented")
 	}
 
 	// All other props
