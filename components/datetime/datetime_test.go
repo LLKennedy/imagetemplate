@@ -730,6 +730,11 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 		props render.NamedProperties
 		err   string
 	}
+	ttfFS := filesystem.NewMockFileSystem(
+		filesystem.NewMockFile("myFont.ttf", goregular.TTF),
+		filesystem.NewMockFile("badfont.TTF", []byte("hello")),
+	)
+	ttfFS.On("Open", "nilfont.TTF").Return(filesystem.NilFile, nil)
 	tests := []testSet{
 		{
 			name:  "incorrect format data",
@@ -738,6 +743,138 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 			res:   Component{},
 			props: render.NamedProperties{},
 			err:   "failed to convert returned data to component properties",
+		},
+		{
+			name: "error extracting font",
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					
+				},
+			},
+			props: render.NamedProperties{},
+			err: "exactly one of (fontName,fontFile,fontURL) must be set",
+		},
+		{
+			name: "bad font name",
+			start: Component{
+				fontPool: fakeSysFonts{},
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontName: "bad",
+				},
+			},
+			res: Component{
+				fontPool: fakeSysFonts{},
+			},
+			props: render.NamedProperties{},
+			err: "bad font requested",
+		},
+		{
+			name: "valid font name",
+			start: Component{
+				fontPool: fakeSysFonts{},
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontName: "good",
+				},
+			},
+			res: Component{
+				fontPool: fakeSysFonts{},
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property time: could not parse empty property",
+		},
+		{
+			name: "bad font reader returned from filesystem",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "nilfont.TTF",
+				},
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "cannot read from nil file",
+		},
+		{
+			name: "bad font TTF data",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "badfont.TTF",
+				},
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "freetype: invalid TrueType format: TTF data is too short",
+		},
+		{
+			name: "working font file",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property time: could not parse empty property",
+		},
+		{
+			name: "font URL not implemented",
+			start: Component{
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontURL: "anything",
+				},
+			},
+			res: Component{
+			},
+			props: render.NamedProperties{},
+			err: "fontURL not implemented",
 		},
 	}
 	for _, test := range tests {
@@ -752,6 +889,7 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 			}
 		})
 	}
+	ttfFS.AssertExpectations(t)
 }
 
 func TestGetFontPool(t *testing.T) {

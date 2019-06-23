@@ -334,8 +334,6 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 			c.Font = rawFont
 		case 2:
 			return component, props, fmt.Errorf("fontURL not implemented")
-		default:
-			return component, props, fmt.Errorf("failed to extract font")
 		}
 	}
 
