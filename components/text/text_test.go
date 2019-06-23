@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"runtime/debug"
 	"testing"
 
 	"golang.org/x/image/font"
@@ -760,9 +761,35 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 			props: render.NamedProperties{},
 			err: "fontURL not implemented",
 		},
+		{
+			name: "valid content",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &textFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Content: "hello",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property startX: could not parse empty property",
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			defer func() {
+				if r := recover(); r != nil {
+					assert.Failf(t, "caught panic", "%v\n%s", r, debug.Stack())
+				}
+			}()
 			res, props, err := test.start.VerifyAndSetJSONData(test.input)
 			assert.Equal(t, test.res, res)
 			assert.Equal(t, test.props, props)
