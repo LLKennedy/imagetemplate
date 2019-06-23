@@ -343,7 +343,8 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 		return component, props, err
 	}
 	if newVal != nil {
-		c.Time = newVal.(*time.Time)
+		timeVal := time.Now().Add(newVal.(time.Duration))
+		c.Time = &timeVal
 	}
 	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TimeFormat, "timeFormat", render.StringType, c.NamedPropertiesMap)
 	if err != nil {

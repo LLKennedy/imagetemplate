@@ -353,26 +353,13 @@ func TestExtractSingleProp(t *testing.T) {
 			testFunc(t, test)
 		})
 	}
-	t.Run("valid *time.Time", func(t *testing.T) {
-		// 	inputVal:         "2000h",
-		// 	propName:         "aProp",
-		// 	typeName:         TimeType,
-		// 	err:              nil,
-		// 	returnedPropsMap: map[string][]string{},
-		// 	extractedValue:   time.Now().Add(time.Duration(2000)),
+	t.Run("valid time.Duration", func(t *testing.T) {
 		dur, err := time.ParseDuration("2000h")
 		assert.NoError(t, err)
 		returnedPropsMap, extractedValue, err := ExtractSingleProp("2000h", "aProp", TimeType, nil)
 		assert.NoError(t, err)
-		expectedTime := time.Now().Add(dur)
-		assert.NoError(t, err)
-		expectedString := expectedTime.Format("2006/01/02")
 		assert.Equal(t, map[string][]string{}, returnedPropsMap)
-		convertedTime, ok := extractedValue.(*time.Time)
-		if !ok || convertedTime == nil {
-			t.Fatal("failed to convert extracted value to *time.Time")
-		}
-		assert.Equal(t, expectedString, convertedTime.Format("2006/01/02"))
+		assert.Equal(t, dur, extractedValue)
 	})
 }
 

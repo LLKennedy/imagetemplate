@@ -876,6 +876,49 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 			props: render.NamedProperties{},
 			err: "fontURL not implemented",
 		},
+		{
+			name: "valid time",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Time: "3h",
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property timeFormat: could not parse empty property",
+		},
+		{
+			name: "valid time format",
+			start: Component{
+				fs: ttfFS,
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontFile: "myFont.ttf",
+				},
+				Time: "3h",
+				TimeFormat: time.RFC822,
+			},
+			res: Component{
+				fs: ttfFS,
+			},
+			props: render.NamedProperties{},
+			err: "error parsing data for property startX: could not parse empty property",
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
