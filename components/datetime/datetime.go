@@ -271,6 +271,7 @@ func (component Component) GetJSONFormat() interface{} {
 
 // VerifyAndSetJSONData processes the data parsed from JSON and uses it to set datetime properties and fill the named properties map
 func (component Component) VerifyAndSetJSONData(data interface{}) (render.Component, render.NamedProperties, error) {
+	startTime := time.Now()
 	c := component
 	props := make(render.NamedProperties)
 	stringStruct, ok := data.(*datetimeFormat)
@@ -334,8 +335,6 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 			c.Font = rawFont
 		case 2:
 			return component, props, fmt.Errorf("fontURL not implemented")
-		default:
-			return component, props, fmt.Errorf("failed to extract font")
 		}
 	}
 
@@ -345,7 +344,8 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 		return component, props, err
 	}
 	if newVal != nil {
-		c.Time = newVal.(*time.Time)
+		timeVal := startTime.Add(newVal.(time.Duration))
+		c.Time = &timeVal
 	}
 	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TimeFormat, "timeFormat", render.StringType, c.NamedPropertiesMap)
 	if err != nil {
