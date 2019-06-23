@@ -162,39 +162,32 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	if err != nil {
 		return component, props, err
 	}
-	var file, fdata interface{}
-	switch validIndex {
-	case 0:
-		file = extractedVal
-	case 1:
-		fdata = extractedVal
-	default:
-		return component, props, fmt.Errorf("failed to extract image file")
-	}
-	if fdata != nil {
-		base64Val := fdata.(string)
-		r := base64.NewDecoder(base64.StdEncoding, strings.NewReader(base64Val))
-		img, _, err := image.Decode(r)
-		if err != nil {
-			return component, props, err
+	if extractedVal != nil {
+		switch validIndex {
+		case 0:
+			stringVal := extractedVal.(string)
+			if c.fs == nil {
+				c.fs = vfs.OS(".")
+			}
+			bytesVal, err := c.fs.Open(stringVal)
+			if err != nil {
+				return component, props, err
+			}
+			defer bytesVal.Close()
+			img, _, err := image.Decode(bytesVal)
+			if err != nil {
+				return component, props, err
+			}
+			c.Image = img
+		case 1:
+			base64Val := extractedVal.(string)
+			r := base64.NewDecoder(base64.StdEncoding, strings.NewReader(base64Val))
+			img, _, err := image.Decode(r)
+			if err != nil {
+				return component, props, err
+			}
+			c.Image = img
 		}
-		c.Image = img
-	}
-	if file != nil {
-		stringVal := file.(string)
-		if component.fs == nil {
-			component.fs = vfs.OS(".")
-		}
-		bytesVal, err := component.fs.Open(stringVal)
-		if err != nil {
-			return component, props, err
-		}
-		defer bytesVal.Close()
-		img, _, err := image.Decode(bytesVal)
-		if err != nil {
-			return component, props, err
-		}
-		c.Image = img
 	}
 
 	// All other props

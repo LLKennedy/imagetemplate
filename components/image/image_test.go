@@ -412,11 +412,15 @@ func TestImageVerifyAndTestImageJSONData(t *testing.T) {
 	tests := []testSet{
 		{
 			name:  "incorrect format data",
-			start: Component{},
 			input: "hello",
-			res:   Component{},
 			props: render.NamedProperties{},
 			err:   "failed to convert returned data to component properties",
+		},
+		{
+			name:  "invalid image type",
+			input: &imageFormat{},
+			props: render.NamedProperties{},
+			err:   "exactly one of (fileName,data) must be set",
 		},
 	}
 	for _, test := range tests {
