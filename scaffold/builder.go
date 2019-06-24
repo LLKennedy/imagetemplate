@@ -1,4 +1,4 @@
-// Package scaffold defines a template for drawing custom images from pre-defined components, and provides to tools to load and implement that template.
+// Package scaffold parses JSON data, matches it to known template components and controls rendering of the resultant image.
 package scaffold
 
 import (

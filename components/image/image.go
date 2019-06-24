@@ -1,3 +1,4 @@
+// Package image is an embedded image component with support for jpg, png, bmp and tiff files.
 package image
 
 import (

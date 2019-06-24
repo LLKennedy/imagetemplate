@@ -1,3 +1,4 @@
+// Package datetime is a text-based time component with customisable content, size, colour, location and time format.
 package datetime
 
 import (

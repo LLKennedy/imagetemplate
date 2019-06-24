@@ -1,3 +1,4 @@
+// Package text is a simple text component with customisable content, size, colour, location and font.
 package text
 
 import (

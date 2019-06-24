@@ -1,3 +1,4 @@
+// Package imagetemplate generates images from JSON templates and application-specific variables.
 package imagetemplate
 
 import (
