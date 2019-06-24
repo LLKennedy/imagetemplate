@@ -60,7 +60,6 @@ func TestDateTimeSetNamedPropertiesOS(t *testing.T) {
 	}
 }
 
-
 func TestTextVerifyAndTestTextJSONDataOS(t *testing.T) {
 	type testSet struct {
 		name  string
@@ -89,7 +88,7 @@ func TestTextVerifyAndTestTextJSONDataOS(t *testing.T) {
 				fontPool: fakeSysFonts{},
 			},
 			props: render.NamedProperties{},
-			err: "open gibberish file that doesn't exist: The system cannot find the file specified.",
+			err:   "open gibberish file that doesn't exist: The system cannot find the file specified.",
 		},
 	}
 	for _, test := range tests {
