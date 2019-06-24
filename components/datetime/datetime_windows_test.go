@@ -88,7 +88,7 @@ func TestDateTimeVerifyAndTestTextJSONDataOS(t *testing.T) {
 				fontPool: fakeSysFonts{},
 			},
 			props: render.NamedProperties{},
-			err: "open gibberish file that doesn't exist: The system cannot find the file specified.",
+			err:   "open gibberish file that doesn't exist: The system cannot find the file specified.",
 		},
 	}
 	for _, test := range tests {
@@ -104,7 +104,6 @@ func TestDateTimeVerifyAndTestTextJSONDataOS(t *testing.T) {
 		})
 	}
 }
-
 
 func TestInit(t *testing.T) {
 	c, err := render.Decode("datetime")

@@ -206,11 +206,12 @@ func (builder ImageBuilder) setBackgroundImage(template Template) (ImageBuilder,
 			sReader := strings.NewReader(template.BaseImage.Data)
 			imageData = base64.NewDecoder(base64.StdEncoding, sReader)
 		} else {
-			imageData, err = builder.fs.Open(template.BaseImage.FileName)
+			imgFile, err := builder.fs.Open(template.BaseImage.FileName)
 			if err != nil {
 				return builder, err
 			}
-			defer imageData.(io.Closer).Close()
+			defer imgFile.Close()
+			imageData = imgFile
 		}
 		// Decode image data
 		baseImage, _, err = image.Decode(imageData)
