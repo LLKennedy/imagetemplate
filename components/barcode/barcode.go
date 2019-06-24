@@ -1,3 +1,4 @@
+// Package barcode is a component for rendering barcodes with customisable content and colour for both background and data channels.
 package barcode
 
 import (

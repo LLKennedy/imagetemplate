@@ -1,3 +1,4 @@
+// Package rectangle is a simple rectangle component with customisable size, colour and location.
 package rectangle
 
 import (

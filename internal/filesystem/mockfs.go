@@ -1,3 +1,4 @@
+// Package filesystem is a mock filesystem
 package filesystem
 
 import (

@@ -1,3 +1,4 @@
+// Package circle is a simple circle component with customisable size, colour, location and radius.
 package circle
 
 import (
