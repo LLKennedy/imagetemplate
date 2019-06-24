@@ -19,4 +19,4 @@
 !LICENSE
 
 # special cases
-!examples/**
+!internal/examples/**
