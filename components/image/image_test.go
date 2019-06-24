@@ -470,6 +470,69 @@ func TestImageVerifyAndTestImageJSONData(t *testing.T) {
 			props: render.NamedProperties{},
 			err:   "error parsing data for property topLeftX: could not parse empty property",
 		},
+		{
+			name:  "bad image b64",
+			input: &imageFormat{
+				Data: "%^*&%^#@*",
+			},
+			props: render.NamedProperties{},
+			err:   "image: unknown format",
+		},
+		{
+			name:  "valid image b64",
+			input: &imageFormat{
+				Data: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY/j//z8ABf4C/qc1gYQAAAAASUVORK5CYII=",
+			},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property topLeftX: could not parse empty property",
+		},
+		{
+			name:  "valid topLeftX",
+			input: &imageFormat{
+				TopLeftX: "12",
+				Data: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY/j//z8ABf4C/qc1gYQAAAAASUVORK5CYII=",
+			},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property topLeftY: could not parse empty property",
+		},
+		{
+			name:  "valid topLeftY",
+			input: &imageFormat{
+				TopLeftX: "12",
+				TopLeftY: "120",
+				Data: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY/j//z8ABf4C/qc1gYQAAAAASUVORK5CYII=",
+			},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property width: could not parse empty property",
+		},
+		{
+			name:  "valid width",
+			input: &imageFormat{
+				TopLeftX: "12",
+				TopLeftY: "120",
+				Width: "55",
+				Data: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY/j//z8ABf4C/qc1gYQAAAAASUVORK5CYII=",
+			},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property height: could not parse empty property",
+		},
+		{
+			name:  "valid everything",
+			input: &imageFormat{
+				TopLeftX: "12",
+				TopLeftY: "120",
+				Width: "55",
+				Height: "16",
+				FileName: "$photo$",
+			},
+			res: Component{
+				TopLeft: image.Pt(12, 120),
+				Width: 55,
+				Height: 16,
+				NamedPropertiesMap: map[string][]string{"photo": []string{"fileName"}},
+			},
+			props: render.NamedProperties{"photo": struct{Message string}{Message: "Please replace me with real data"}},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
