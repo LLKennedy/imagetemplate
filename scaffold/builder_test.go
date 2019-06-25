@@ -330,6 +330,18 @@ func TestParseComponents(t *testing.T) {
 			props:     render.NamedProperties{},
 			err:       fmt.Errorf("invalid character ':' looking for beginning of value"),
 		},
+		{
+			name:        "mock component with valid but irrelevant JSON",
+			templates:   []ComponentTemplate{{Type: "mock", Properties: []byte(`{"name": "someone", "stuff": {"a": 1}}`)}},
+			props:       render.NamedProperties{},
+			toggleables: []ToggleableComponent{{Component: mockComponent{}}},
+		},
+		{
+			name:      "mock component with valid but ill-fitting JSON", // FIXME: This message is unhelpful when it's coming from a list of mostly valid components
+			templates: []ComponentTemplate{{Type: "mock", Properties: []byte(`{"someProp": 1}`)}},
+			props:     render.NamedProperties{},
+			err:       fmt.Errorf("json: cannot unmarshal number into Go struct field .someProp of type string"),
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) { testFunc(test, t) })

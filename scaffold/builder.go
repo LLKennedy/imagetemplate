@@ -314,6 +314,7 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, rend
 		err = json.Unmarshal(template.Properties, shape)
 		if err != nil {
 			// Invalid JSON
+			// FIXME: output more helpful expected vs. actual data here for debugging templates
 			return results, namedProperties, err
 		}
 		// Set real properties from JSON struct
