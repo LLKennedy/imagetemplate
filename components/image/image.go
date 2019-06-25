@@ -20,12 +20,29 @@ import (
 
 // Component implements the Component interface for images
 type Component struct {
+	/*
+		NamedPropertiesMap maps user/application variables to properties of the component.
+		This field is filled automatically by VerifyAndSetJSONData, then used in
+		SetNamedProperties to determine whether a variable being passed in is relevant to this
+		component.
+
+		For example, map[string][]string{"photo": []string{"fileName"}} would indicate that
+		the user specified variable "photo" will fill the Image property via an image file.
+	*/
 	NamedPropertiesMap map[string][]string
-	Image              image.Image
-	TopLeft            image.Point
-	Width              int
-	Height             int
-	fs                 vfs.FileSystem
+	// Image is the image to draw on the canvas.
+	Image image.Image
+	/*
+		TopLeft is the coordinates of the top-left corner of the image relative to the
+		top-left corner of the canvas.
+	*/
+	TopLeft image.Point
+	// Width is the width to scale the image to.
+	Width int
+	// Height is the height to scale the image to.
+	Height int
+	// fs is the file system.
+	fs vfs.FileSystem
 }
 
 type imageFormat struct {

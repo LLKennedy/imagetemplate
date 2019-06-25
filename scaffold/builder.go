@@ -46,47 +46,68 @@ type Builder interface {
 
 // Template is the format of the JSON file used as a template for building images. See samples.json for examples, each element in the samples array is a complete and valid template object.
 type Template struct {
-	BaseImage  BaseImage           `json:"baseImage"`
+	// BaseImage is the bottom layer of the canvas, on which to draw everything else.
+	BaseImage BaseImage `json:"baseImage"`
+	// Components are all other elements to be rendered.
 	Components []ComponentTemplate `json:"components"`
 }
 
-// BaseImage is the template format of the base image settings
+// BaseImage is the template format of the base image settings.
 type BaseImage struct {
-	FileName   string     `json:"fileName"`
-	Data       string     `json:"data"`
+	// FileName is the file to load the base image from.
+	FileName string `json:"fileName"`
+	// Data is the base64-encoded data to load the base image from.
+	Data string `json:"data"`
+	// BaseColour is the pure colour to use as a base image.
 	BaseColour BaseColour `json:"baseColour"`
-	BaseWidth  string     `json:"width"`
-	BaseHeight string     `json:"height"`
-	PPI        string     `json:"ppi"`
+	// BaseWidth is the width to use for pure colour.
+	BaseWidth string `json:"width"`
+	// BaseHeight is the height to use for pure colour.
+	BaseHeight string `json:"height"`
+	// PPI is the pixels per inch to set in the canvas.
+	PPI string `json:"ppi"`
 }
 
-// BaseColour is the template format of the base colour settings
+// BaseColour is the template format of the base colour settings.
 type BaseColour struct {
-	Red   string `json:"R"`
+	// Red is the red channel.
+	Red string `json:"R"`
+	// Green is the green channel.
 	Green string `json:"G"`
-	Blue  string `json:"B"`
+	// Blue is the blue channel.
+	Blue string `json:"B"`
+	// Alpha is the alpha channel.
 	Alpha string `json:"A"`
 }
 
 // ComponentTemplate is a partial unmarshalled Component, with its properties left in raw form to be handled by each known type of Component.
 type ComponentTemplate struct {
-	Type        string                      `json:"type"`
+	// Type is the type of the component, such as Rectangle or Barcode.
+	Type string `json:"type"`
+	// Conditional is the condition(s) on which the component will render.
 	Conditional render.ComponentConditional `json:"conditional"`
-	Properties  json.RawMessage             `json:"properties"`
+	// Properties are the raw, unprocessed JSON data for the component to parse
+	Properties json.RawMessage `json:"properties"`
 }
 
-// ToggleableComponent is a component with its conditional
+// ToggleableComponent is a component with its conditional.
 type ToggleableComponent struct {
+	// Conditional is the condition(s) on which the component will render.
 	Conditional render.ComponentConditional
-	Component   render.Component
+	// Component is the component to render.
+	Component render.Component
 }
 
 // ImageBuilder uses golang's native Image package to implement the Builder interface
 type ImageBuilder struct {
-	Canvas          render.Canvas
-	Components      []ToggleableComponent
+	// Canvas is the canvas on which the image is drawn.
+	Canvas render.Canvas
+	// Components are the components to render.
+	Components []ToggleableComponent
+	// NamedProperties are the user/application defined variables
 	NamedProperties render.NamedProperties
-	fs              vfs.FileSystem
+	// fs is the file system
+	fs vfs.FileSystem
 }
 
 // NewBuilder generates a new ImageBuilder with an internal canvas of the specified width and height, and optionally the specified starting colour. No provided colour will result in defaults for Image.
@@ -97,7 +118,7 @@ func NewBuilder(fs vfs.FileSystem) Builder {
 	return ImageBuilder{fs: fs}
 }
 
-// WriteToBMP outputs the contents of the builder to a BMP byte array
+// WriteToBMP outputs the contents of the builder to a BMP byte array.
 func (builder ImageBuilder) WriteToBMP() ([]byte, error) {
 	var buf bytes.Buffer
 	err := bmp.Encode(&buf, builder.GetCanvas().GetUnderlyingImage())
@@ -107,7 +128,7 @@ func (builder ImageBuilder) WriteToBMP() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// LoadComponentsFile sets the internal Component array based on the contents of the specified JSON file
+// LoadComponentsFile sets the internal Component array based on the contents of the specified JSON file.
 func (builder ImageBuilder) LoadComponentsFile(fileName string) (Builder, error) {
 	b := builder
 	// Load initial data into template object
@@ -123,7 +144,7 @@ func (builder ImageBuilder) LoadComponentsFile(fileName string) (Builder, error)
 	return b.LoadComponentsData(fileData)
 }
 
-// LoadComponentsData sets the internal component array based on the contents of the specified JSON data
+// LoadComponentsData sets the internal component array based on the contents of the specified JSON data.
 func (builder ImageBuilder) LoadComponentsData(fileData []byte) (Builder, error) {
 	b := builder
 	var template Template

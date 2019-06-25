@@ -2,10 +2,11 @@ package render
 
 import (
 	"fmt"
-	"golang.org/x/tools/godoc/vfs"
 	"strconv"
 	"strings"
 	"time"
+
+	"golang.org/x/tools/godoc/vfs"
 )
 
 var registry = map[string](func(vfs.FileSystem) Component){}
@@ -65,8 +66,10 @@ func StandardSetNamedProperties(properties NamedProperties, propMap map[string][
 
 // DeconstructedDataValue is a string broken down into static values and property names. The reconstruction always starts with a static value, always has one more static value than props, and always alternates static, prop, static, prop... if any props exist.
 type DeconstructedDataValue struct {
+	// StaticValues are the true string components of the processed JSON value.
 	StaticValues []string
-	PropNames    []string
+	// PropNames are the extracted variable names from the processed JSON value.
+	PropNames []string
 }
 
 func isSingleProp(d DeconstructedDataValue) bool {
@@ -150,9 +153,12 @@ func ExtractSingleProp(inputVal, propName string, typeName PropType, namedPropsM
 
 // PropData is a matched triplet of input property data for use with extraction of exclusive properties
 type PropData struct {
+	// InputValue is the raw JSON string data.
 	InputValue string
-	PropName   string
-	Type       PropType
+	// PropName is the name of the property being sought, to associate with discovered variables.
+	PropName string
+	// Type is the conversion to attempt on the string.
+	Type PropType
 }
 
 // ExtractExclusiveProp parses the loaded property configuration and application inputs and returns the desired property if it exists and if only one of the desired options exists
@@ -275,13 +281,27 @@ Float operators: "=", ">", "<", "<=", ">=".
 
 Group operators can be "and", "or", "nand", "nor", "xor".*/
 type ComponentConditional struct {
-	Name      string              `json:"name"`
-	Not       bool                `json:"boolNot"`
-	Operator  conditionalOperator `json:"operator"`
-	Value     string              `json:"value"`
-	Group     conditionalGroup    `json:"group"`
-	valueSet  bool                // Represents whether this individual component has had its value set and its condition evaluated at least once
-	validated bool                // Represents whether this individual component at this level is validated. Use ComponentConditional.Validate() to evaluate the logic of entire groups.
+	// Name is the variable to check against the specified value.
+	Name string `json:"name"`
+	// Not determines whether to negate the final result of the boolean operation.
+	Not bool `json:"boolNot"`
+	// Operator specifies which comparison operation to perform.
+	Operator conditionalOperator `json:"operator"`
+	// Value is the condition to operate against with the variable specified by Name.
+	Value string `json:"value"`
+	// Group is an optional set of other conditionals to check along with this one.
+	Group conditionalGroup `json:"group"`
+	/*
+		valueSet represents whether this individual component has had its value set
+		and its condition evaluated at least once.
+	*/
+	valueSet bool
+	/*
+		validated represents whether this individual component at this level is
+		validated. Use ComponentConditional.Validate() to evaluate the logic of
+		entire groups.
+	*/
+	validated bool
 }
 
 type conditionalGroup struct {

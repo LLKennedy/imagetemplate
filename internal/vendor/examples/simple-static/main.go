@@ -16,6 +16,10 @@ func main() {
 		os.Exit(1)
 	}
 	data, err := loader.Write().ToBMP(props)
+	if err != nil {
+		fmt.Printf("failed to write to bmp data: %v\n", err)
+		os.Exit(1)
+	}
 	err = ioutil.WriteFile("simple-static.bmp", data, os.ModeExclusive)
 	if err != nil {
 		fmt.Printf("failed to write file: %v\n", err)

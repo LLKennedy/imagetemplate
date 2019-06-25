@@ -13,10 +13,25 @@ import (
 
 // Component implements the Component interface for circles
 type Component struct {
+	/*
+		NamedPropertiesMap maps user/application variables to properties of the component.
+		This field is filled automatically by VerifyAndSetJSONData, then used in
+		SetNamedProperties to determine whether a variable being passed in is relevant to this
+		component.
+
+		For example, map[string][]string{"circleSize": []string{"radius"}} would indicate that
+		the user specified variable "circleSize" will fill the Radius property.
+	*/
 	NamedPropertiesMap map[string][]string
-	Centre             image.Point
-	Radius             int
-	Colour             color.NRGBA
+	/*
+		Centre is the coordinates of the centre of the circle relative to the top-left corner
+		of the canvas.
+	*/
+	Centre image.Point
+	// Radius is the radius of the circle.
+	Radius int
+	// Colour is the colour of the circle.
+	Colour color.NRGBA
 }
 
 type circleFormat struct {
