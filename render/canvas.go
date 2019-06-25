@@ -41,8 +41,11 @@ type Canvas interface {
 
 // ImageCanvas uses golang's native Image package to implement the Canvas interface
 type ImageCanvas struct {
-	Image         draw.Image
-	fs            vfs.FileSystem
+	// Image is the underlying drawable image used for rendering.
+	Image draw.Image
+	// fs is the file system
+	fs vfs.FileSystem
+	// pixelsPerInch is the PPI of the canvas
 	pixelsPerInch float64
 }
 
@@ -264,23 +267,23 @@ func ToBarcodeType(raw string) (BarcodeType, error) {
 
 // BarcodeExtraData contains additional data required for some barcode formats, leave any fields not named for the type in use alone
 type BarcodeExtraData struct {
-	// AztecMinECCPercent       is required for aztec barcodes
+	// AztecMinECCPercent is required for aztec barcodes
 	AztecMinECCPercent int
 	// AztecUserSpecifiedLayers is required for aztec barcodes
 	AztecUserSpecifiedLayers int
-	// Code39IncludeChecksum    is required for code39 barcodes
+	// Code39IncludeChecksum is required for code39 barcodes
 	Code39IncludeChecksum bool
-	// Code39FullASCIIMode      is required for code39 barcodes
+	// Code39FullASCIIMode is required for code39 barcodes
 	Code39FullASCIIMode bool
-	// Code93IncludeChecksum    is required for code93 barcodes
+	// Code93IncludeChecksum is required for code93 barcodes
 	Code93IncludeChecksum bool
-	// Code93FullASCIIMode      is required for code93 barcodes
+	// Code93FullASCIIMode is required for code93 barcodes
 	Code93FullASCIIMode bool
-	// PDFSecurityLevel         is required for pdf417 barcodes
+	// PDFSecurityLevel is required for pdf417 barcodes
 	PDFSecurityLevel byte
-	// QRLevel                  is required for qr barcodes
+	// QRLevel is required for qr barcodes
 	QRLevel qr.ErrorCorrectionLevel
-	// QRMode                   is required for qr barcodes
+	// QRMode is required for qr barcodes
 	QRMode qr.Encoding
 }
 

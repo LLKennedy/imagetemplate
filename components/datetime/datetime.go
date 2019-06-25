@@ -19,17 +19,36 @@ import (
 
 // Component implements the Component interface for datetime
 type Component struct {
+	/*
+		NamedPropertiesMap maps user/application variables to properties of the component.
+		This field is filled automatically by VerifyAndSetJSONData, then used in
+		SetNamedProperties to determine whether a variable being passed in is relevant to this
+		component.
+
+		For example, map[string][]string{"expiry": []string{"time"}} would indicate that
+		the user specified variable "expiry" will fill the Time property.
+	*/
 	NamedPropertiesMap map[string][]string
-	Time               *time.Time
-	TimeFormat         string
-	Start              image.Point
-	Size               float64
-	MaxWidth           int
-	Alignment          Alignment
-	Font               *truetype.Font
-	Colour             color.NRGBA
-	fs                 vfs.FileSystem
-	fontPool           gosysfonts.Pool
+	// Time is the timestamp to render.
+	Time *time.Time
+	// TimeFormat is the format with which to parse a string-based time input.
+	TimeFormat string
+	// Start is the coordinates of the dot relative to the top-left corner of the canvas.
+	Start image.Point
+	// Size is the size of the text in points.
+	Size float64
+	// MaxWidth is the maximum number of horizontal pixels the dot can move before scaling text.
+	MaxWidth int
+	// Alignment aligns text to the left, right or centre.
+	Alignment Alignment
+	// Font is the typeface to use.
+	Font *truetype.Font
+	// Colour is the colour of the text.
+	Colour color.NRGBA
+	// fs is the file system.
+	fs vfs.FileSystem
+	// fontPool is the pool of available fonts.
+	fontPool gosysfonts.Pool
 }
 
 type datetimeFormat struct {

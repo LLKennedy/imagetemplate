@@ -18,16 +18,34 @@ import (
 
 // Component implements the Component interface for text
 type Component struct {
+	/*
+		NamedPropertiesMap maps user/application variables to properties of the component.
+		This field is filled automatically by VerifyAndSetJSONData, then used in
+		SetNamedProperties to determine whether a variable being passed in is relevant to this
+		component.
+
+		For example, map[string][]string{"username": []string{"content"}} would indicate that
+		the user specified variable "username" will fill the Content property.
+	*/
 	NamedPropertiesMap map[string][]string
-	Content            string
-	Start              image.Point
-	Size               float64
-	MaxWidth           int
-	Alignment          Alignment
-	Font               *truetype.Font
-	Colour             color.NRGBA
-	fs                 vfs.FileSystem
-	fontPool           gosysfonts.Pool
+	// Content is the text to render.
+	Content string
+	// Start is the coordinates of the dot relative to the top-left corner of the canvas.
+	Start image.Point
+	// Size is the size of the text in points.
+	Size float64
+	// MaxWidth is the maximum number of horizontal pixels the dot can move before scaling text.
+	MaxWidth int
+	// Alignment aligns text to the left, right or centre.
+	Alignment Alignment
+	// Font is the typeface to use.
+	Font *truetype.Font
+	// Colour is the colour of the text.
+	Colour color.NRGBA
+	// fs is the file system.
+	fs vfs.FileSystem
+	// fontPool is the pool of available fonts.
+	fontPool gosysfonts.Pool
 }
 
 type textFormat struct {
