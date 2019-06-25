@@ -13,11 +13,28 @@ import (
 
 // Component implements the Component interface for rectangles
 type Component struct {
+	/*
+		NamedPropertiesMap maps user/application variables to properties of the component.
+		This field is filled automatically by VerifyAndSetJSONData, then used in
+		SetNamedProperties to determine whether a variable being passed in is relevant to this
+		component.
+
+		For example, map[string][]string{"squareSize": []string{"width", "height"}} would
+		indicate that the user specified variable "squareSize" will fill the Width and Height
+		properties.
+	*/
 	NamedPropertiesMap map[string][]string
-	TopLeft            image.Point
-	Width              int
-	Height             int
-	Colour             color.NRGBA
+	/*
+		TopLeft is the coordinates of the top-left corner of the rectangle relative to the
+		top-left corner of the canvas.
+	*/
+	TopLeft image.Point
+	// Width is the width of the rectangle.
+	Width int
+	// Height is the height of the rectangle.
+	Height int
+	// Colour is the colour of the rectangle.
+	Colour color.NRGBA
 }
 
 type rectangleFormat struct {

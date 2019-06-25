@@ -14,15 +14,35 @@ import (
 
 // Component implements the Component interface for images
 type Component struct {
+	/*
+		NamedPropertiesMap maps user/application variables to properties of the component.
+		This field is filled automatically by VerifyAndSetJSONData, then used in
+		SetNamedProperties to determine whether a variable being passed in is relevant to this
+		component.
+
+		For example, map[string][]string{"websiteURL": []string{"content"}} would indicate that
+		the user specified variable "websiteURL" will fill the Content property.
+	*/
 	NamedPropertiesMap map[string][]string
-	Content            string
-	Type               render.BarcodeType
-	TopLeft            image.Point
-	Width              int
-	Height             int
-	DataColour         color.NRGBA
-	BackgroundColour   color.NRGBA
-	Extra              render.BarcodeExtraData
+	// Content is the data which will be encoded as a barcode.
+	Content string
+	// Type is the sort of barcode to encode, such as QR, PDF, or two of five.
+	Type render.BarcodeType
+	/*
+		TopLeft is the coordinates of the top-left corner of the rendered barcode (including
+		background) relative to the top-left corner of the canvas.
+	*/
+	TopLeft image.Point
+	// Width is the width of the barcode (including background).
+	Width int
+	// Height is the height of the barcode (including background).
+	Height int
+	// DataColour is the colour which will fill the data channel.
+	DataColour color.NRGBA
+	// BackgroundColour is the colour which will fill the background channel.
+	BackgroundColour color.NRGBA
+	// Extra is additional information required by certain barcode types.
+	Extra render.BarcodeExtraData
 }
 
 type barcodeFormat struct {
