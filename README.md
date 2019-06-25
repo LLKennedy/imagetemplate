@@ -29,4 +29,4 @@ On windows, the simplest way to test is to use the powershell script.
 
 To emulate the testing which occurs in build pipelines for linux and mac, run the following:
 
-`go test . ./components/... ./render/... ./scaffold/... ./internal/filesystem -race -coverprofile=coverage.out;`
+`go test ./... -race`
