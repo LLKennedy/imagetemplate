@@ -298,64 +298,18 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	if !ok {
 		return component, props, fmt.Errorf("failed to convert returned data to component properties")
 	}
+	return c.parseJSONFormat(stringStruct, startTime, props)
+}
+
+func (component Component) parseJSONFormat(stringStruct *datetimeFormat, startTime time.Time, props render.NamedProperties) (render.Component, render.NamedProperties, error) {
+	c := component
 	// Get named properties and assign each real property
 	var newVal interface{}
 	var err error
 	// Deal with the font restrictions
-	propData := []render.PropData{
-		{
-			InputValue: stringStruct.Font.FontName,
-			PropName:   "fontName",
-			Type:       render.StringType,
-		},
-		{
-			InputValue: stringStruct.Font.FontFile,
-			PropName:   "fontFile",
-			Type:       render.StringType,
-		},
-		{
-			InputValue: stringStruct.Font.FontURL,
-			PropName:   "fontURL",
-			Type:       render.StringType,
-		},
-	}
-	var extractedVal interface{}
-	var validIndex int
-	c.NamedPropertiesMap, extractedVal, validIndex, err = render.ExtractExclusiveProp(propData, c.NamedPropertiesMap)
+	c, err = c.parseFont(stringStruct, err)
 	if err != nil {
 		return component, props, err
-	}
-	if extractedVal != nil {
-		switch validIndex {
-		case 0:
-			stringVal := extractedVal.(string)
-			rawFont, err := c.getFontPool().GetFont(stringVal)
-			if err != nil {
-				return component, props, err
-			}
-			c.Font = rawFont
-		case 1:
-			stringVal := extractedVal.(string)
-			if c.fs == nil {
-				c.fs = vfs.OS(".")
-			}
-			fontReader, err := c.fs.Open(stringVal)
-			if err != nil {
-				return component, props, err
-			}
-			defer fontReader.Close()
-			fontData, err := ioutil.ReadAll(fontReader)
-			if err != nil {
-				return component, props, err
-			}
-			rawFont, err := truetype.Parse(fontData)
-			if err != nil {
-				return component, props, err
-			}
-			c.Font = rawFont
-		case 2:
-			return component, props, fmt.Errorf("fontURL not implemented")
-		}
 	}
 
 	// All other props
@@ -454,6 +408,94 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 		}{Message: "Please replace me with real data"}
 	}
 	return c, props, nil
+}
+
+func combineErrors(history error, latest error) error {
+	if history == nil {
+		return latest
+	}
+	return fmt.Errorf("%v\n%v", history, latest)
+}
+
+func (component Component) parseFont(stringStruct *datetimeFormat, history error) (c Component, err error) {
+	err = history
+	c = component
+	propData := []render.PropData{
+		{
+			InputValue: stringStruct.Font.FontName,
+			PropName:   "fontName",
+			Type:       render.StringType,
+		},
+		{
+			InputValue: stringStruct.Font.FontFile,
+			PropName:   "fontFile",
+			Type:       render.StringType,
+		},
+		{
+			InputValue: stringStruct.Font.FontURL,
+			PropName:   "fontURL",
+			Type:       render.StringType,
+		},
+	}
+	var extractedVal interface{}
+	var validIndex int
+	var extractError error
+	c.NamedPropertiesMap, extractedVal, validIndex, extractError = render.ExtractExclusiveProp(propData, component.NamedPropertiesMap)
+	if extractError != nil {
+		err = combineErrors(history, extractError)
+		return
+	}
+	if extractedVal != nil {
+		switch validIndex {
+		case 0:
+			c, err = c.parseFontName(extractedVal.(string), history)
+			return
+		case 1:
+			c, err = c.parseFontFile(extractedVal.(string), history)
+		case 2:
+			err = combineErrors(history, fmt.Errorf("fontURL not implemented"))
+			return
+		}
+	}
+	return
+}
+
+func (component Component) parseFontName(name string, history error) (c Component, err error) {
+	err = history
+	c = component
+	rawFont, fontErr := c.getFontPool().GetFont(name)
+	if fontErr != nil {
+		err = combineErrors(history, fontErr)
+		return
+	}
+	c.Font = rawFont
+	return
+}
+
+func (component Component) parseFontFile(path string, history error) (c Component, err error) {
+	err = history
+	c = component
+	if c.fs == nil {
+		c.fs = vfs.OS(".")
+	}
+	fontReader, fontErr := c.fs.Open(path)
+	if fontErr != nil {
+		err = combineErrors(history, fontErr)
+		return
+	}
+	defer fontReader.Close()
+	fontData, fontErr := ioutil.ReadAll(fontReader)
+	if fontErr != nil {
+		err = combineErrors(history, fontErr)
+		return
+	}
+	rawFont, fontErr := truetype.Parse(fontData)
+	if fontErr != nil {
+		err = combineErrors(history, fontErr)
+		return
+	}
+	c.Font = rawFont
+	return
 }
 
 func (component Component) getFontPool() gosysfonts.Pool {
