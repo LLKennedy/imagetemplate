@@ -12,7 +12,7 @@ import (
 	"golang.org/x/tools/godoc/vfs"
 )
 
-// Component implements the Component interface for images
+// Component implements the Component interface for images.
 type Component struct {
 	/*
 		NamedPropertiesMap maps user/application variables to properties of the component.
@@ -66,7 +66,7 @@ type barcodeFormat struct {
 	} `json:"backgroundColour"`
 }
 
-// Write draws a barcode on the canvas
+// Write draws a barcode on the canvas.
 func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 	if len(component.NamedPropertiesMap) != 0 {
 		return canvas, fmt.Errorf("cannot draw barcode, not all named properties are set: %v", component.NamedPropertiesMap)
@@ -80,7 +80,7 @@ func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 	return c, nil
 }
 
-// SetNamedProperties processes the named properties and sets them into the barcode properties
+// SetNamedProperties processes the named properties and sets them into the barcode properties.
 func (component Component) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
 	c := component
 	setFunc := func(name string, value interface{}) error {
@@ -189,12 +189,12 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 	return c, nil
 }
 
-// GetJSONFormat returns the JSON structure of a barcode component
+// GetJSONFormat returns the JSON structure of a barcode component.
 func (component Component) GetJSONFormat() interface{} {
 	return &barcodeFormat{}
 }
 
-// VerifyAndSetJSONData processes the data parsed from JSON and uses it to set barcode properties and fill the named properties map
+// VerifyAndSetJSONData processes the data parsed from JSON and uses it to set barcode properties and fill the named properties map.
 func (component Component) VerifyAndSetJSONData(data interface{}) (render.Component, render.NamedProperties, error) {
 	c := component
 	props := make(render.NamedProperties)

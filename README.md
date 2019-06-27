@@ -17,7 +17,7 @@ Several default components are included, see their documentation as well as deta
 ```
 loader, props, err := imagetemplate.New().Load().FromFile("template.json")
 
-// Check props here, set any discovered variables with real values
+// Check props here, set any discovered variables with real values.
 
 data, err := loader.Write().ToBMP(props)
 err = ioutil.WriteFile("output.bmp", data, os.ModeExclusive)
