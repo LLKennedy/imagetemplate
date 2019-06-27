@@ -298,10 +298,44 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	if !ok {
 		return component, props, fmt.Errorf("failed to convert returned data to component properties")
 	}
+	return c.parseJSONFormat(stringStruct, startTime, props)
+}
+
+func (component Component) parseJSONFormat(stringStruct *datetimeFormat, startTime time.Time, props render.NamedProperties) (c Component, foundProps render.NamedProperties, err error) {
+	c = component
 	// Get named properties and assign each real property
-	var newVal interface{}
-	var err error
-	// Deal with the font restrictions
+	c, err = c.parseFont(stringStruct, err)
+	c, err = c.parseTime(stringStruct, startTime, err)
+	c, err = c.parseStart(stringStruct, err)
+	c, err = c.parseMaxWidth(stringStruct, err)
+	c, err = c.parseSize(stringStruct, err)
+	c, err = c.parseAlignment(stringStruct, err)
+	c, err = c.parseColour(stringStruct, err)
+
+	// Fill discovered properties with real data
+	for key := range c.NamedPropertiesMap {
+		props[key] = struct {
+			Message string
+		}{Message: "Please replace me with real data"}
+	}
+
+	// Return original component on error
+	if err != nil {
+		c = component
+	}
+	return c, props, err
+}
+
+func combineErrors(history error, latest error) error {
+	if history == nil {
+		return latest
+	}
+	return fmt.Errorf("%v\n%v", history, latest)
+}
+
+func (component Component) parseFont(stringStruct *datetimeFormat, history error) (c Component, err error) {
+	err = history
+	c = component
 	propData := []render.PropData{
 		{
 			InputValue: stringStruct.Font.FontName,
@@ -321,91 +355,166 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	}
 	var extractedVal interface{}
 	var validIndex int
-	c.NamedPropertiesMap, extractedVal, validIndex, err = render.ExtractExclusiveProp(propData, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
+	var parseErr error
+	c.NamedPropertiesMap, extractedVal, validIndex, parseErr = render.ExtractExclusiveProp(propData, component.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+		return
 	}
 	if extractedVal != nil {
 		switch validIndex {
 		case 0:
-			stringVal := extractedVal.(string)
-			rawFont, err := c.getFontPool().GetFont(stringVal)
-			if err != nil {
-				return component, props, err
-			}
-			c.Font = rawFont
+			c, err = c.parseFontName(extractedVal.(string), history)
 		case 1:
-			stringVal := extractedVal.(string)
-			if c.fs == nil {
-				c.fs = vfs.OS(".")
-			}
-			fontReader, err := c.fs.Open(stringVal)
-			if err != nil {
-				return component, props, err
-			}
-			defer fontReader.Close()
-			fontData, err := ioutil.ReadAll(fontReader)
-			if err != nil {
-				return component, props, err
-			}
-			rawFont, err := truetype.Parse(fontData)
-			if err != nil {
-				return component, props, err
-			}
-			c.Font = rawFont
+			c, err = c.parseFontFile(extractedVal.(string), history)
 		case 2:
-			return component, props, fmt.Errorf("fontURL not implemented")
+			c, err = c.parseFontURL(extractedVal.(string), history)
 		}
 	}
+	return
+}
 
-	// All other props
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Time, "time", render.TimeType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
+func (component Component) parseFontName(name string, history error) (c Component, err error) {
+	err = history
+	c = component
+	rawFont, parseErr := c.getFontPool().GetFont(name)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+		return
 	}
-	if newVal != nil {
-		timeVal := startTime.Add(newVal.(time.Duration))
-		c.Time = &timeVal
+	c.Font = rawFont
+	return
+}
+
+func (component Component) parseFontURL(url string, history error) (c Component, err error) {
+	err = history
+	c = component
+	err = combineErrors(err, fmt.Errorf("fontURL not implemented"))
+	return
+}
+
+func (component Component) parseFontFile(path string, history error) (c Component, err error) {
+	err = history
+	c = component
+	if c.fs == nil {
+		c.fs = vfs.OS(".")
 	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TimeFormat, "timeFormat", render.StringType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
+	fontReader, parseErr := c.fs.Open(path)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+		return
 	}
+	defer fontReader.Close()
+	fontData, parseErr := ioutil.ReadAll(fontReader)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+		return
+	}
+	rawFont, parseErr := truetype.Parse(fontData)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+		return
+	}
+	c.Font = rawFont
+	return
+}
+
+func (component Component) getFontPool() gosysfonts.Pool {
+	if component.fontPool == nil {
+		return gosysfonts.New()
+	}
+	return component.fontPool
+}
+
+func (component Component) parseTime(stringStruct *datetimeFormat, startTime time.Time, history error) (c Component, err error) {
+	err = history
+	c = component
+	// TODO: rewrite this logic to handle standalone time vs passed in time vs passed in string time vs hard-coded string time etc.
+	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.Time, "time", render.TimeType, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+	} else {
+		c.NamedPropertiesMap = props
+		if newVal != nil {
+			timeVal := startTime.Add(newVal.(time.Duration))
+			c.Time = &timeVal
+		}
+	}
+	props, newVal, parseErr = render.ExtractSingleProp(stringStruct.TimeFormat, "timeFormat", render.StringType, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+		return
+	}
+	c.NamedPropertiesMap = props
 	if newVal != nil {
 		c.TimeFormat = newVal.(string)
 	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.StartX, "startX", render.IntType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
+	return
+}
+
+func (component Component) parseStart(stringStruct *datetimeFormat, history error) (c Component, err error) {
+	err = history
+	c = component
+	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.StartX, "startX", render.IntType, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+	} else {
+		c.NamedPropertiesMap = props
+		if newVal != nil {
+			c.Start.X = newVal.(int)
+		}
 	}
-	if newVal != nil {
-		c.Start.X = newVal.(int)
+	props, newVal, parseErr = render.ExtractSingleProp(stringStruct.StartY, "startY", render.IntType, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+		return
 	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.StartY, "startY", render.IntType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
+	c.NamedPropertiesMap = props
 	if newVal != nil {
 		c.Start.Y = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.MaxWidth, "maxWidth", render.IntType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
+	return
+}
+
+func (component Component) parseMaxWidth(stringStruct *datetimeFormat, history error) (c Component, err error) {
+	err = history
+	c = component
+	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.MaxWidth, "maxWidth", render.IntType, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+		return
 	}
+	c.NamedPropertiesMap = props
 	if newVal != nil {
 		c.MaxWidth = newVal.(int)
 	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Size, "size", render.Float64Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
+	return
+}
+
+func (component Component) parseSize(stringStruct *datetimeFormat, history error) (c Component, err error) {
+	err = history
+	c = component
+	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.Size, "size", render.Float64Type, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+		return
 	}
+	c.NamedPropertiesMap = props
 	if newVal != nil {
 		c.Size = newVal.(float64)
 	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Alignment, "alignment", render.StringType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
+	return
+}
+
+func (component Component) parseAlignment(stringStruct *datetimeFormat, history error) (c Component, err error) {
+	err = history
+	c = component
+	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.Alignment, "alignment", render.StringType, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+		return
 	}
+	c.NamedPropertiesMap = props
 	if newVal != nil {
 		alignmentString := newVal.(string)
 		switch alignmentString {
@@ -419,48 +528,49 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 			c.Alignment = AlignmentLeft
 		}
 	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Red, "R", render.Uint8Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.Colour.R = newVal.(uint8)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Green, "G", render.Uint8Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.Colour.G = newVal.(uint8)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Blue, "B", render.Uint8Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.Colour.B = newVal.(uint8)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Alpha, "A", render.Uint8Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.Colour.A = newVal.(uint8)
-	}
-
-	for key := range c.NamedPropertiesMap {
-		props[key] = struct {
-			Message string
-		}{Message: "Please replace me with real data"}
-	}
-	return c, props, nil
+	return
 }
 
-func (component Component) getFontPool() gosysfonts.Pool {
-	if component.fontPool == nil {
-		return gosysfonts.New()
+func (component Component) parseColour(stringStruct *datetimeFormat, history error) (c Component, err error) {
+	err = history
+	c = component
+	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.Colour.Red, "R", render.Uint8Type, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+	} else {
+		c.NamedPropertiesMap = props
+		if newVal != nil {
+			c.Colour.R = newVal.(uint8)
+		}
 	}
-	return component.fontPool
+	props, newVal, parseErr = render.ExtractSingleProp(stringStruct.Colour.Green, "G", render.Uint8Type, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+	} else {
+		c.NamedPropertiesMap = props
+		if newVal != nil {
+			c.Colour.G = newVal.(uint8)
+		}
+	}
+	props, newVal, parseErr = render.ExtractSingleProp(stringStruct.Colour.Blue, "B", render.Uint8Type, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+	} else {
+		c.NamedPropertiesMap = props
+		if newVal != nil {
+			c.Colour.B = newVal.(uint8)
+		}
+	}
+	props, newVal, parseErr = render.ExtractSingleProp(stringStruct.Colour.Alpha, "A", render.Uint8Type, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+	} else {
+		c.NamedPropertiesMap = props
+		if newVal != nil {
+			c.Colour.A = newVal.(uint8)
+		}
+	}
+	return
 }
 
 func init() {
