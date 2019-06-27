@@ -1,3 +1,4 @@
+gofmt -s -w .
 go test ./... -race -cover -coverprofile="coverage.out"; 
 if ($LastExitCode -eq 0) {
 	go tool cover -html="coverage.out";
