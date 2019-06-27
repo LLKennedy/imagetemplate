@@ -752,7 +752,10 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 					FontFile string `json:"fontFile"`
 					FontURL  string `json:"fontURL"`
 				}{},
-				Time: "3h",
+				Time:       "3h",
+				TimeFormat: time.RFC822,
+				StartX:     "12",
+				StartY:     "12",
 			},
 			props: render.NamedProperties{},
 			err:   "exactly one of (fontName,fontFile,fontURL) must be set",
@@ -770,7 +773,10 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontName: "bad",
 				},
-				Time: "3h",
+				Time:       "3h",
+				TimeFormat: time.RFC822,
+				StartX:     "12",
+				StartY:     "12",
 			},
 			res: Component{
 				fontPool: fakeSysFonts{},
@@ -791,13 +797,16 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontName: "good",
 				},
-				Time: "3h",
+				Time:       "3h",
+				TimeFormat: time.RFC822,
+				StartX:     "12",
+				StartY:     "12",
 			},
 			res: Component{
 				fontPool: fakeSysFonts{},
 			},
 			props: render.NamedProperties{},
-			err:   "error parsing data for property timeFormat: could not parse empty property",
+			err:   "error parsing data for property maxWidth: could not parse empty property",
 		},
 		{
 			name: "bad font reader returned from filesystem",
@@ -812,7 +821,10 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "nilfont.TTF",
 				},
-				Time: "3h",
+				Time:       "3h",
+				TimeFormat: time.RFC822,
+				StartX:     "12",
+				StartY:     "12",
 			},
 			res: Component{
 				fs: ttfFS,
@@ -833,7 +845,10 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "badfont.TTF",
 				},
-				Time: "3h",
+				Time:       "3h",
+				TimeFormat: time.RFC822,
+				StartX:     "12",
+				StartY:     "12",
 			},
 			res: Component{
 				fs: ttfFS,
@@ -843,110 +858,6 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 		},
 		{
 			name: "working font file",
-			start: Component{
-				fs: ttfFS,
-			},
-			input: &datetimeFormat{
-				Font: struct {
-					FontName string `json:"fontName"`
-					FontFile string `json:"fontFile"`
-					FontURL  string `json:"fontURL"`
-				}{
-					FontFile: "myFont.ttf",
-				},
-				Time: "3h",
-			},
-			res: Component{
-				fs: ttfFS,
-			},
-			props: render.NamedProperties{},
-			err:   "error parsing data for property timeFormat: could not parse empty property",
-		},
-		{
-			name:  "font URL not implemented",
-			start: Component{},
-			input: &datetimeFormat{
-				Font: struct {
-					FontName string `json:"fontName"`
-					FontFile string `json:"fontFile"`
-					FontURL  string `json:"fontURL"`
-				}{
-					FontURL: "anything",
-				},
-				Time: "3h",
-			},
-			res:   Component{},
-			props: render.NamedProperties{},
-			err:   "fontURL not implemented",
-		},
-		{
-			name: "valid time",
-			start: Component{
-				fs: ttfFS,
-			},
-			input: &datetimeFormat{
-				Font: struct {
-					FontName string `json:"fontName"`
-					FontFile string `json:"fontFile"`
-					FontURL  string `json:"fontURL"`
-				}{
-					FontFile: "myFont.ttf",
-				},
-				Time: "3h",
-			},
-			res: Component{
-				fs: ttfFS,
-			},
-			props: render.NamedProperties{},
-			err:   "error parsing data for property timeFormat: could not parse empty property",
-		},
-		{
-			name: "valid time format",
-			start: Component{
-				fs: ttfFS,
-			},
-			input: &datetimeFormat{
-				Font: struct {
-					FontName string `json:"fontName"`
-					FontFile string `json:"fontFile"`
-					FontURL  string `json:"fontURL"`
-				}{
-					FontFile: "myFont.ttf",
-				},
-				Time:       "3h",
-				TimeFormat: time.RFC822,
-			},
-			res: Component{
-				fs: ttfFS,
-			},
-			props: render.NamedProperties{},
-			err:   "error parsing data for property startX: could not parse empty property",
-		},
-		{
-			name: "valid startX",
-			start: Component{
-				fs: ttfFS,
-			},
-			input: &datetimeFormat{
-				Font: struct {
-					FontName string `json:"fontName"`
-					FontFile string `json:"fontFile"`
-					FontURL  string `json:"fontURL"`
-				}{
-					FontFile: "myFont.ttf",
-				},
-				Time:       "3h",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-			},
-			res: Component{
-				fs: ttfFS,
-			},
-			props: render.NamedProperties{},
-			err:   "error parsing data for property startY: could not parse empty property",
-		},
-		{
-			name: "valid startY",
 			start: Component{
 				fs: ttfFS,
 			},
@@ -968,6 +879,162 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 			},
 			props: render.NamedProperties{},
 			err:   "error parsing data for property maxWidth: could not parse empty property",
+		},
+		{
+			name:  "font URL not implemented",
+			start: Component{},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontURL: "anything",
+				},
+				Time:       "3h",
+				TimeFormat: time.RFC822,
+				StartX:     "12",
+				StartY:     "12",
+			},
+			res:   Component{},
+			props: render.NamedProperties{},
+			err:   "fontURL not implemented",
+		},
+		{
+			name: "empty time",
+			start: Component{
+				fontPool: fakeSysFonts{},
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontName: "good",
+				},
+				TimeFormat: time.RFC822,
+				StartX:     "12",
+				StartY:     "12",
+			},
+			res: Component{
+				fontPool: fakeSysFonts{},
+			},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property time: could not parse empty property",
+		},
+		{
+			name: "empty time format",
+			start: Component{
+				fontPool: fakeSysFonts{},
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontName: "good",
+				},
+				Time:   "3h",
+				StartX: "12",
+				StartY: "12",
+			},
+			res: Component{
+				fontPool: fakeSysFonts{},
+			},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property timeFormat: could not parse empty property",
+		},
+		{
+			name: "empty time and time format",
+			start: Component{
+				fontPool: fakeSysFonts{},
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontName: "good",
+				},
+				StartX: "12",
+				StartY: "12",
+			},
+			res: Component{
+				fontPool: fakeSysFonts{},
+			},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property time: could not parse empty property\nerror parsing data for property timeFormat: could not parse empty property",
+		},
+		{
+			name: "empty startX",
+			start: Component{
+				fontPool: fakeSysFonts{},
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontName: "good",
+				},
+				Time:       "3h",
+				TimeFormat: time.RFC822,
+				StartY:     "12",
+			},
+			res: Component{
+				fontPool: fakeSysFonts{},
+			},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property startX: could not parse empty property",
+		},
+		{
+			name: "empty startY",
+			start: Component{
+				fontPool: fakeSysFonts{},
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontName: "good",
+				},
+				Time:       "3h",
+				TimeFormat: time.RFC822,
+				StartX:     "12",
+			},
+			res: Component{
+				fontPool: fakeSysFonts{},
+			},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property startY: could not parse empty property",
+		},
+		{
+			name: "empty startX and startY",
+			start: Component{
+				fontPool: fakeSysFonts{},
+			},
+			input: &datetimeFormat{
+				Font: struct {
+					FontName string `json:"fontName"`
+					FontFile string `json:"fontFile"`
+					FontURL  string `json:"fontURL"`
+				}{
+					FontName: "good",
+				},
+				Time:       "3h",
+				TimeFormat: time.RFC822,
+			},
+			res: Component{
+				fontPool: fakeSysFonts{},
+			},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property startX: could not parse empty property\nerror parsing data for property startY: could not parse empty property",
 		},
 		{
 			name: "valid maxWidth",

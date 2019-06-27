@@ -309,33 +309,13 @@ func (component Component) parseJSONFormat(stringStruct *datetimeFormat, startTi
 	// Deal with the font restrictions
 	c, err = c.parseFont(stringStruct, err)
 	c, err = c.parseTime(stringStruct, startTime, err)
+	c, err = c.parseStart(stringStruct, err)
 	if err != nil {
 		return component, props, err
 	}
 
 	// All other props
 	
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TimeFormat, "timeFormat", render.StringType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.TimeFormat = newVal.(string)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.StartX, "startX", render.IntType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.Start.X = newVal.(int)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.StartY, "startY", render.IntType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.Start.Y = newVal.(int)
-	}
 	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.MaxWidth, "maxWidth", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
@@ -436,7 +416,7 @@ func (component Component) parseFont(stringStruct *datetimeFormat, history error
 	var parseErr error
 	c.NamedPropertiesMap, extractedVal, validIndex, parseErr = render.ExtractExclusiveProp(propData, component.NamedPropertiesMap)
 	if parseErr != nil {
-		err = combineErrors(history, parseErr)
+		err = combineErrors(err, parseErr)
 		return
 	}
 	if extractedVal != nil {
@@ -457,7 +437,7 @@ func (component Component) parseFontName(name string, history error) (c Componen
 	c = component
 	rawFont, parseErr := c.getFontPool().GetFont(name)
 	if parseErr != nil {
-		err = combineErrors(history, parseErr)
+		err = combineErrors(err, parseErr)
 		return
 	}
 	c.Font = rawFont
@@ -467,7 +447,7 @@ func (component Component) parseFontName(name string, history error) (c Componen
 func (component Component) parseFontURL(url string, history error) (c Component, err error) {
 	err = history
 	c = component
-	err = combineErrors(history, fmt.Errorf("fontURL not implemented"))
+	err = combineErrors(err, fmt.Errorf("fontURL not implemented"))
 	return
 }
 
@@ -479,18 +459,18 @@ func (component Component) parseFontFile(path string, history error) (c Componen
 	}
 	fontReader, parseErr := c.fs.Open(path)
 	if parseErr != nil {
-		err = combineErrors(history, parseErr)
+		err = combineErrors(err, parseErr)
 		return
 	}
 	defer fontReader.Close()
 	fontData, parseErr := ioutil.ReadAll(fontReader)
 	if parseErr != nil {
-		err = combineErrors(history, parseErr)
+		err = combineErrors(err, parseErr)
 		return
 	}
 	rawFont, parseErr := truetype.Parse(fontData)
 	if parseErr != nil {
-		err = combineErrors(history, parseErr)
+		err = combineErrors(err, parseErr)
 		return
 	}
 	c.Font = rawFont
@@ -507,16 +487,49 @@ func (component Component) getFontPool() gosysfonts.Pool {
 func (component Component) parseTime(stringStruct *datetimeFormat, startTime time.Time, history error) (c Component, err error) {
 	err = history
 	c = component
-	var parseErr error
-	var newVal interface{}
-	c.NamedPropertiesMap, newVal, parseErr = render.ExtractSingleProp(stringStruct.Time, "time", render.TimeType, c.NamedPropertiesMap)
+	// TODO: rewrite this logic to handle standalone time vs passed in time vs passed in string time vs hard-coded string time etc.
+	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.Time, "time", render.TimeType, c.NamedPropertiesMap)
 	if parseErr != nil {
-		err = combineErrors(history, parseErr)
+		err = combineErrors(err, parseErr)
+	} else {
+		c.NamedPropertiesMap = props
+		if newVal != nil {
+			timeVal := startTime.Add(newVal.(time.Duration))
+			c.Time = &timeVal
+		}
+	}
+	props, newVal, parseErr = render.ExtractSingleProp(stringStruct.TimeFormat, "timeFormat", render.StringType, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
 		return
 	}
+	c.NamedPropertiesMap = props
 	if newVal != nil {
-		timeVal := startTime.Add(newVal.(time.Duration))
-		c.Time = &timeVal
+		c.TimeFormat = newVal.(string)
+	}
+	return
+}
+
+func (component Component) parseStart(stringStruct *datetimeFormat, history error) (c Component, err error) {
+	err = history
+	c = component
+	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.StartX, "startX", render.IntType, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+	} else {
+		c.NamedPropertiesMap = props
+		if newVal != nil {
+			c.Start.X = newVal.(int)
+		}
+	}
+	props, newVal, parseErr = render.ExtractSingleProp(stringStruct.StartY, "startY", render.IntType, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+		return
+	}
+	c.NamedPropertiesMap = props
+	if newVal != nil {
+		c.Start.Y = newVal.(int)
 	}
 	return
 }

@@ -3,6 +3,7 @@ package datetime
 import (
 	"runtime/debug"
 	"testing"
+	"time"
 
 	"github.com/LLKennedy/gosysfonts"
 	"github.com/LLKennedy/imagetemplate/v3/internal/filesystem"
@@ -83,6 +84,10 @@ func TestDateTimeVerifyAndTestTextJSONDataOS(t *testing.T) {
 				}{
 					FontFile: "gibberish file that doesn't exist",
 				},
+				Time:       "3h",
+				TimeFormat: time.RFC822,
+				StartX:     "12",
+				StartY:     "12",
 			},
 			res: Component{
 				fontPool: fakeSysFonts{},
