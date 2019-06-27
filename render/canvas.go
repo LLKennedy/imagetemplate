@@ -23,7 +23,7 @@ import (
 	"golang.org/x/tools/godoc/vfs"
 )
 
-// Canvas holds the image struct and associated properties
+// Canvas holds the image struct and associated properties.
 type Canvas interface {
 	SetUnderlyingImage(newImage image.Image) Canvas
 	GetUnderlyingImage() image.Image
@@ -39,7 +39,7 @@ type Canvas interface {
 	Barcode(codeType BarcodeType, content []byte, extra BarcodeExtraData, start image.Point, width, height int, dataColour color.Color, bgColour color.Color) (Canvas, error)
 }
 
-// ImageCanvas uses golang's native Image package to implement the Canvas interface
+// ImageCanvas uses golang's native Image package to implement the Canvas interface.
 type ImageCanvas struct {
 	// Image is the underlying drawable image used for rendering.
 	Image draw.Image
@@ -49,7 +49,7 @@ type ImageCanvas struct {
 	pixelsPerInch float64
 }
 
-// NewCanvas generates a new canvas of the given width and height
+// NewCanvas generates a new canvas of the given width and height.
 func NewCanvas(width, height int) (ImageCanvas, error) {
 	if width <= 0 && height <= 0 {
 		return ImageCanvas{}, errors.New("invalid width and height")
@@ -67,7 +67,7 @@ func NewCanvas(width, height int) (ImageCanvas, error) {
 	}, nil
 }
 
-// SetUnderlyingImage sets the internal Image property to the given object
+// SetUnderlyingImage sets the internal Image property to the given object.
 func (canvas ImageCanvas) SetUnderlyingImage(newImage image.Image) Canvas {
 	if newImage == nil {
 		canvas.Image = nil
@@ -83,7 +83,7 @@ func (canvas ImageCanvas) SetUnderlyingImage(newImage image.Image) Canvas {
 	return canvas
 }
 
-// GetUnderlyingImage gets the internal Image property
+// GetUnderlyingImage gets the internal Image property.
 func (canvas ImageCanvas) GetUnderlyingImage() image.Image {
 	if canvas.Image == nil {
 		return image.NewNRGBA(image.Rect(0, 0, 0, 0))
@@ -107,18 +107,18 @@ func (canvas ImageCanvas) GetHeight() int {
 	return canvas.Image.Bounds().Size().Y
 }
 
-// SetPPI sets the pixels per inch of the canvas
+// SetPPI sets the pixels per inch of the canvas.
 func (canvas ImageCanvas) SetPPI(ppi float64) Canvas {
 	canvas.pixelsPerInch = ppi
 	return canvas
 }
 
-// GetPPI returns the pixels per inch of the canvas
+// GetPPI returns the pixels per inch of the canvas.
 func (canvas ImageCanvas) GetPPI() float64 {
 	return canvas.pixelsPerInch
 }
 
-// Rectangle draws a rectangle of a specific colour on the canvas
+// Rectangle draws a rectangle of a specific colour on the canvas.
 func (canvas ImageCanvas) Rectangle(topLeft image.Point, width, height int, colour color.Color) (Canvas, error) {
 	c := canvas
 	if width <= 0 && height <= 0 {
@@ -135,7 +135,7 @@ func (canvas ImageCanvas) Rectangle(topLeft image.Point, width, height int, colo
 	return c, nil
 }
 
-// Circle draws a circle of a specific colour on the canvas
+// Circle draws a circle of a specific colour on the canvas.
 func (canvas ImageCanvas) Circle(centre image.Point, radius int, colour color.Color) (Canvas, error) {
 	c := canvas
 	if radius <= 0 {
@@ -149,7 +149,7 @@ func (canvas ImageCanvas) Circle(centre image.Point, radius int, colour color.Co
 	return c, nil
 }
 
-// Text draws text on the canvas
+// Text draws text on the canvas.
 func (canvas ImageCanvas) Text(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (Canvas, error) {
 	if maxWidth <= 0 {
 		return canvas, errors.New("invalid maxWidth")
@@ -172,7 +172,7 @@ func (canvas ImageCanvas) Text(text string, start image.Point, typeFace font.Fac
 	return c, nil
 }
 
-// TryText returns whether the text would fit on the canvas, and the width the text would currently use up
+// TryText returns whether the text would fit on the canvas, and the width the text would currently use up.
 func (canvas ImageCanvas) TryText(text string, start image.Point, typeFace font.Face, colour color.Color, maxWidth int) (bool, int) {
 	if maxWidth <= 0 {
 		return false, -1
@@ -190,7 +190,7 @@ func (canvas ImageCanvas) TryText(text string, start image.Point, typeFace font.
 	return width <= maxWidth, width
 }
 
-// DrawImage draws another image on the canvas
+// DrawImage draws another image on the canvas.
 func (canvas ImageCanvas) DrawImage(start image.Point, subImage image.Image) (Canvas, error) {
 	c := canvas
 	if c.Image == nil {
@@ -203,7 +203,7 @@ func (canvas ImageCanvas) DrawImage(start image.Point, subImage image.Image) (Ca
 	return c, nil
 }
 
-// BarcodeType wraps the barcode types into a single enum
+// BarcodeType wraps the barcode types into a single enum.
 type BarcodeType string
 
 const (
@@ -233,7 +233,7 @@ const (
 	BarcodeType2of5Interleaved BarcodeType = barcode.Type2of5Interleaved
 )
 
-// ToBarcodeType attempts to convert a barcode type string to a defined BarcodeType constant
+// ToBarcodeType attempts to convert a barcode type string to a defined BarcodeType constant.
 func ToBarcodeType(raw string) (BarcodeType, error) {
 	switch raw {
 	case string(BarcodeTypeAztec):
@@ -265,7 +265,7 @@ func ToBarcodeType(raw string) (BarcodeType, error) {
 	}
 }
 
-// BarcodeExtraData contains additional data required for some barcode formats, leave any fields not named for the type in use alone
+// BarcodeExtraData contains additional data required for some barcode formats, leave any fields not named for the type in use alone.
 type BarcodeExtraData struct {
 	// AztecMinECCPercent is required for aztec barcodes
 	AztecMinECCPercent int
@@ -287,7 +287,7 @@ type BarcodeExtraData struct {
 	QRMode qr.Encoding
 }
 
-// Barcode draws a barcode on the canvas
+// Barcode draws a barcode on the canvas.
 func (canvas ImageCanvas) Barcode(codeType BarcodeType, content []byte, extra BarcodeExtraData, start image.Point, width, height int, dataColour color.Color, backgroundColour color.Color) (Canvas, error) {
 	c := canvas
 	if c.Image == nil {
@@ -383,7 +383,7 @@ func (canvas ImageCanvas) Barcode(codeType BarcodeType, content []byte, extra Ba
 	return c, nil
 }
 
-// Steal the circle example code from https://blog.golang.org/go-imagedraw-package
+// Steal the circle example code from https://blog.golang.org/go-imagedraw-package.
 type circle struct {
 	p image.Point
 	r int

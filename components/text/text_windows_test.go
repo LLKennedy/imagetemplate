@@ -34,7 +34,6 @@ func TestDateTimeSetNamedPropertiesOS(t *testing.T) {
 				NamedPropertiesMap: map[string][]string{
 					"aProp": {"fontFile"},
 				},
-				fs: vfs.OS("."),
 			},
 			err: "open gibberish file that doesn't exist: The system cannot find the file specified.",
 		},
@@ -82,6 +81,23 @@ func TestTextVerifyAndTestTextJSONDataOS(t *testing.T) {
 					FontURL  string `json:"fontURL"`
 				}{
 					FontFile: "gibberish file that doesn't exist",
+				},
+				Content:   "hello",
+				StartX:    "123",
+				StartY:    "45",
+				MaxWidth:  "67",
+				Size:      "89",
+				Alignment: "something else",
+				Colour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "6",
+					Green: "53",
+					Blue:  "197",
+					Alpha: "244",
 				},
 			},
 			res: Component{

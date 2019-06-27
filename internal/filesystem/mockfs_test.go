@@ -16,6 +16,12 @@ func TestMockFS(t *testing.T) {
 	m := NewMockFileSystem(NewMockFile("a file", []byte("hello!")))
 	res, err := m.Open("a file")
 	assert.NoError(t, err)
+	t.Run("invalid open", func(t *testing.T) {
+		var badFS *MockFileSystem
+		file, err := badFS.Open("something")
+		assert.Nil(t, file)
+		assert.EqualError(t, err, "cannot open on nil file system")
+	})
 	t.Run("valid read", func(t *testing.T) {
 		readRes, err := ioutil.ReadAll(res)
 		assert.NoError(t, err)
