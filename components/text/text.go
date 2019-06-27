@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"io/ioutil"
 	"runtime/debug"
-	"strings"
 
 	"github.com/LLKennedy/gosysfonts"
 	"github.com/LLKennedy/imagetemplate/v3/render"
@@ -129,124 +127,8 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 // SetNamedProperties processes the named properties and sets them into the text properties.
 func (component Component) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
 	c := component
-	setFunc := func(name string, value interface{}) error {
-		switch name {
-		case "content":
-			stringVal, ok := value.(string)
-			if !ok {
-				return fmt.Errorf("error converting %v to string", value)
-			}
-			c.Content = stringVal
-			return nil
-		case "fontName":
-			stringVal, ok := value.(string)
-			if !ok {
-				return fmt.Errorf("error converting %v to string", value)
-			}
-			rawFont, err := c.getFontPool().GetFont(stringVal)
-			if err != nil {
-				return err
-			}
-			c.Font = rawFont
-			return nil
-		case "fontFile":
-			stringVal, ok := value.(string)
-			if !ok {
-				return fmt.Errorf("error converting %v to string", value)
-			}
-			if component.fs == nil {
-				component.fs = vfs.OS(".")
-			}
-			fontReader, err := component.fs.Open(stringVal)
-			if err != nil {
-				return err
-			}
-			defer fontReader.Close()
-			fontData, err := ioutil.ReadAll(fontReader)
-			if err != nil {
-				return err
-			}
-			rawFont, err := truetype.Parse(fontData)
-			if err != nil {
-				return err
-			}
-			c.Font = rawFont
-			return nil
-		case "fontURL":
-			return fmt.Errorf("fontURL not implemented")
-		case "size":
-			float64Val, ok := value.(float64)
-			if !ok {
-				return fmt.Errorf("error converting %v to float64", value)
-			}
-			c.Size = float64Val
-			return nil
-		case "alignment":
-			alignmentVal, isAlignment := value.(Alignment)
-			stringVal, isString := value.(string)
-			if !isAlignment && !isString {
-				return fmt.Errorf("could not convert %v to text alignment or string", value)
-			}
-			if isAlignment {
-				c.Alignment = alignmentVal
-				return nil
-			}
-			switch stringVal {
-			case "left":
-				c.Alignment = AlignmentLeft
-				return nil
-			case "right":
-				c.Alignment = AlignmentRight
-				return nil
-			case "centre":
-				c.Alignment = AlignmentCentre
-				return nil
-			default:
-				c.Alignment = AlignmentLeft
-				return nil
-			}
-		}
-		if strings.Contains("RGBA", name) && len(name) == 1 {
-			//Process colours
-			colourVal, ok := value.(uint8)
-			if !ok {
-				return fmt.Errorf("error converting %v to uint8", value)
-			}
-			switch name {
-			case "R":
-				c.Colour.R = colourVal
-				return nil
-			case "G":
-				c.Colour.G = colourVal
-				return nil
-			case "B":
-				c.Colour.B = colourVal
-				return nil
-			case "A":
-				c.Colour.A = colourVal
-				return nil
-			}
-		}
-		numberVal, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("error converting %v to int", value)
-		}
-		switch name {
-		case "startX":
-			c.Start.X = numberVal
-			return nil
-		case "startY":
-			c.Start.Y = numberVal
-			return nil
-		case "maxWidth":
-			c.MaxWidth = numberVal
-			return nil
-		default:
-			return fmt.Errorf("invalid component property in named property map: %v", name)
-		}
-	}
 	var err error
-	c.NamedPropertiesMap, err = render.StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
+	c.NamedPropertiesMap, err = render.StandardSetNamedProperties(properties, component.NamedPropertiesMap, (&c).delegatedSetProperties)
 	if err != nil {
 		return component, err
 	}

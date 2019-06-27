@@ -34,7 +34,6 @@ func TestTextSetNamedPropertiesOS(t *testing.T) {
 				NamedPropertiesMap: map[string][]string{
 					"aProp": {"fontFile"},
 				},
-				fs: vfs.OS("."),
 			},
 			err: "open gibberish file that doesn't exist: no such file or directory",
 		},
