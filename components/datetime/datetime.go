@@ -301,87 +301,29 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	return c.parseJSONFormat(stringStruct, startTime, props)
 }
 
-func (component Component) parseJSONFormat(stringStruct *datetimeFormat, startTime time.Time, props render.NamedProperties) (render.Component, render.NamedProperties, error) {
-	c := component
+func (component Component) parseJSONFormat(stringStruct *datetimeFormat, startTime time.Time, props render.NamedProperties) (c Component, foundProps render.NamedProperties, err error) {
+	c = component
 	// Get named properties and assign each real property
-	var newVal interface{}
-	var err error
-	// Deal with the font restrictions
 	c, err = c.parseFont(stringStruct, err)
 	c, err = c.parseTime(stringStruct, startTime, err)
 	c, err = c.parseStart(stringStruct, err)
-	if err != nil {
-		return component, props, err
-	}
+	c, err = c.parseMaxWidth(stringStruct, err)
+	c, err = c.parseSize(stringStruct, err)
+	c, err = c.parseAlignment(stringStruct, err)
+	c, err = c.parseColour(stringStruct, err)
 
-	// All other props
-	
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.MaxWidth, "maxWidth", render.IntType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.MaxWidth = newVal.(int)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Size, "size", render.Float64Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.Size = newVal.(float64)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Alignment, "alignment", render.StringType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		alignmentString := newVal.(string)
-		switch alignmentString {
-		case "left":
-			c.Alignment = AlignmentLeft
-		case "right":
-			c.Alignment = AlignmentRight
-		case "centre":
-			c.Alignment = AlignmentCentre
-		default:
-			c.Alignment = AlignmentLeft
-		}
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Red, "R", render.Uint8Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.Colour.R = newVal.(uint8)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Green, "G", render.Uint8Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.Colour.G = newVal.(uint8)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Blue, "B", render.Uint8Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.Colour.B = newVal.(uint8)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Alpha, "A", render.Uint8Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.Colour.A = newVal.(uint8)
-	}
-
+	// Fill discovered properties with real data
 	for key := range c.NamedPropertiesMap {
 		props[key] = struct {
 			Message string
 		}{Message: "Please replace me with real data"}
 	}
-	return c, props, nil
+
+	// Return original component on error
+	if err != nil {
+		c = component
+	}
+	return c, props, err
 }
 
 func combineErrors(history error, latest error) error {
@@ -530,6 +472,103 @@ func (component Component) parseStart(stringStruct *datetimeFormat, history erro
 	c.NamedPropertiesMap = props
 	if newVal != nil {
 		c.Start.Y = newVal.(int)
+	}
+	return
+}
+
+func (component Component) parseMaxWidth(stringStruct *datetimeFormat, history error) (c Component, err error) {
+	err = history
+	c = component
+	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.MaxWidth, "maxWidth", render.IntType, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+		return
+	}
+	c.NamedPropertiesMap = props
+	if newVal != nil {
+		c.MaxWidth = newVal.(int)
+	}
+	return
+}
+
+func (component Component) parseSize(stringStruct *datetimeFormat, history error) (c Component, err error) {
+	err = history
+	c = component
+	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.Size, "size", render.Float64Type, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+		return
+	}
+	c.NamedPropertiesMap = props
+	if newVal != nil {
+		c.Size = newVal.(float64)
+	}
+	return
+}
+
+func (component Component) parseAlignment(stringStruct *datetimeFormat, history error) (c Component, err error) {
+	err = history
+	c = component
+	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.Alignment, "alignment", render.StringType, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+		return
+	}
+	c.NamedPropertiesMap = props
+	if newVal != nil {
+		alignmentString := newVal.(string)
+		switch alignmentString {
+		case "left":
+			c.Alignment = AlignmentLeft
+		case "right":
+			c.Alignment = AlignmentRight
+		case "centre":
+			c.Alignment = AlignmentCentre
+		default:
+			c.Alignment = AlignmentLeft
+		}
+	}
+	return
+}
+
+func (component Component) parseColour(stringStruct *datetimeFormat, history error) (c Component, err error) {
+	err = history
+	c = component
+	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.Colour.Red, "R", render.Uint8Type, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+	} else {
+		c.NamedPropertiesMap = props
+		if newVal != nil {
+			c.Colour.R = newVal.(uint8)
+		}
+	}
+	props, newVal, parseErr = render.ExtractSingleProp(stringStruct.Colour.Green, "G", render.Uint8Type, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+	} else {
+		c.NamedPropertiesMap = props
+		if newVal != nil {
+			c.Colour.G = newVal.(uint8)
+		}
+	}
+	props, newVal, parseErr = render.ExtractSingleProp(stringStruct.Colour.Blue, "B", render.Uint8Type, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+	} else {
+		c.NamedPropertiesMap = props
+		if newVal != nil {
+			c.Colour.B = newVal.(uint8)
+		}
+	}
+	props, newVal, parseErr = render.ExtractSingleProp(stringStruct.Colour.Alpha, "A", render.Uint8Type, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(err, parseErr)
+	} else {
+		c.NamedPropertiesMap = props
+		if newVal != nil {
+			c.Colour.A = newVal.(uint8)
+		}
 	}
 	return
 }

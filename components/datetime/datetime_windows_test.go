@@ -88,6 +88,20 @@ func TestDateTimeVerifyAndTestTextJSONDataOS(t *testing.T) {
 				TimeFormat: time.RFC822,
 				StartX:     "12",
 				StartY:     "12",
+				MaxWidth:   "12",
+				Size:       "12",
+				Alignment:  "left",
+				Colour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "6",
+					Green: "53",
+					Blue:  "197",
+					Alpha: "244",
+				},
 			},
 			res: Component{
 				fontPool: fakeSysFonts{},
