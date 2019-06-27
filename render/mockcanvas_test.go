@@ -2,10 +2,11 @@ package render
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"image"
 	"image/color"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMockCanvas(t *testing.T) {

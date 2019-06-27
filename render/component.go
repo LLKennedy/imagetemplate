@@ -11,7 +11,7 @@ import (
 
 var registry = map[string](func(vfs.FileSystem) Component){}
 
-// RegisterComponent adds a new component to the registry, returning an error if duplicate names exist
+// RegisterComponent adds a new component to the registry, returning an error if duplicate names exist.
 func RegisterComponent(name string, generator func(vfs.FileSystem) Component) error {
 	if registry == nil {
 		registry = map[string](func(vfs.FileSystem) Component){}
@@ -23,7 +23,7 @@ func RegisterComponent(name string, generator func(vfs.FileSystem) Component) er
 	return nil
 }
 
-// Decode searches the registry for a component matching the provided name and returns a new blank component of that type
+// Decode searches the registry for a component matching the provided name and returns a new blank component of that type.
 func Decode(name string) (Component, error) {
 	if registry == nil || registry[name] == nil {
 		return nil, fmt.Errorf("component error: no component registered for name %v", name)
@@ -31,10 +31,10 @@ func Decode(name string) (Component, error) {
 	return registry[name](vfs.OS(".")), nil
 }
 
-// NamedProperties is a map of property names to property values - application variables to be set
+// NamedProperties is a map of property names to property values - application variables to be set.
 type NamedProperties map[string]interface{}
 
-// Component provides a generic interface for operations to perform on a canvas
+// Component provides a generic interface for operations to perform on a canvas.
 type Component interface {
 	Write(canvas Canvas) (Canvas, error)
 	SetNamedProperties(properties NamedProperties) (Component, error)
@@ -42,7 +42,7 @@ type Component interface {
 	VerifyAndSetJSONData(interface{}) (Component, NamedProperties, error)
 }
 
-// PropertySetFunc maps property names and values to component inner properties
+// PropertySetFunc maps property names and values to component inner properties.
 type PropertySetFunc func(string, interface{}) error
 
 // StandardSetNamedProperties iterates over all named properties, retrieves their value, and calls the provided function to map properties to inner component properties. Each implementation of Component should call this within its SetNamedProperties function.
@@ -76,7 +76,7 @@ func isSingleProp(d DeconstructedDataValue) bool {
 	return len(d.PropNames) == 1 && len(d.StaticValues) == 2 && d.StaticValues[0] == "" && d.StaticValues[1] == ""
 }
 
-// PropType represents the types of properties which can be parsed
+// PropType represents the types of properties which can be parsed.
 type PropType string
 
 const (
@@ -94,7 +94,7 @@ const (
 	TimeType PropType = "time"
 )
 
-// ExtractSingleProp parses the loaded property configuration and application inputs and returns the desired property if it exists
+// ExtractSingleProp parses the loaded property configuration and application inputs and returns the desired property if it exists.
 func ExtractSingleProp(inputVal, propName string, typeName PropType, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, ExtractedValue interface{}, err error) {
 	npm := namedPropsMap
 	if npm == nil {
@@ -151,7 +151,7 @@ func ExtractSingleProp(inputVal, propName string, typeName PropType, namedPropsM
 	return namedPropsMap, nil, fmt.Errorf("cannot convert property %v to unsupported type %v", propName, typeName)
 }
 
-// PropData is a matched triplet of input property data for use with extraction of exclusive properties
+// PropData is a matched triplet of input property data for use with extraction of exclusive properties.
 type PropData struct {
 	// InputValue is the raw JSON string data.
 	InputValue string
@@ -161,7 +161,7 @@ type PropData struct {
 	Type PropType
 }
 
-// ExtractExclusiveProp parses the loaded property configuration and application inputs and returns the desired property if it exists and if only one of the desired options exists
+// ExtractExclusiveProp parses the loaded property configuration and application inputs and returns the desired property if it exists and if only one of the desired options exists.
 func ExtractExclusiveProp(data []PropData, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, ExtractedValue interface{}, validIndex int, err error) {
 	listSize := len(data)
 	type result struct {
@@ -205,7 +205,7 @@ func ExtractExclusiveProp(data []PropData, namedPropsMap map[string][]string) (r
 	return
 }
 
-// ParseDataValue determines whether a string represents raw data or a named variable and returns this information as well as the data cleaned of any variable definitions
+// ParseDataValue determines whether a string represents raw data or a named variable and returns this information as well as the data cleaned of any variable definitions.
 func ParseDataValue(value string) (hasNamedProperties bool, deconstructed DeconstructedDataValue, err error) {
 	deconstructed = DeconstructedDataValue{}
 	cleanString := ""
@@ -309,7 +309,7 @@ type conditionalGroup struct {
 	Conditionals []ComponentConditional `json:"conditionals"`
 }
 
-// SetValue sets the value of a specific named property through this conditional chain, evaluating any conditions along the way
+// SetValue sets the value of a specific named property through this conditional chain, evaluating any conditions along the way.
 func (c ComponentConditional) SetValue(name string, value interface{}) (ComponentConditional, error) {
 	conditional := c
 	for conIndex, con := range conditional.Group.Conditionals {
@@ -404,7 +404,7 @@ func (c ComponentConditional) SetValue(name string, value interface{}) (Componen
 	return conditional, nil
 }
 
-// Validate validates this conditional chain, erroring if a value down the line has not been set and evaluated
+// Validate validates this conditional chain, erroring if a value down the line has not been set and evaluated.
 func (c ComponentConditional) Validate() (bool, error) {
 	if !c.valueSet && c.Name != "" {
 		return false, fmt.Errorf("attempted to validate conditional %v %v %v without setting %v", c.Name, c.Operator, c.Value, c.Name)
@@ -457,7 +457,7 @@ func (c ComponentConditional) Validate() (bool, error) {
 	return false, fmt.Errorf("invalid group operator %v", op)
 }
 
-// GetNamedPropertiesList returns a list of all named props found in the conditional
+// GetNamedPropertiesList returns a list of all named props found in the conditional.
 func (c ComponentConditional) GetNamedPropertiesList() NamedProperties {
 	results := NamedProperties{}
 	if c.Name == "" && len(c.Group.Conditionals) == 0 {

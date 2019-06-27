@@ -11,7 +11,7 @@ import (
 	"golang.org/x/tools/godoc/vfs"
 )
 
-// Component implements the Component interface for circles
+// Component implements the Component interface for circles.
 type Component struct {
 	/*
 		NamedPropertiesMap maps user/application variables to properties of the component.
@@ -48,7 +48,7 @@ type colourFormat struct {
 	Alpha string `json:"A"`
 }
 
-// Write draws a circle on the canvas
+// Write draws a circle on the canvas.
 func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 	if len(component.NamedPropertiesMap) != 0 {
 		return canvas, fmt.Errorf("cannot draw circle, not all named properties are set: %v", component.NamedPropertiesMap)
@@ -56,7 +56,7 @@ func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 	return canvas.Circle(component.Centre, component.Radius, component.Colour)
 }
 
-// SetNamedProperties processes the named properties and sets them into the circle properties
+// SetNamedProperties processes the named properties and sets them into the circle properties.
 func (component Component) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
 	c := component
 	setFunc := func(name string, value interface{}) error {
@@ -107,12 +107,12 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 	return c, nil
 }
 
-// GetJSONFormat returns the JSON structure of a circle component
+// GetJSONFormat returns the JSON structure of a circle component.
 func (component Component) GetJSONFormat() interface{} {
 	return &circleFormat{}
 }
 
-// VerifyAndSetJSONData processes the data parsed from JSON and uses it to set circle properties and fill the named properties map
+// VerifyAndSetJSONData processes the data parsed from JSON and uses it to set circle properties and fill the named properties map.
 func (component Component) VerifyAndSetJSONData(data interface{}) (render.Component, render.NamedProperties, error) {
 	c := component
 	props := make(render.NamedProperties)

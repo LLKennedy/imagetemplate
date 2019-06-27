@@ -11,7 +11,7 @@ import (
 	"golang.org/x/tools/godoc/vfs"
 )
 
-// Component implements the Component interface for rectangles
+// Component implements the Component interface for rectangles.
 type Component struct {
 	/*
 		NamedPropertiesMap maps user/application variables to properties of the component.
@@ -50,7 +50,7 @@ type rectangleFormat struct {
 	} `json:"colour"`
 }
 
-// Write draws a rectangle on the canvas
+// Write draws a rectangle on the canvas.
 func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 	if len(component.NamedPropertiesMap) != 0 {
 		return canvas, fmt.Errorf("cannot draw rectangle, not all named properties are set: %v", component.NamedPropertiesMap)
@@ -58,7 +58,7 @@ func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 	return canvas.Rectangle(component.TopLeft, component.Width, component.Height, component.Colour)
 }
 
-// SetNamedProperties processes the named properties and sets them into the rectangle properties
+// SetNamedProperties processes the named properties and sets them into the rectangle properties.
 func (component Component) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
 	c := component
 	setFunc := func(name string, value interface{}) error {
@@ -112,12 +112,12 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 	return c, nil
 }
 
-// GetJSONFormat returns the JSON structure of a rectangle component
+// GetJSONFormat returns the JSON structure of a rectangle component.
 func (component Component) GetJSONFormat() interface{} {
 	return &rectangleFormat{}
 }
 
-// VerifyAndSetJSONData processes the data parsed from JSON and uses it to set rectangle properties and fill the named properties map
+// VerifyAndSetJSONData processes the data parsed from JSON and uses it to set rectangle properties and fill the named properties map.
 func (component Component) VerifyAndSetJSONData(data interface{}) (render.Component, render.NamedProperties, error) {
 	c := component
 	props := make(render.NamedProperties)
