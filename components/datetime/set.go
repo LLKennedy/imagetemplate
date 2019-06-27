@@ -2,11 +2,9 @@ package datetime
 
 import (
 	"fmt"
-	"io/ioutil"
 	"time"
 
-	"github.com/golang/freetype/truetype"
-	"golang.org/x/tools/godoc/vfs"
+	"github.com/LLKennedy/imagetemplate/v3/internal/cutils"
 )
 
 func (component *Component) delegatedSetProperties(name string, value interface{}) (err error) {
@@ -82,29 +80,9 @@ func (component *Component) setFontName(value interface{}) error {
 	return nil
 }
 
-func (component *Component) setFontFile(value interface{}) error {
-	stringVal, ok := value.(string)
-	if !ok {
-		return fmt.Errorf("error converting %v to string", value)
-	}
-	if component.fs == nil {
-		component.fs = vfs.OS(".")
-	}
-	fontReader, err := component.fs.Open(stringVal)
-	if err != nil {
-		return err
-	}
-	defer fontReader.Close()
-	fontData, err := ioutil.ReadAll(fontReader)
-	if err != nil {
-		return err
-	}
-	rawFont, err := truetype.Parse(fontData)
-	if err != nil {
-		return err
-	}
-	component.Font = rawFont
-	return nil
+func (component *Component) setFontFile(value interface{}) (err error) {
+	component.Font, err = cutils.LoadFontFile(component.getFileSystem(), value)
+	return
 }
 
 func (component *Component) setFontURL(value interface{}) error {

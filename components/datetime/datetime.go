@@ -169,6 +169,13 @@ func combineErrors(history error, latest error) error {
 	return fmt.Errorf("%v\n%v", history, latest)
 }
 
+func (component Component) getFileSystem() vfs.FileSystem {
+	if component.fs == nil {
+		return vfs.OS(".")
+	}
+	return component.fs
+}
+
 func (component Component) getFontPool() gosysfonts.Pool {
 	if component.fontPool == nil {
 		return gosysfonts.New()

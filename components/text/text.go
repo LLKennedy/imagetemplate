@@ -165,6 +165,13 @@ func (component Component) getFontPool() gosysfonts.Pool {
 	return component.fontPool
 }
 
+func (component Component) getFileSystem() vfs.FileSystem {
+	if component.fs == nil {
+		return vfs.OS(".")
+	}
+	return component.fs
+}
+
 func init() {
 	for _, name := range []string{"text", "Text", "TEXT", "words", "Words", "WORDS", "writing", "Writing", "WRITING"} {
 		render.RegisterComponent(name, func(fs vfs.FileSystem) render.Component { return Component{fs: fs, fontPool: gosysfonts.New()} })

@@ -7,7 +7,6 @@ import (
 
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/golang/freetype/truetype"
-	"golang.org/x/tools/godoc/vfs"
 )
 
 func (component Component) parseJSONFormat(stringStruct *datetimeFormat, startTime time.Time, props render.NamedProperties) (c Component, foundProps render.NamedProperties, err error) {
@@ -98,10 +97,7 @@ func (component Component) parseFontURL(url string, history error) (c Component,
 func (component Component) parseFontFile(path string, history error) (c Component, err error) {
 	err = history
 	c = component
-	if c.fs == nil {
-		c.fs = vfs.OS(".")
-	}
-	fontReader, parseErr := c.fs.Open(path)
+	fontReader, parseErr := c.getFileSystem().Open(path)
 	if parseErr != nil {
 		err = combineErrors(err, parseErr)
 		return

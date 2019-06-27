@@ -31,6 +31,9 @@ func NewMockFileSystem(files ...*MockFile) *MockFileSystem {
 
 // Open returns a pre-set data/error pair.
 func (m *MockFileSystem) Open(filename string) (vfs.ReadSeekCloser, error) {
+	if m == nil {
+		return nil, fmt.Errorf("cannot open on nil file system")
+	}
 	args := m.Called(filename)
 	mFile := args.Get(0).(*MockFile)
 	var newMFile *MockFile

@@ -101,10 +101,7 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 			if !ok {
 				return fmt.Errorf("error converting %v to string", value)
 			}
-			if component.fs == nil {
-				component.fs = vfs.OS(".")
-			}
-			bytesVal, err := component.fs.Open(stringVal)
+			bytesVal, err := component.getFileSystem().Open(stringVal)
 			if err != nil {
 				return err
 			}
@@ -244,6 +241,13 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 		}{Message: "Please replace me with real data"}
 	}
 	return c, props, nil
+}
+
+func (component Component) getFileSystem() vfs.FileSystem {
+	if component.fs == nil {
+		return vfs.OS(".")
+	}
+	return component.fs
 }
 
 func init() {
