@@ -1,10 +1,11 @@
 package image
 
 import (
+	"testing"
+
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/tools/godoc/vfs"
-	"testing"
 )
 
 func TestImageSetNamedPropertiesLoadRealFile(t *testing.T) {
