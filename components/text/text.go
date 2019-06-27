@@ -16,7 +16,7 @@ import (
 	"golang.org/x/tools/godoc/vfs"
 )
 
-// Component implements the Component interface for text
+// Component implements the Component interface for text.
 type Component struct {
 	/*
 		NamedPropertiesMap maps user/application variables to properties of the component.
@@ -68,7 +68,7 @@ type textFormat struct {
 	} `json:"colour"`
 }
 
-// Alignment is a text alignment
+// Alignment is a text alignment.
 type Alignment int
 
 const (
@@ -80,7 +80,7 @@ const (
 	AlignmentCentre
 )
 
-// Write draws text on the canvas
+// Write draws text on the canvas.
 func (component Component) Write(canvas render.Canvas) (c render.Canvas, err error) {
 	c = canvas
 	defer func() {
@@ -126,7 +126,7 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 	return c, nil
 }
 
-// SetNamedProperties processes the named properties and sets them into the text properties
+// SetNamedProperties processes the named properties and sets them into the text properties.
 func (component Component) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
 	c := component
 	setFunc := func(name string, value interface{}) error {
@@ -253,12 +253,12 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 	return c, nil
 }
 
-// GetJSONFormat returns the JSON structure of a text component
+// GetJSONFormat returns the JSON structure of a text component.
 func (component Component) GetJSONFormat() interface{} {
 	return &textFormat{}
 }
 
-// VerifyAndSetJSONData processes the data parsed from JSON and uses it to set text properties and fill the named properties map
+// VerifyAndSetJSONData processes the data parsed from JSON and uses it to set text properties and fill the named properties map.
 func (component Component) VerifyAndSetJSONData(data interface{}) (render.Component, render.NamedProperties, error) {
 	c := component
 	props := make(render.NamedProperties)

@@ -21,7 +21,7 @@ type Loader interface {
 	Write() WriteOptions
 }
 
-// LoadOptions chooses the input format for Loader
+// LoadOptions chooses the input format for Loader.
 type LoadOptions interface {
 	FromBuilder(builder scaffold.Builder) (Loader, render.NamedProperties, error)
 	FromBytes(bytes []byte) (Loader, render.NamedProperties, error)
@@ -30,7 +30,7 @@ type LoadOptions interface {
 	FromReader(reader io.Reader) (Loader, render.NamedProperties, error)
 }
 
-// WriteOptions chooses the output format for Loader
+// WriteOptions chooses the output format for Loader.
 type WriteOptions interface {
 	ToBuilder(props render.NamedProperties) (scaffold.Builder, error)
 	ToBMP(props render.NamedProperties) ([]byte, error)
@@ -44,12 +44,12 @@ type loader struct {
 	fs      vfs.FileSystem
 }
 
-// New returns a new loader with the default file system
+// New returns a new loader with the default file system.
 func New() Loader {
 	return NewUsing(vfs.OS("."))
 }
 
-// NewUsing returns a new loader using a specified vfs
+// NewUsing returns a new loader using a specified vfs.
 func NewUsing(fs vfs.FileSystem) Loader {
 	if fs == nil {
 		fs = vfs.OS(".")
@@ -60,17 +60,17 @@ func NewUsing(fs vfs.FileSystem) Loader {
 	}
 }
 
-// Load returns the load options for a loader
+// Load returns the load options for a loader.
 func (l loader) Load() LoadOptions {
 	return l
 }
 
-// Write returns the write options for a loader
+// Write returns the write options for a loader.
 func (l loader) Write() WriteOptions {
 	return l
 }
 
-// FromBuilder constructs a loader using a pre-existing builder
+// FromBuilder constructs a loader using a pre-existing builder.
 func (l loader) FromBuilder(builder scaffold.Builder) (newLoader Loader, props render.NamedProperties, err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -82,7 +82,7 @@ func (l loader) FromBuilder(builder scaffold.Builder) (newLoader Loader, props r
 	return l, props, nil
 }
 
-// FromBytes constructs a loader from the bytes of a template file
+// FromBytes constructs a loader from the bytes of a template file.
 func (l loader) FromBytes(bytes []byte) (newLoader Loader, props render.NamedProperties, err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -93,7 +93,7 @@ func (l loader) FromBytes(bytes []byte) (newLoader Loader, props render.NamedPro
 	return l, l.builder.GetNamedPropertiesList(), err
 }
 
-// FromFile constructs a loader from the template file located at the provided path
+// FromFile constructs a loader from the template file located at the provided path.
 func (l loader) FromFile(path string) (newLoader Loader, props render.NamedProperties, err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -104,7 +104,7 @@ func (l loader) FromFile(path string) (newLoader Loader, props render.NamedPrope
 	return l, l.builder.GetNamedPropertiesList(), err
 }
 
-// FromJSON constructs a loader from the raw JSON template data provided
+// FromJSON constructs a loader from the raw JSON template data provided.
 func (l loader) FromJSON(raw json.RawMessage) (newLoader Loader, props render.NamedProperties, err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -116,7 +116,7 @@ func (l loader) FromJSON(raw json.RawMessage) (newLoader Loader, props render.Na
 	return l, l.builder.GetNamedPropertiesList(), err
 }
 
-// FromReader constructs a loader from the streamed bytes of a template file
+// FromReader constructs a loader from the streamed bytes of a template file.
 func (l loader) FromReader(reader io.Reader) (newLoader Loader, props render.NamedProperties, err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -132,7 +132,7 @@ func (l loader) FromReader(reader io.Reader) (newLoader Loader, props render.Nam
 	return l, l.builder.GetNamedPropertiesList(), err
 }
 
-// ToBuilder returns the finished render contained within its builder
+// ToBuilder returns the finished render contained within its builder.
 func (l loader) ToBuilder(props render.NamedProperties) (newBuilder scaffold.Builder, err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -143,7 +143,7 @@ func (l loader) ToBuilder(props render.NamedProperties) (newBuilder scaffold.Bui
 	return l.builder, err
 }
 
-// ToBMP returns the finished render as the bytes of a bitmap file
+// ToBMP returns the finished render as the bytes of a bitmap file.
 func (l loader) ToBMP(props render.NamedProperties) (raw []byte, err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -157,7 +157,7 @@ func (l loader) ToBMP(props render.NamedProperties) (raw []byte, err error) {
 	return l.builder.WriteToBMP()
 }
 
-// ToCanvas returns the finished render as a canvas object
+// ToCanvas returns the finished render as a canvas object.
 func (l loader) ToCanvas(props render.NamedProperties) (c render.Canvas, err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -171,7 +171,7 @@ func (l loader) ToCanvas(props render.NamedProperties) (c render.Canvas, err err
 	return l.builder.GetCanvas(), nil
 }
 
-// ToImage returns the finished render as an image.Image object
+// ToImage returns the finished render as an image.Image object.
 func (l loader) ToImage(props render.NamedProperties) (img image.Image, err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -185,7 +185,7 @@ func (l loader) ToImage(props render.NamedProperties) (img image.Image, err erro
 	return l.builder.GetCanvas().GetUnderlyingImage(), nil
 }
 
-// ToBMPReader returns the finished render as streamed bytes of a bitmap file
+// ToBMPReader returns the finished render as streamed bytes of a bitmap file.
 func (l loader) ToBMPReader(props render.NamedProperties) (rdr io.Reader, err error) {
 	defer func() {
 		if r := recover(); r != nil {

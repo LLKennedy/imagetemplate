@@ -17,7 +17,7 @@ import (
 	"golang.org/x/tools/godoc/vfs"
 )
 
-// Component implements the Component interface for datetime
+// Component implements the Component interface for datetime.
 type Component struct {
 	/*
 		NamedPropertiesMap maps user/application variables to properties of the component.
@@ -76,7 +76,7 @@ type colourFormat struct {
 	Alpha string `json:"A"`
 }
 
-// Alignment is a datetime alignment
+// Alignment is a datetime alignment.
 type Alignment int
 
 const (
@@ -88,7 +88,7 @@ const (
 	AlignmentCentre
 )
 
-// Write draws datetime on the canvas
+// Write draws datetime on the canvas.
 func (component Component) Write(canvas render.Canvas) (c render.Canvas, err error) {
 	c = canvas
 	defer func() {
@@ -136,7 +136,7 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 	return c, nil
 }
 
-// SetNamedProperties processes the named properties and sets them into the datetime properties
+// SetNamedProperties processes the named properties and sets them into the datetime properties.
 func (component Component) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
 	c := component
 	setFunc := func(name string, value interface{}) error {
@@ -284,12 +284,12 @@ func (component Component) SetNamedProperties(properties render.NamedProperties)
 	return c, nil
 }
 
-// GetJSONFormat returns the JSON structure of a datetime component
+// GetJSONFormat returns the JSON structure of a datetime component.
 func (component Component) GetJSONFormat() interface{} {
 	return &datetimeFormat{}
 }
 
-// VerifyAndSetJSONData processes the data parsed from JSON and uses it to set datetime properties and fill the named properties map
+// VerifyAndSetJSONData processes the data parsed from JSON and uses it to set datetime properties and fill the named properties map.
 func (component Component) VerifyAndSetJSONData(data interface{}) (render.Component, render.NamedProperties, error) {
 	startTime := time.Now()
 	c := component
