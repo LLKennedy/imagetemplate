@@ -308,19 +308,13 @@ func (component Component) parseJSONFormat(stringStruct *datetimeFormat, startTi
 	var err error
 	// Deal with the font restrictions
 	c, err = c.parseFont(stringStruct, err)
+	c, err = c.parseTime(stringStruct, startTime, err)
 	if err != nil {
 		return component, props, err
 	}
 
 	// All other props
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Time, "time", render.TimeType, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		timeVal := startTime.Add(newVal.(time.Duration))
-		c.Time = &timeVal
-	}
+	
 	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TimeFormat, "timeFormat", render.StringType, c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
@@ -439,22 +433,20 @@ func (component Component) parseFont(stringStruct *datetimeFormat, history error
 	}
 	var extractedVal interface{}
 	var validIndex int
-	var extractError error
-	c.NamedPropertiesMap, extractedVal, validIndex, extractError = render.ExtractExclusiveProp(propData, component.NamedPropertiesMap)
-	if extractError != nil {
-		err = combineErrors(history, extractError)
+	var parseErr error
+	c.NamedPropertiesMap, extractedVal, validIndex, parseErr = render.ExtractExclusiveProp(propData, component.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(history, parseErr)
 		return
 	}
 	if extractedVal != nil {
 		switch validIndex {
 		case 0:
 			c, err = c.parseFontName(extractedVal.(string), history)
-			return
 		case 1:
 			c, err = c.parseFontFile(extractedVal.(string), history)
 		case 2:
-			err = combineErrors(history, fmt.Errorf("fontURL not implemented"))
-			return
+			c, err = c.parseFontURL(extractedVal.(string), history)
 		}
 	}
 	return
@@ -463,12 +455,19 @@ func (component Component) parseFont(stringStruct *datetimeFormat, history error
 func (component Component) parseFontName(name string, history error) (c Component, err error) {
 	err = history
 	c = component
-	rawFont, fontErr := c.getFontPool().GetFont(name)
-	if fontErr != nil {
-		err = combineErrors(history, fontErr)
+	rawFont, parseErr := c.getFontPool().GetFont(name)
+	if parseErr != nil {
+		err = combineErrors(history, parseErr)
 		return
 	}
 	c.Font = rawFont
+	return
+}
+
+func (component Component) parseFontURL(url string, history error) (c Component, err error) {
+	err = history
+	c = component
+	err = combineErrors(history, fmt.Errorf("fontURL not implemented"))
 	return
 }
 
@@ -478,20 +477,20 @@ func (component Component) parseFontFile(path string, history error) (c Componen
 	if c.fs == nil {
 		c.fs = vfs.OS(".")
 	}
-	fontReader, fontErr := c.fs.Open(path)
-	if fontErr != nil {
-		err = combineErrors(history, fontErr)
+	fontReader, parseErr := c.fs.Open(path)
+	if parseErr != nil {
+		err = combineErrors(history, parseErr)
 		return
 	}
 	defer fontReader.Close()
-	fontData, fontErr := ioutil.ReadAll(fontReader)
-	if fontErr != nil {
-		err = combineErrors(history, fontErr)
+	fontData, parseErr := ioutil.ReadAll(fontReader)
+	if parseErr != nil {
+		err = combineErrors(history, parseErr)
 		return
 	}
-	rawFont, fontErr := truetype.Parse(fontData)
-	if fontErr != nil {
-		err = combineErrors(history, fontErr)
+	rawFont, parseErr := truetype.Parse(fontData)
+	if parseErr != nil {
+		err = combineErrors(history, parseErr)
 		return
 	}
 	c.Font = rawFont
@@ -503,6 +502,23 @@ func (component Component) getFontPool() gosysfonts.Pool {
 		return gosysfonts.New()
 	}
 	return component.fontPool
+}
+
+func (component Component) parseTime(stringStruct *datetimeFormat, startTime time.Time, history error) (c Component, err error) {
+	err = history
+	c = component
+	var parseErr error
+	var newVal interface{}
+	c.NamedPropertiesMap, newVal, parseErr = render.ExtractSingleProp(stringStruct.Time, "time", render.TimeType, c.NamedPropertiesMap)
+	if parseErr != nil {
+		err = combineErrors(history, parseErr)
+		return
+	}
+	if newVal != nil {
+		timeVal := startTime.Add(newVal.(time.Duration))
+		c.Time = &timeVal
+	}
+	return
 }
 
 func init() {

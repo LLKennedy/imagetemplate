@@ -752,6 +752,7 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 					FontFile string `json:"fontFile"`
 					FontURL  string `json:"fontURL"`
 				}{},
+				Time: "3h",
 			},
 			props: render.NamedProperties{},
 			err:   "exactly one of (fontName,fontFile,fontURL) must be set",
@@ -769,6 +770,7 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontName: "bad",
 				},
+				Time: "3h",
 			},
 			res: Component{
 				fontPool: fakeSysFonts{},
@@ -789,12 +791,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontName: "good",
 				},
+				Time: "3h",
 			},
 			res: Component{
 				fontPool: fakeSysFonts{},
 			},
 			props: render.NamedProperties{},
-			err:   "error parsing data for property time: could not parse empty property",
+			err:   "error parsing data for property timeFormat: could not parse empty property",
 		},
 		{
 			name: "bad font reader returned from filesystem",
@@ -809,6 +812,7 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "nilfont.TTF",
 				},
+				Time: "3h",
 			},
 			res: Component{
 				fs: ttfFS,
@@ -829,6 +833,7 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "badfont.TTF",
 				},
+				Time: "3h",
 			},
 			res: Component{
 				fs: ttfFS,
@@ -849,12 +854,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
+				Time: "3h",
 			},
 			res: Component{
 				fs: ttfFS,
 			},
 			props: render.NamedProperties{},
-			err:   "error parsing data for property time: could not parse empty property",
+			err:   "error parsing data for property timeFormat: could not parse empty property",
 		},
 		{
 			name:  "font URL not implemented",
@@ -867,6 +873,7 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontURL: "anything",
 				},
+				Time: "3h",
 			},
 			res:   Component{},
 			props: render.NamedProperties{},
