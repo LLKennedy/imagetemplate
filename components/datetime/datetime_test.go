@@ -560,7 +560,7 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 					"aProp": {"not a prop"},
 				},
 			},
-			err: "error converting not a number to int",
+			err: "invalid component property in named property map: not a prop",
 		},
 		{
 			name: "non-RGBA invalid name",
@@ -596,6 +596,23 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			err: "",
 		},
 		{
+			name: "invalid startX type",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"startX"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "15",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"startX"},
+				},
+			},
+			err: "error converting 15 to int",
+		},
+		{
 			name: "startY",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
@@ -612,6 +629,23 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			err: "",
 		},
 		{
+			name: "invalid startY type",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"startY"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "15",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"startY"},
+				},
+			},
+			err: "error converting 15 to int",
+		},
+		{
 			name: "maxWidth",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
@@ -626,6 +660,23 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 				MaxWidth:           15,
 			},
 			err: "",
+		},
+		{
+			name: "invalid maxWidth type",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"maxWidth"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "15",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"maxWidth"},
+				},
+			},
+			err: "error converting 15 to int",
 		},
 		{
 			name: "size",

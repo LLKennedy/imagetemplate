@@ -1,10 +1,10 @@
 package image
 
 import (
+	"testing"
+
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/tools/godoc/vfs"
-	"testing"
 )
 
 func TestImageSetNamedPropertiesLoadRealFile(t *testing.T) {
@@ -20,7 +20,6 @@ func TestImageSetNamedPropertiesLoadRealFile(t *testing.T) {
 		NamedPropertiesMap: map[string][]string{
 			"aProp": {"fileName"},
 		},
-		fs: vfs.OS("."),
 	}
 	expectedErr := "open !!!\\!!!!!!/\\/\\/\\/\\/!!!!/\\!!!\\\\\\: no such file or directory"
 	res, err := c.SetNamedProperties(input)

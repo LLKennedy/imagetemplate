@@ -30,7 +30,7 @@ import (
 	"golang.org/x/tools/godoc/vfs"
 )
 
-// Builder manipulates Canvas objects and outputs to a bitmap
+// Builder manipulates Canvas objects and outputs to a bitmap.
 type Builder interface {
 	GetCanvas() render.Canvas
 	SetCanvas(newCanvas render.Canvas) Builder
@@ -98,7 +98,7 @@ type ToggleableComponent struct {
 	Component render.Component
 }
 
-// ImageBuilder uses golang's native Image package to implement the Builder interface
+// ImageBuilder uses golang's native Image package to implement the Builder interface.
 type ImageBuilder struct {
 	// Canvas is the canvas on which the image is drawn.
 	Canvas render.Canvas
@@ -333,7 +333,7 @@ func parseComponents(templates []ComponentTemplate) ([]ToggleableComponent, rend
 	return results, namedProperties, nil
 }
 
-// GetCanvas returns the internal Canvas object
+// GetCanvas returns the internal Canvas object.
 func (builder ImageBuilder) GetCanvas() render.Canvas {
 	if builder.Canvas == nil {
 		return render.ImageCanvas{}
@@ -341,13 +341,13 @@ func (builder ImageBuilder) GetCanvas() render.Canvas {
 	return builder.Canvas
 }
 
-// SetCanvas sets the internal Canvas object
+// SetCanvas sets the internal Canvas object.
 func (builder ImageBuilder) SetCanvas(newCanvas render.Canvas) Builder {
 	builder.Canvas = newCanvas
 	return builder
 }
 
-// GetComponents gets the internal Component array
+// GetComponents gets the internal Component array.
 func (builder ImageBuilder) GetComponents() []render.Component {
 	result := []render.Component{}
 	for _, tComponent := range builder.Components {
@@ -359,18 +359,18 @@ func (builder ImageBuilder) GetComponents() []render.Component {
 	return result
 }
 
-// SetComponents sets the internal Component array
+// SetComponents sets the internal Component array.
 func (builder ImageBuilder) SetComponents(components []ToggleableComponent) Builder {
 	builder.Components = components
 	return builder
 }
 
-// GetNamedPropertiesList returns the list of named properties in the builder object
+// GetNamedPropertiesList returns the list of named properties in the builder object.
 func (builder ImageBuilder) GetNamedPropertiesList() render.NamedProperties {
 	return builder.NamedProperties
 }
 
-// SetNamedProperties sets the values of names properties in all components and conditionals in the builder
+// SetNamedProperties sets the values of names properties in all components and conditionals in the builder.
 func (builder ImageBuilder) SetNamedProperties(properties render.NamedProperties) (Builder, error) {
 	b := builder
 	b.Components = builder.Components[:]
@@ -391,7 +391,7 @@ func (builder ImageBuilder) SetNamedProperties(properties render.NamedProperties
 	return b, nil
 }
 
-// ApplyComponents iterates over the internal Component array, applying each in turn to the Canvas
+// ApplyComponents iterates over the internal Component array, applying each in turn to the Canvas.
 func (builder ImageBuilder) ApplyComponents() (Builder, error) {
 	b := builder
 	for _, tComponent := range b.Components {
