@@ -4,6 +4,7 @@
 [![Build Status](https://travis-ci.org/disintegration/imaging.svg?branch=master)](https://travis-ci.org/LLKennedy/imagetemplate)
 [![Coverage Status](https://coveralls.io/repos/github/LLKennedy/imagetemplate/badge.svg?branch=master)](https://coveralls.io/github/LLKennedy/imagetemplate?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/LLKennedy/imagetemplate)](https://goreportcard.com/report/github.com/LLKennedy/imagetemplate)
+[![Maintainability](https://api.codeclimate.com/v1/badges/22d24397a4cccf8471d4/maintainability)](https://codeclimate.com/github/LLKennedy/imagetemplate/maintainability)
 
 An image templating library for golang. Builder provides the templating engine, render provides the canvas, individual components provide the elements which can be templated and rendered. Component registration follows the pattern of built-in package "image", any package which implements the Component interface (found under render) and uses the RegisterComponent function during initialisation will be available for use.
 
