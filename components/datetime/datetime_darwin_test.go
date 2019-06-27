@@ -3,6 +3,7 @@ package datetime
 import (
 	"runtime/debug"
 	"testing"
+	"time"
 
 	"github.com/LLKennedy/gosysfonts"
 	"github.com/LLKennedy/imagetemplate/v3/internal/filesystem"
