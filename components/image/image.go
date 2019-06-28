@@ -11,6 +11,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/LLKennedy/imagetemplate/v3/cutils"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/disintegration/imaging"
 	_ "golang.org/x/image/bmp"  // bmp imported for image decoding
@@ -156,7 +157,6 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 		return component, props, fmt.Errorf("failed to convert returned data to component properties")
 	}
 	// Get named properties and assign each real property
-	var newVal interface{}
 	var err error
 	// Deal with the file/data restrictions
 	propData := []render.PropData{
@@ -206,33 +206,21 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	}
 
 	// All other props
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TopLeftX, "topLeftX", render.IntType, c.NamedPropertiesMap)
+	c.TopLeft.X, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.TopLeftX, "topLeftX", c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
-	if newVal != nil {
-		c.TopLeft.X = newVal.(int)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TopLeftY, "topLeftY", render.IntType, c.NamedPropertiesMap)
+	c.TopLeft.Y, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.TopLeftY, "topLeftY", c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
-	if newVal != nil {
-		c.TopLeft.Y = newVal.(int)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Width, "width", render.IntType, c.NamedPropertiesMap)
+	c.Width, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.Width, "width", c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
-	if newVal != nil {
-		c.Width = newVal.(int)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Height, "height", render.IntType, c.NamedPropertiesMap)
+	c.Height, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.Height, "height", c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
-	}
-	if newVal != nil {
-		c.Height = newVal.(int)
 	}
 
 	for key := range c.NamedPropertiesMap {
