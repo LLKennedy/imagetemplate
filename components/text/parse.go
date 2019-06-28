@@ -1,7 +1,7 @@
 package text
 
 import (
-	"github.com/LLKennedy/imagetemplate/v3/internal/cutils"
+	"github.com/LLKennedy/imagetemplate/v3/cutils"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 )
 

@@ -11,7 +11,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/LLKennedy/imagetemplate/v3/internal/cutils"
+	"github.com/LLKennedy/imagetemplate/v3/cutils"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/disintegration/imaging"
 	_ "golang.org/x/image/bmp"  // bmp imported for image decoding

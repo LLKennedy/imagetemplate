@@ -3,7 +3,7 @@ package text
 import (
 	"fmt"
 
-	"github.com/LLKennedy/imagetemplate/v3/internal/cutils"
+	"github.com/LLKennedy/imagetemplate/v3/cutils"
 )
 
 func (component *Component) delegatedSetProperties(name string, value interface{}) (err error) {
