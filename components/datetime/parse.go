@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"time"
 
+	"github.com/LLKennedy/imagetemplate/v3/internal/cutils"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/golang/freetype/truetype"
 )
@@ -59,7 +60,7 @@ func (component Component) parseFont(stringStruct *datetimeFormat, history error
 	var parseErr error
 	c.NamedPropertiesMap, extractedVal, validIndex, parseErr = render.ExtractExclusiveProp(propData, component.NamedPropertiesMap)
 	if parseErr != nil {
-		err = combineErrors(err, parseErr)
+		err = cutils.CombineErrors(err, parseErr)
 		return
 	}
 	if extractedVal != nil {
@@ -80,7 +81,7 @@ func (component Component) parseFontName(name string, history error) (c Componen
 	c = component
 	rawFont, parseErr := c.getFontPool().GetFont(name)
 	if parseErr != nil {
-		err = combineErrors(err, parseErr)
+		err = cutils.CombineErrors(err, parseErr)
 		return
 	}
 	c.Font = rawFont
@@ -90,7 +91,7 @@ func (component Component) parseFontName(name string, history error) (c Componen
 func (component Component) parseFontURL(url string, history error) (c Component, err error) {
 	err = history
 	c = component
-	err = combineErrors(err, fmt.Errorf("fontURL not implemented"))
+	err = cutils.CombineErrors(err, fmt.Errorf("fontURL not implemented"))
 	return
 }
 
@@ -99,18 +100,18 @@ func (component Component) parseFontFile(path string, history error) (c Componen
 	c = component
 	fontReader, parseErr := c.getFileSystem().Open(path)
 	if parseErr != nil {
-		err = combineErrors(err, parseErr)
+		err = cutils.CombineErrors(err, parseErr)
 		return
 	}
 	defer fontReader.Close()
 	fontData, parseErr := ioutil.ReadAll(fontReader)
 	if parseErr != nil {
-		err = combineErrors(err, parseErr)
+		err = cutils.CombineErrors(err, parseErr)
 		return
 	}
 	rawFont, parseErr := truetype.Parse(fontData)
 	if parseErr != nil {
-		err = combineErrors(err, parseErr)
+		err = cutils.CombineErrors(err, parseErr)
 		return
 	}
 	c.Font = rawFont
@@ -123,7 +124,7 @@ func (component Component) parseTime(stringStruct *datetimeFormat, startTime tim
 	// TODO: rewrite this logic to handle standalone time vs passed in time vs passed in string time vs hard-coded string time etc.
 	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.Time, "time", render.TimeType, c.NamedPropertiesMap)
 	if parseErr != nil {
-		err = combineErrors(err, parseErr)
+		err = cutils.CombineErrors(err, parseErr)
 	} else {
 		c.NamedPropertiesMap = props
 		if newVal != nil {
@@ -133,7 +134,7 @@ func (component Component) parseTime(stringStruct *datetimeFormat, startTime tim
 	}
 	props, newVal, parseErr = render.ExtractSingleProp(stringStruct.TimeFormat, "timeFormat", render.StringType, c.NamedPropertiesMap)
 	if parseErr != nil {
-		err = combineErrors(err, parseErr)
+		err = cutils.CombineErrors(err, parseErr)
 		return
 	}
 	c.NamedPropertiesMap = props
@@ -148,7 +149,7 @@ func (component Component) parseStart(stringStruct *datetimeFormat, history erro
 	c = component
 	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.StartX, "startX", render.IntType, c.NamedPropertiesMap)
 	if parseErr != nil {
-		err = combineErrors(err, parseErr)
+		err = cutils.CombineErrors(err, parseErr)
 	} else {
 		c.NamedPropertiesMap = props
 		if newVal != nil {
@@ -157,7 +158,7 @@ func (component Component) parseStart(stringStruct *datetimeFormat, history erro
 	}
 	props, newVal, parseErr = render.ExtractSingleProp(stringStruct.StartY, "startY", render.IntType, c.NamedPropertiesMap)
 	if parseErr != nil {
-		err = combineErrors(err, parseErr)
+		err = cutils.CombineErrors(err, parseErr)
 		return
 	}
 	c.NamedPropertiesMap = props
@@ -172,7 +173,7 @@ func (component Component) parseMaxWidth(stringStruct *datetimeFormat, history e
 	c = component
 	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.MaxWidth, "maxWidth", render.IntType, c.NamedPropertiesMap)
 	if parseErr != nil {
-		err = combineErrors(err, parseErr)
+		err = cutils.CombineErrors(err, parseErr)
 		return
 	}
 	c.NamedPropertiesMap = props
@@ -187,7 +188,7 @@ func (component Component) parseSize(stringStruct *datetimeFormat, history error
 	c = component
 	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.Size, "size", render.Float64Type, c.NamedPropertiesMap)
 	if parseErr != nil {
-		err = combineErrors(err, parseErr)
+		err = cutils.CombineErrors(err, parseErr)
 		return
 	}
 	c.NamedPropertiesMap = props
@@ -202,7 +203,7 @@ func (component Component) parseAlignment(stringStruct *datetimeFormat, history 
 	c = component
 	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.Alignment, "alignment", render.StringType, c.NamedPropertiesMap)
 	if parseErr != nil {
-		err = combineErrors(err, parseErr)
+		err = cutils.CombineErrors(err, parseErr)
 		return
 	}
 	c.NamedPropertiesMap = props
@@ -225,41 +226,10 @@ func (component Component) parseAlignment(stringStruct *datetimeFormat, history 
 func (component Component) parseColour(stringStruct *datetimeFormat, history error) (c Component, err error) {
 	err = history
 	c = component
-	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.Colour.Red, "R", render.Uint8Type, c.NamedPropertiesMap)
+	var parseErr error
+	c.Colour, c.NamedPropertiesMap, parseErr = cutils.ParseColourStrings(stringStruct.Colour.Red, stringStruct.Colour.Green, stringStruct.Colour.Blue, stringStruct.Colour.Alpha, c.NamedPropertiesMap)
 	if parseErr != nil {
-		err = combineErrors(err, parseErr)
-	} else {
-		c.NamedPropertiesMap = props
-		if newVal != nil {
-			c.Colour.R = newVal.(uint8)
-		}
-	}
-	props, newVal, parseErr = render.ExtractSingleProp(stringStruct.Colour.Green, "G", render.Uint8Type, c.NamedPropertiesMap)
-	if parseErr != nil {
-		err = combineErrors(err, parseErr)
-	} else {
-		c.NamedPropertiesMap = props
-		if newVal != nil {
-			c.Colour.G = newVal.(uint8)
-		}
-	}
-	props, newVal, parseErr = render.ExtractSingleProp(stringStruct.Colour.Blue, "B", render.Uint8Type, c.NamedPropertiesMap)
-	if parseErr != nil {
-		err = combineErrors(err, parseErr)
-	} else {
-		c.NamedPropertiesMap = props
-		if newVal != nil {
-			c.Colour.B = newVal.(uint8)
-		}
-	}
-	props, newVal, parseErr = render.ExtractSingleProp(stringStruct.Colour.Alpha, "A", render.Uint8Type, c.NamedPropertiesMap)
-	if parseErr != nil {
-		err = combineErrors(err, parseErr)
-	} else {
-		c.NamedPropertiesMap = props
-		if newVal != nil {
-			c.Colour.A = newVal.(uint8)
-		}
+		err = cutils.CombineErrors(history, parseErr)
 	}
 	return
 }

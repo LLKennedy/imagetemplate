@@ -162,13 +162,6 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	return c.parseJSONFormat(stringStruct, startTime, props)
 }
 
-func combineErrors(history error, latest error) error {
-	if history == nil {
-		return latest
-	}
-	return fmt.Errorf("%v\n%v", history, latest)
-}
-
 func (component Component) getFileSystem() vfs.FileSystem {
 	if component.fs == nil {
 		return vfs.OS(".")

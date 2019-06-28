@@ -151,13 +151,6 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	return c.parseJSONFormat(stringStruct, props)
 }
 
-func combineErrors(history error, latest error) error {
-	if history == nil {
-		return latest
-	}
-	return fmt.Errorf("%v\n%v", history, latest)
-}
-
 func (component Component) getFontPool() gosysfonts.Pool {
 	if component.fontPool == nil {
 		return gosysfonts.New()
