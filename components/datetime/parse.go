@@ -2,12 +2,10 @@ package datetime
 
 import (
 	"fmt"
-	"io/ioutil"
 	"time"
 
 	"github.com/LLKennedy/imagetemplate/v3/internal/cutils"
 	"github.com/LLKennedy/imagetemplate/v3/render"
-	"github.com/golang/freetype/truetype"
 )
 
 func (component Component) parseJSONFormat(stringStruct *datetimeFormat, startTime time.Time, props render.NamedProperties) (c Component, foundProps render.NamedProperties, err error) {
@@ -96,26 +94,9 @@ func (component Component) parseFontURL(url string, history error) (c Component,
 }
 
 func (component Component) parseFontFile(path string, history error) (c Component, err error) {
-	err = history
 	c = component
-	fontReader, parseErr := c.getFileSystem().Open(path)
-	if parseErr != nil {
-		err = cutils.CombineErrors(err, parseErr)
-		return
-	}
-	defer fontReader.Close()
-	fontData, parseErr := ioutil.ReadAll(fontReader)
-	if parseErr != nil {
-		err = cutils.CombineErrors(err, parseErr)
-		return
-	}
-	rawFont, parseErr := truetype.Parse(fontData)
-	if parseErr != nil {
-		err = cutils.CombineErrors(err, parseErr)
-		return
-	}
-	c.Font = rawFont
-	return
+	c.Font, err = cutils.LoadFontFile(c.getFileSystem(), path)
+	return c, cutils.CombineErrors(history, err)
 }
 
 func (component Component) parseTime(stringStruct *datetimeFormat, startTime time.Time, history error) (c Component, err error) {
