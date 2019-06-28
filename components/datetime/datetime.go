@@ -96,22 +96,7 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 		face = truetype.NewFace(component.Font, &truetype.Options{Size: fontSize, Hinting: font.HintingFull, SubPixelsX: 64, SubPixelsY: 64, DPI: canvas.GetPPI()})
 		var realWidth int
 		fits, realWidth = c.TryText(formattedTime, component.Start, face, component.Colour, component.MaxWidth)
-		if realWidth > component.MaxWidth {
-			ratio := float64(component.MaxWidth) / float64(realWidth)
-			fontSize = ratio * fontSize
-		} else if realWidth < component.MaxWidth {
-			remainingWidth := float64(component.MaxWidth) - float64(realWidth)
-			switch component.TextAlignment {
-			case cutils.TextAlignmentLeft:
-				alignmentOffset = 0
-			case cutils.TextAlignmentRight:
-				alignmentOffset = int(remainingWidth)
-			case cutils.TextAlignmentCentre:
-				alignmentOffset = int(remainingWidth / 2)
-			default:
-				alignmentOffset = 0
-			}
-		}
+		fontSize, alignmentOffset = cutils.ScaleFontsToWidth(fontSize, realWidth, component.MaxWidth, component.TextAlignment)
 	}
 	if !fits {
 		return canvas, fmt.Errorf("unable to fit datetime %s into maxWidth %d after %d tries", formattedTime, component.MaxWidth, tries)

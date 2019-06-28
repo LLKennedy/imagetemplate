@@ -42,3 +42,25 @@ func StringToAlignment(alignment string) (converted TextAlignment) {
 	}
 	return
 }
+
+// ScaleFontsToWidth scales the input float to match the font size and alignment parameters
+func ScaleFontsToWidth(currentSize float64, currentWidth, maxWidth int, alignment TextAlignment) (newSize float64, alignmentOffset int) {
+	newSize = currentSize
+	if currentWidth > maxWidth {
+		ratio := float64(maxWidth) / float64(currentWidth)
+		newSize = ratio * currentSize
+	} else if currentWidth < maxWidth {
+		remainingWidth := float64(maxWidth) - float64(currentWidth)
+		switch alignment {
+		case TextAlignmentLeft:
+			alignmentOffset = 0
+		case TextAlignmentRight:
+			alignmentOffset = int(remainingWidth)
+		case TextAlignmentCentre:
+			alignmentOffset = int(remainingWidth / 2)
+		default:
+			alignmentOffset = 0
+		}
+	}
+	return
+}

@@ -36,3 +36,38 @@ func TestStringToAlignment(t *testing.T) {
 	assert.Equal(t, TextAlignmentRight, StringToAlignment("right"))
 	assert.Equal(t, TextAlignmentLeft, StringToAlignment("gibberish"))
 }
+
+func TestScaleFontsToWidth(t *testing.T) {
+	t.Run("perfect size", func(t *testing.T) {
+		size, offset := ScaleFontsToWidth(10, 150, 150, TextAlignmentRight)
+		assert.Equal(t, float64(10), size)
+		assert.Equal(t, 0, offset)
+	})
+	t.Run("too large", func(t *testing.T) {
+		size, offset := ScaleFontsToWidth(10, 300, 150, TextAlignmentRight)
+		assert.Equal(t, float64(5), size)
+		assert.Equal(t, 0, offset)
+	})
+	t.Run("too small", func(t *testing.T) {
+		t.Run("left", func(t *testing.T) {
+			size, offset := ScaleFontsToWidth(10, 100, 200, TextAlignmentLeft)
+			assert.Equal(t, float64(10), size)
+			assert.Equal(t, 0, offset)
+		})
+		t.Run("right", func(t *testing.T) {
+			size, offset := ScaleFontsToWidth(10, 100, 200, TextAlignmentRight)
+			assert.Equal(t, float64(10), size)
+			assert.Equal(t, 100, offset)
+		})
+		t.Run("centre", func(t *testing.T) {
+			size, offset := ScaleFontsToWidth(10, 100, 200, TextAlignmentCentre)
+			assert.Equal(t, float64(10), size)
+			assert.Equal(t, 50, offset)
+		})
+		t.Run("default", func(t *testing.T) {
+			size, offset := ScaleFontsToWidth(10, 100, 200, TextAlignment(-1))
+			assert.Equal(t, float64(10), size)
+			assert.Equal(t, 0, offset)
+		})
+	})
+}
