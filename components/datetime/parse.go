@@ -113,14 +113,9 @@ func (component Component) parseTime(stringStruct *datetimeFormat, startTime tim
 			c.Time = &timeVal
 		}
 	}
-	props, newVal, parseErr = render.ExtractSingleProp(stringStruct.TimeFormat, "timeFormat", render.StringType, c.NamedPropertiesMap)
+	c.TimeFormat, c.NamedPropertiesMap, parseErr = cutils.ExtractString(stringStruct.TimeFormat, "timeFormat", c.NamedPropertiesMap)
 	if parseErr != nil {
 		err = cutils.CombineErrors(err, parseErr)
-		return
-	}
-	c.NamedPropertiesMap = props
-	if newVal != nil {
-		c.TimeFormat = newVal.(string)
 	}
 	return
 }
@@ -182,24 +177,22 @@ func (component Component) parseSize(stringStruct *datetimeFormat, history error
 func (component Component) parseAlignment(stringStruct *datetimeFormat, history error) (c Component, err error) {
 	err = history
 	c = component
-	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.Alignment, "alignment", render.StringType, c.NamedPropertiesMap)
+	var alignmentString string
+	var parseErr error
+	alignmentString, c.NamedPropertiesMap, parseErr = cutils.ExtractString(stringStruct.Alignment, "alignment", c.NamedPropertiesMap)
 	if parseErr != nil {
 		err = cutils.CombineErrors(err, parseErr)
 		return
 	}
-	c.NamedPropertiesMap = props
-	if newVal != nil {
-		alignmentString := newVal.(string)
-		switch alignmentString {
-		case "left":
-			c.Alignment = AlignmentLeft
-		case "right":
-			c.Alignment = AlignmentRight
-		case "centre":
-			c.Alignment = AlignmentCentre
-		default:
-			c.Alignment = AlignmentLeft
-		}
+	switch alignmentString {
+	case "left":
+		c.Alignment = AlignmentLeft
+	case "right":
+		c.Alignment = AlignmentRight
+	case "centre":
+		c.Alignment = AlignmentCentre
+	default:
+		c.Alignment = AlignmentLeft
 	}
 	return
 }

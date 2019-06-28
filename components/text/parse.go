@@ -101,14 +101,10 @@ func (component Component) parseFontFile(path string, history error) (c Componen
 func (component Component) parseContent(stringStruct *textFormat, history error) (c Component, err error) {
 	err = history
 	c = component
-	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.Content, "content", render.StringType, c.NamedPropertiesMap)
+	var parseErr error
+	c.Content, c.NamedPropertiesMap, parseErr = cutils.ExtractString(stringStruct.Content, "content", c.NamedPropertiesMap)
 	if parseErr != nil {
 		err = cutils.CombineErrors(err, parseErr)
-		return
-	}
-	c.NamedPropertiesMap = props
-	if newVal != nil {
-		c.Content = newVal.(string)
 	}
 	return
 }
@@ -170,24 +166,22 @@ func (component Component) parseSize(stringStruct *textFormat, history error) (c
 func (component Component) parseAlignment(stringStruct *textFormat, history error) (c Component, err error) {
 	err = history
 	c = component
-	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.Alignment, "alignment", render.StringType, c.NamedPropertiesMap)
+	var alignmentString string
+	var parseErr error
+	alignmentString, c.NamedPropertiesMap, parseErr = cutils.ExtractString(stringStruct.Alignment, "alignment", c.NamedPropertiesMap)
 	if parseErr != nil {
 		err = cutils.CombineErrors(err, parseErr)
 		return
 	}
-	c.NamedPropertiesMap = props
-	if newVal != nil {
-		alignmentString := newVal.(string)
-		switch alignmentString {
-		case "left":
-			c.Alignment = AlignmentLeft
-		case "right":
-			c.Alignment = AlignmentRight
-		case "centre":
-			c.Alignment = AlignmentCentre
-		default:
-			c.Alignment = AlignmentLeft
-		}
+	switch alignmentString {
+	case "left":
+		c.Alignment = AlignmentLeft
+	case "right":
+		c.Alignment = AlignmentRight
+	case "centre":
+		c.Alignment = AlignmentCentre
+	default:
+		c.Alignment = AlignmentLeft
 	}
 	return
 }

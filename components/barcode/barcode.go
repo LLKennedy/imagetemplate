@@ -7,6 +7,7 @@ import (
 	"image/color"
 	"strings"
 
+	"github.com/LLKennedy/imagetemplate/v3/internal/cutils"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/boombuler/barcode/qr"
 	"golang.org/x/tools/godoc/vfs"
@@ -205,22 +206,20 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	// Get named properties and assign each real property
 	var newVal interface{}
 	var err error
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Type, "barcodeType", render.StringType, c.NamedPropertiesMap)
+	var typeString string
+	typeString, c.NamedPropertiesMap, err = cutils.ExtractString(stringStruct.Type, "barcodeType", c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
-	if newVal != nil {
-		c.Type, err = render.ToBarcodeType(newVal.(string))
+	if typeString != "" {
+		c.Type, err = render.ToBarcodeType(typeString)
 		if err != nil {
-			return component, props, fmt.Errorf("for barcode type %s: %v", newVal, err)
+			return component, props, fmt.Errorf("for barcode type %s: %v", typeString, err)
 		}
 	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Content, "content", render.StringType, c.NamedPropertiesMap)
+	c.Content, c.NamedPropertiesMap, err = cutils.ExtractString(stringStruct.Content, "content", c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
-	}
-	if newVal != nil {
-		c.Content = newVal.(string)
 	}
 	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TopLeftX, "topLeftX", render.IntType, c.NamedPropertiesMap)
 	if err != nil {
