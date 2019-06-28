@@ -110,41 +110,19 @@ func (component Component) parseContent(stringStruct *textFormat, history error)
 }
 
 func (component Component) parseStart(stringStruct *textFormat, history error) (c Component, err error) {
-	err = history
 	c = component
-	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.StartX, "startX", render.IntType, c.NamedPropertiesMap)
-	if parseErr != nil {
-		err = cutils.CombineErrors(err, parseErr)
-	} else {
-		c.NamedPropertiesMap = props
-		if newVal != nil {
-			c.Start.X = newVal.(int)
-		}
-	}
-	props, newVal, parseErr = render.ExtractSingleProp(stringStruct.StartY, "startY", render.IntType, c.NamedPropertiesMap)
-	if parseErr != nil {
-		err = cutils.CombineErrors(err, parseErr)
-		return
-	}
-	c.NamedPropertiesMap = props
-	if newVal != nil {
-		c.Start.Y = newVal.(int)
-	}
+	var parseErr error
+	c.Start.X, c.NamedPropertiesMap, parseErr = cutils.ExtractInt(stringStruct.StartX, "startX", c.NamedPropertiesMap)
+	err = cutils.CombineErrors(history, parseErr)
+	c.Start.Y, c.NamedPropertiesMap, parseErr = cutils.ExtractInt(stringStruct.StartY, "startY", c.NamedPropertiesMap)
+	err = cutils.CombineErrors(err, parseErr)
 	return
 }
 
 func (component Component) parseMaxWidth(stringStruct *textFormat, history error) (c Component, err error) {
-	err = history
 	c = component
-	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.MaxWidth, "maxWidth", render.IntType, c.NamedPropertiesMap)
-	if parseErr != nil {
-		err = cutils.CombineErrors(err, parseErr)
-		return
-	}
-	c.NamedPropertiesMap = props
-	if newVal != nil {
-		c.MaxWidth = newVal.(int)
-	}
+	c.MaxWidth, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.MaxWidth, "maxWidth", c.NamedPropertiesMap)
+	err = cutils.CombineErrors(history, err)
 	return
 }
 

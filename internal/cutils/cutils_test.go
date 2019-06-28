@@ -18,10 +18,14 @@ func TestCombineErrors(t *testing.T) {
 		combined := CombineErrors(history, nil)
 		assert.EqualError(t, combined, "error a")
 	})
-	t.Run("nil latest", func(t *testing.T) {
+	t.Run("valid both", func(t *testing.T) {
 		history := fmt.Errorf("error a")
 		latest := fmt.Errorf("error b")
 		combined := CombineErrors(history, latest)
 		assert.EqualError(t, combined, "error a\nerror b")
+	})
+	t.Run("nil both", func(t *testing.T) {
+		combined := CombineErrors(nil, nil)
+		assert.NoError(t, combined)
 	})
 }

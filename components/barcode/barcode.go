@@ -221,33 +221,21 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	if err != nil {
 		return component, props, err
 	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TopLeftX, "topLeftX", render.IntType, c.NamedPropertiesMap)
+	c.TopLeft.X, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.TopLeftX, "topLeftX", c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
-	if newVal != nil {
-		c.TopLeft.X = newVal.(int)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.TopLeftY, "topLeftY", render.IntType, c.NamedPropertiesMap)
+	c.TopLeft.Y, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.TopLeftY, "topLeftY", c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
-	if newVal != nil {
-		c.TopLeft.Y = newVal.(int)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Width, "width", render.IntType, c.NamedPropertiesMap)
+	c.Width, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.Width, "width", c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
-	if newVal != nil {
-		c.Width = newVal.(int)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Height, "height", render.IntType, c.NamedPropertiesMap)
+	c.Height, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.Height, "height", c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
-	}
-	if newVal != nil {
-		c.Height = newVal.(int)
 	}
 	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.DataColour.Red, "dR", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {

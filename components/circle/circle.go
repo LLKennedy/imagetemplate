@@ -7,6 +7,7 @@ import (
 	"image/color"
 	"strings"
 
+	"github.com/LLKennedy/imagetemplate/v3/internal/cutils"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"golang.org/x/tools/godoc/vfs"
 )
@@ -123,26 +124,17 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	// Get named properties and assign each real property
 	var newVal interface{}
 	var err error
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.CentreX, "centreX", render.IntType, c.NamedPropertiesMap)
+	c.Centre.X, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.CentreX, "centreX", c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
-	if newVal != nil {
-		c.Centre.X = newVal.(int)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.CentreY, "centreY", render.IntType, c.NamedPropertiesMap)
+	c.Centre.Y, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.CentreY, "centreY", c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
 	}
-	if newVal != nil {
-		c.Centre.Y = newVal.(int)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Radius, "radius", render.IntType, c.NamedPropertiesMap)
+	c.Radius, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.Radius, "radius", c.NamedPropertiesMap)
 	if err != nil {
 		return component, props, err
-	}
-	if newVal != nil {
-		c.Radius = newVal.(int)
 	}
 	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.Colour.Red, "R", render.Uint8Type, c.NamedPropertiesMap)
 	if err != nil {

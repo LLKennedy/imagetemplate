@@ -8,9 +8,22 @@ func ExtractString(raw, name string, props map[string][]string) (string, map[str
 	if err != nil {
 		return "", props, err
 	}
-	foundString := ""
+	var foundString string
 	if newVal != nil {
 		foundString = newVal.(string)
 	}
 	return foundString, newProps, nil
+}
+
+// ExtractInt extracts an integer or variable(s) from the raw JSON data
+func ExtractInt(raw, name string, props map[string][]string) (int, map[string][]string, error) {
+	newProps, newVal, err := render.ExtractSingleProp(raw, name, render.IntType, props)
+	if err != nil {
+		return 0, props, err
+	}
+	var foundInt int
+	if newVal != nil {
+		foundInt = newVal.(int)
+	}
+	return foundInt, newProps, nil
 }
