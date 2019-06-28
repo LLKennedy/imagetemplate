@@ -47,3 +47,24 @@ func TestExtractInt(t *testing.T) {
 		assert.NoError(t, err)
 	})
 }
+
+func TestExtractFloat(t *testing.T) {
+	t.Run("empty value", func(t *testing.T) {
+		f, props, err := ExtractFloat("", "myProp", map[string][]string{})
+		assert.Equal(t, float64(0), f)
+		assert.Equal(t, map[string][]string{}, props)
+		assert.EqualError(t, err, "error parsing data for property myProp: could not parse empty property")
+	})
+	t.Run("valid value", func(t *testing.T) {
+		f, props, err := ExtractFloat("72", "myProp", map[string][]string{})
+		assert.Equal(t, float64(72), f)
+		assert.Equal(t, map[string][]string{}, props)
+		assert.NoError(t, err)
+	})
+	t.Run("extracted props", func(t *testing.T) {
+		f, props, err := ExtractFloat("$hello$", "myProp", map[string][]string{"preExisting": {"something"}})
+		assert.Equal(t, float64(0), f)
+		assert.Equal(t, map[string][]string{"preExisting": {"something"}, "hello": {"myProp"}}, props)
+		assert.NoError(t, err)
+	})
+}

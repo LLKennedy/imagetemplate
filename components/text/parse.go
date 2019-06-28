@@ -11,14 +11,18 @@ func (component Component) parseJSONFormat(stringStruct *textFormat, props rende
 	// Get named properties and assign each real property
 	c.Font, c.NamedPropertiesMap, parseErr = cutils.ParseFont(stringStruct.Font.FontName, stringStruct.Font.FontFile, stringStruct.Font.FontURL, cutils.ParseFontOptions{Props: c.NamedPropertiesMap, FileSystem: c.getFileSystem(), FontPool: c.getFontPool()})
 	err = cutils.CombineErrors(err, parseErr)
-	c, err = c.parseContent(stringStruct, err)
+	c.Content, c.NamedPropertiesMap, parseErr = cutils.ExtractString(stringStruct.Content, "content", c.NamedPropertiesMap)
+	err = cutils.CombineErrors(err, parseErr)
 	c.Start, c.NamedPropertiesMap, parseErr = cutils.ParsePoint(stringStruct.StartX, stringStruct.StartY, "startX", "startY", c.NamedPropertiesMap)
 	err = cutils.CombineErrors(err, parseErr)
-	c, err = c.parseMaxWidth(stringStruct, err)
-	c, err = c.parseSize(stringStruct, err)
+	c.MaxWidth, c.NamedPropertiesMap, parseErr = cutils.ExtractInt(stringStruct.MaxWidth, "maxWidth", c.NamedPropertiesMap)
+	err = cutils.CombineErrors(err, parseErr)
+	c.Size, c.NamedPropertiesMap, parseErr = cutils.ExtractFloat(stringStruct.Size, "size", c.NamedPropertiesMap)
+	err = cutils.CombineErrors(err, parseErr)
 	c, err = c.parseAlignment(stringStruct, err)
 	c.Colour, c.NamedPropertiesMap, parseErr = cutils.ParseColourStrings(stringStruct.Colour.Red, stringStruct.Colour.Green, stringStruct.Colour.Blue, stringStruct.Colour.Alpha, c.NamedPropertiesMap)
 	err = cutils.CombineErrors(err, parseErr)
+
 	// Fill discovered properties with real data
 	for key := range c.NamedPropertiesMap {
 		props[key] = struct {
@@ -31,39 +35,6 @@ func (component Component) parseJSONFormat(stringStruct *textFormat, props rende
 		c = component
 	}
 	return c, props, err
-}
-
-func (component Component) parseContent(stringStruct *textFormat, history error) (c Component, err error) {
-	err = history
-	c = component
-	var parseErr error
-	c.Content, c.NamedPropertiesMap, parseErr = cutils.ExtractString(stringStruct.Content, "content", c.NamedPropertiesMap)
-	if parseErr != nil {
-		err = cutils.CombineErrors(err, parseErr)
-	}
-	return
-}
-
-func (component Component) parseMaxWidth(stringStruct *textFormat, history error) (c Component, err error) {
-	c = component
-	c.MaxWidth, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.MaxWidth, "maxWidth", c.NamedPropertiesMap)
-	err = cutils.CombineErrors(history, err)
-	return
-}
-
-func (component Component) parseSize(stringStruct *textFormat, history error) (c Component, err error) {
-	err = history
-	c = component
-	props, newVal, parseErr := render.ExtractSingleProp(stringStruct.Size, "size", render.Float64Type, c.NamedPropertiesMap)
-	if parseErr != nil {
-		err = cutils.CombineErrors(err, parseErr)
-		return
-	}
-	c.NamedPropertiesMap = props
-	if newVal != nil {
-		c.Size = newVal.(float64)
-	}
-	return
 }
 
 func (component Component) parseAlignment(stringStruct *textFormat, history error) (c Component, err error) {

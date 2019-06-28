@@ -27,3 +27,16 @@ func ExtractInt(raw, name string, props map[string][]string) (int, map[string][]
 	}
 	return foundInt, newProps, nil
 }
+
+// ExtractFloat extracts a flot64 or variable(s) from the raw JSON data
+func ExtractFloat(raw, name string, props map[string][]string) (float64, map[string][]string, error) {
+	newProps, newVal, err := render.ExtractSingleProp(raw, name, render.Float64Type, props)
+	if err != nil {
+		return 0, props, err
+	}
+	var foundInt float64
+	if newVal != nil {
+		foundInt = newVal.(float64)
+	}
+	return foundInt, newProps, nil
+}
