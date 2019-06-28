@@ -1,8 +1,6 @@
 package text
 
 import (
-	"fmt"
-
 	"github.com/LLKennedy/imagetemplate/v3/internal/cutils"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 )
@@ -33,69 +31,10 @@ func (component Component) parseJSONFormat(stringStruct *textFormat, props rende
 }
 
 func (component Component) parseFont(stringStruct *textFormat, history error) (c Component, err error) {
-	err = history
 	c = component
-	propData := []render.PropData{
-		{
-			InputValue: stringStruct.Font.FontName,
-			PropName:   "fontName",
-			Type:       render.StringType,
-		},
-		{
-			InputValue: stringStruct.Font.FontFile,
-			PropName:   "fontFile",
-			Type:       render.StringType,
-		},
-		{
-			InputValue: stringStruct.Font.FontURL,
-			PropName:   "fontURL",
-			Type:       render.StringType,
-		},
-	}
-	var extractedVal interface{}
-	var validIndex int
-	var parseErr error
-	c.NamedPropertiesMap, extractedVal, validIndex, parseErr = render.ExtractExclusiveProp(propData, component.NamedPropertiesMap)
-	if parseErr != nil {
-		err = cutils.CombineErrors(err, parseErr)
-		return
-	}
-	if extractedVal != nil {
-		switch validIndex {
-		case 0:
-			c, err = c.parseFontName(extractedVal.(string), history)
-		case 1:
-			c, err = c.parseFontFile(extractedVal.(string), history)
-		case 2:
-			c, err = c.parseFontURL(extractedVal.(string), history)
-		}
-	}
+	c.Font, c.NamedPropertiesMap, err = cutils.ParseFont(stringStruct.Font.FontName, stringStruct.Font.FontFile, stringStruct.Font.FontURL, cutils.ParseFontOptions{Props: c.NamedPropertiesMap, FileSystem: c.getFileSystem(), FontPool: c.getFontPool()})
+	err = cutils.CombineErrors(history, err)
 	return
-}
-
-func (component Component) parseFontName(name string, history error) (c Component, err error) {
-	err = history
-	c = component
-	rawFont, parseErr := c.getFontPool().GetFont(name)
-	if parseErr != nil {
-		err = cutils.CombineErrors(err, parseErr)
-		return
-	}
-	c.Font = rawFont
-	return
-}
-
-func (component Component) parseFontURL(url string, history error) (c Component, err error) {
-	err = history
-	c = component
-	err = cutils.CombineErrors(err, fmt.Errorf("fontURL not implemented"))
-	return
-}
-
-func (component Component) parseFontFile(path string, history error) (c Component, err error) {
-	c = component
-	c.Font, err = cutils.LoadFontFile(c.getFileSystem(), path)
-	return c, cutils.CombineErrors(history, err)
 }
 
 func (component Component) parseContent(stringStruct *textFormat, history error) (c Component, err error) {
