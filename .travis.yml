@@ -45,9 +45,9 @@ jobs:
         - chmod +x ./cc-test-reporter
         - ./cc-test-reporter before-build
       script: 
-        - go test ./... -race -coverprofile=coverage.out
+        - go test ./... -race -coverprofile=c.out
       after_script:
-        - $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci
+        - $GOPATH/bin/goveralls -coverprofile=c.out -service=travis-ci
         - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
     - stage: "Build"
       os: osx
