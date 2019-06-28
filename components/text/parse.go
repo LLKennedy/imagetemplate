@@ -7,10 +7,13 @@ import (
 
 func (component Component) parseJSONFormat(stringStruct *textFormat, props render.NamedProperties) (c Component, foundProps render.NamedProperties, err error) {
 	c = component
+	var parseErr error
 	// Get named properties and assign each real property
-	c.Font, c.NamedPropertiesMap, err = cutils.ParseFont(stringStruct.Font.FontName, stringStruct.Font.FontFile, stringStruct.Font.FontURL, cutils.ParseFontOptions{Props: c.NamedPropertiesMap, FileSystem: c.getFileSystem(), FontPool: c.getFontPool()})
+	c.Font, c.NamedPropertiesMap, parseErr = cutils.ParseFont(stringStruct.Font.FontName, stringStruct.Font.FontFile, stringStruct.Font.FontURL, cutils.ParseFontOptions{Props: c.NamedPropertiesMap, FileSystem: c.getFileSystem(), FontPool: c.getFontPool()})
+	err = cutils.CombineErrors(err, parseErr)
 	c, err = c.parseContent(stringStruct, err)
-	c, err = c.parseStart(stringStruct, err)
+	c.Start, c.NamedPropertiesMap, parseErr = cutils.ParsePoint(stringStruct.StartX, stringStruct.StartY, "startX", "startY", c.NamedPropertiesMap)
+	err = cutils.CombineErrors(err, parseErr)
 	c, err = c.parseMaxWidth(stringStruct, err)
 	c, err = c.parseSize(stringStruct, err)
 	c, err = c.parseAlignment(stringStruct, err)
@@ -38,16 +41,6 @@ func (component Component) parseContent(stringStruct *textFormat, history error)
 	if parseErr != nil {
 		err = cutils.CombineErrors(err, parseErr)
 	}
-	return
-}
-
-func (component Component) parseStart(stringStruct *textFormat, history error) (c Component, err error) {
-	c = component
-	var parseErr error
-	c.Start.X, c.NamedPropertiesMap, parseErr = cutils.ExtractInt(stringStruct.StartX, "startX", c.NamedPropertiesMap)
-	err = cutils.CombineErrors(history, parseErr)
-	c.Start.Y, c.NamedPropertiesMap, parseErr = cutils.ExtractInt(stringStruct.StartY, "startY", c.NamedPropertiesMap)
-	err = cutils.CombineErrors(err, parseErr)
 	return
 }
 

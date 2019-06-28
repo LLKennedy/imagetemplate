@@ -2,6 +2,7 @@ package cutils
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 	"testing"
 
@@ -64,5 +65,32 @@ func TestParseFont(t *testing.T) {
 		assert.Nil(t, font)
 		assert.Equal(t, map[string][]string{}, props)
 		assert.EqualError(t, err, "fontURL not implemented")
+	})
+}
+
+func TestParsePoint(t *testing.T) {
+	t.Run("error in x", func(t *testing.T) {
+		point, props, err := ParsePoint("", "12", "x", "y", map[string][]string{})
+		assert.Equal(t, image.Pt(0, 12), point)
+		assert.Equal(t, map[string][]string{}, props)
+		assert.EqualError(t, err, "error parsing data for property x: could not parse empty property")
+	})
+	t.Run("error in y", func(t *testing.T) {
+		point, props, err := ParsePoint("6", "", "x", "y", map[string][]string{})
+		assert.Equal(t, image.Pt(6, 0), point)
+		assert.Equal(t, map[string][]string{}, props)
+		assert.EqualError(t, err, "error parsing data for property y: could not parse empty property")
+	})
+	t.Run("error in x and y", func(t *testing.T) {
+		point, props, err := ParsePoint("", "", "x", "y", map[string][]string{})
+		assert.Equal(t, image.Pt(0, 0), point)
+		assert.Equal(t, map[string][]string{}, props)
+		assert.EqualError(t, err, "error parsing data for property x: could not parse empty property\nerror parsing data for property y: could not parse empty property")
+	})
+	t.Run("valid point", func(t *testing.T) {
+		point, props, err := ParsePoint("6", "12", "x", "y", map[string][]string{})
+		assert.Equal(t, image.Pt(6, 12), point)
+		assert.Equal(t, map[string][]string{}, props)
+		assert.NoError(t, err)
 	})
 }

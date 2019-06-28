@@ -2,6 +2,7 @@ package cutils
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 
 	"github.com/LLKennedy/gosysfonts"
@@ -96,4 +97,14 @@ func ParseFont(fontName, fileName, url string, opts ParseFontOptions) (*truetype
 		}
 	}
 	return font, props, err
+}
+
+// ParsePoint turns an X and Y string into an image.Point
+func ParsePoint(x, y, xName, yName string, props map[string][]string) (image.Point, map[string][]string, error) {
+	pX, newProps, xErr := ExtractInt(x, xName, props)
+	pY, newProps, yErr := ExtractInt(y, yName, newProps)
+	if xErr != nil || yErr != nil {
+		newProps = props
+	}
+	return image.Pt(pX, pY), newProps, CombineErrors(xErr, yErr)
 }
