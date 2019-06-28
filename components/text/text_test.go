@@ -11,6 +11,7 @@ import (
 	"golang.org/x/image/font/gofont/goregular"
 
 	"github.com/LLKennedy/gosysfonts"
+	"github.com/LLKennedy/imagetemplate/v3/cutils"
 	"github.com/LLKennedy/imagetemplate/v3/internal/filesystem"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/golang/freetype/truetype"
@@ -78,25 +79,25 @@ func TestTextWrite(t *testing.T) {
 		canvas.On("Text", "", image.Pt(25, 0), expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
 		canvas.On("Text", "", image.Pt(50, 0), expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
 		t.Run("left", func(t *testing.T) {
-			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Alignment: AlignmentLeft}
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, TextAlignment: cutils.TextAlignmentLeft}
 			modifiedCanvas, err := c.Write(canvas)
 			assert.Equal(t, canvas, modifiedCanvas)
 			assert.NoError(t, err)
 		})
 		t.Run("right", func(t *testing.T) {
-			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Alignment: AlignmentRight}
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, TextAlignment: cutils.TextAlignmentRight}
 			modifiedCanvas, err := c.Write(canvas)
 			assert.Equal(t, canvas, modifiedCanvas)
 			assert.NoError(t, err)
 		})
 		t.Run("centre", func(t *testing.T) {
-			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Alignment: AlignmentCentre}
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, TextAlignment: cutils.TextAlignmentCentre}
 			modifiedCanvas, err := c.Write(canvas)
 			assert.Equal(t, canvas, modifiedCanvas)
 			assert.NoError(t, err)
 		})
 		t.Run("default", func(t *testing.T) {
-			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Alignment: Alignment(12)}
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, TextAlignment: cutils.TextAlignment(12)}
 			modifiedCanvas, err := c.Write(canvas)
 			assert.Equal(t, canvas, modifiedCanvas)
 			assert.NoError(t, err)
@@ -250,7 +251,7 @@ func TestTextSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 				fs:                 ttfFS,
 				Font:               func() *truetype.Font { f, _ := truetype.Parse(goregular.TTF); return f }(),
 			},
@@ -271,8 +272,8 @@ func TestTextSetNamedProperties(t *testing.T) {
 				NamedPropertiesMap: map[string][]string{
 					"aProp": {"fontFile"},
 				},
-				Alignment: AlignmentLeft,
-				fs:        ttfFS,
+				TextAlignment: cutils.TextAlignmentLeft,
+				fs:            ttfFS,
 			},
 			err: "freetype: invalid TrueType format: TTF data is too short",
 		},
@@ -291,8 +292,8 @@ func TestTextSetNamedProperties(t *testing.T) {
 				NamedPropertiesMap: map[string][]string{
 					"aProp": {"fontFile"},
 				},
-				Alignment: AlignmentLeft,
-				fs:        ttfFS,
+				TextAlignment: cutils.TextAlignmentLeft,
+				fs:            ttfFS,
 			},
 			err: "cannot read from nil file",
 		},
@@ -338,11 +339,11 @@ func TestTextSetNamedProperties(t *testing.T) {
 				},
 			},
 			input: render.NamedProperties{
-				"aProp": AlignmentLeft,
+				"aProp": cutils.TextAlignmentLeft,
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 			},
 			err: "",
 		},
@@ -358,7 +359,7 @@ func TestTextSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 			},
 			err: "",
 		},
@@ -374,7 +375,7 @@ func TestTextSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Alignment:          AlignmentRight,
+				TextAlignment:      cutils.TextAlignmentRight,
 			},
 			err: "",
 		},
@@ -390,7 +391,7 @@ func TestTextSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Alignment:          AlignmentCentre,
+				TextAlignment:      cutils.TextAlignmentCentre,
 			},
 			err: "",
 		},
@@ -406,7 +407,7 @@ func TestTextSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 			},
 			err: "",
 		},
@@ -688,12 +689,12 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 					FontFile string `json:"fontFile"`
 					FontURL  string `json:"fontURL"`
 				}{},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "something else",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -722,12 +723,12 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontName: "bad",
 				},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "something else",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -759,12 +760,12 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontName: "good",
 				},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "something else",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -784,7 +785,7 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				Start:              image.Pt(123, 45),
 				MaxWidth:           67,
 				Size:               89,
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 				Colour:             color.NRGBA{R: 6, G: 53, B: 197, A: 244},
 				NamedPropertiesMap: map[string][]string{},
 			},
@@ -803,12 +804,12 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "nilfont.TTF",
 				},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "something else",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -840,12 +841,12 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "badfont.TTF",
 				},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "something else",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -877,12 +878,12 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "something else",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -902,7 +903,7 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				Start:              image.Pt(123, 45),
 				MaxWidth:           67,
 				Size:               89,
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 				Colour:             color.NRGBA{R: 6, G: 53, B: 197, A: 244},
 				NamedPropertiesMap: map[string][]string{},
 			},
@@ -919,12 +920,12 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontURL: "anything",
 				},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "something else",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -954,11 +955,11 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "something else",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -990,11 +991,11 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content:   "hello",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "something else",
+				Content:       "hello",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1026,11 +1027,11 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content:   "hello",
-				StartX:    "12",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "something else",
+				Content:       "hello",
+				StartX:        "12",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1062,10 +1063,10 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content:   "hello",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "something else",
+				Content:       "hello",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1097,11 +1098,11 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				Size:      "89",
-				Alignment: "something else",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1133,11 +1134,11 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Alignment: "something else",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1205,12 +1206,12 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "left",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1230,7 +1231,7 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				Start:              image.Pt(123, 45),
 				MaxWidth:           67,
 				Size:               89,
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 				Colour:             color.NRGBA{R: 6, G: 53, B: 197, A: 244},
 				NamedPropertiesMap: map[string][]string{},
 			},
@@ -1249,12 +1250,12 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "right",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "right",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1274,7 +1275,7 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				Start:              image.Pt(123, 45),
 				MaxWidth:           67,
 				Size:               89,
-				Alignment:          AlignmentRight,
+				TextAlignment:      cutils.TextAlignmentRight,
 				Colour:             color.NRGBA{R: 6, G: 53, B: 197, A: 244},
 				NamedPropertiesMap: map[string][]string{},
 			},
@@ -1293,12 +1294,12 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "centre",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "centre",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1318,7 +1319,7 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				Start:              image.Pt(123, 45),
 				MaxWidth:           67,
 				Size:               89,
-				Alignment:          AlignmentCentre,
+				TextAlignment:      cutils.TextAlignmentCentre,
 				Colour:             color.NRGBA{R: 6, G: 53, B: 197, A: 244},
 				NamedPropertiesMap: map[string][]string{},
 			},
@@ -1337,12 +1338,12 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "something else",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1362,7 +1363,7 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				Start:              image.Pt(123, 45),
 				MaxWidth:           67,
 				Size:               89,
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 				Colour:             color.NRGBA{R: 6, G: 53, B: 197, A: 244},
 				NamedPropertiesMap: map[string][]string{},
 			},
@@ -1381,12 +1382,12 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "left",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1417,12 +1418,12 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "left",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1453,12 +1454,12 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "something else",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1489,12 +1490,12 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "something else",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1525,12 +1526,12 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Content:   "$set me$",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "something else",
+				Content:       "$set me$",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1549,7 +1550,7 @@ func TestTextVerifyAndTestTextJSONData(t *testing.T) {
 				Start:              image.Pt(123, 45),
 				MaxWidth:           67,
 				Size:               89,
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 				Colour:             color.NRGBA{R: 6, G: 53, B: 197, A: 244},
 				NamedPropertiesMap: map[string][]string{"set me": {"content"}},
 			},

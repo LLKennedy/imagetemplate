@@ -83,13 +83,13 @@ func TestDateTimeVerifyAndTestTextJSONDataOS(t *testing.T) {
 				}{
 					FontFile: "gibberish file that doesn't exist",
 				},
-				Time:       "3h",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "12",
-				Size:       "12",
-				Alignment:  "left",
+				Time:          "3h",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "12",
+				Size:          "12",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`

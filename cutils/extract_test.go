@@ -68,3 +68,10 @@ func TestExtractFloat(t *testing.T) {
 		assert.NoError(t, err)
 	})
 }
+
+func TestExtractAlignment(t *testing.T) {
+	alignment, props, err := ExtractTextAlignment("right", "al", map[string][]string{})
+	assert.Equal(t, TextAlignmentRight, alignment)
+	assert.Equal(t, map[string][]string{}, props)
+	assert.NoError(t, err)
+}

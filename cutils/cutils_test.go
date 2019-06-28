@@ -29,3 +29,10 @@ func TestCombineErrors(t *testing.T) {
 		assert.NoError(t, combined)
 	})
 }
+
+func TestStringToAlignment(t *testing.T) {
+	assert.Equal(t, TextAlignmentLeft, StringToAlignment("left"))
+	assert.Equal(t, TextAlignmentCentre, StringToAlignment("centre"))
+	assert.Equal(t, TextAlignmentRight, StringToAlignment("right"))
+	assert.Equal(t, TextAlignmentLeft, StringToAlignment("gibberish"))
+}

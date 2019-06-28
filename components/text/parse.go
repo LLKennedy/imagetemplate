@@ -19,7 +19,8 @@ func (component Component) parseJSONFormat(stringStruct *textFormat, props rende
 	err = cutils.CombineErrors(err, parseErr)
 	c.Size, c.NamedPropertiesMap, parseErr = cutils.ExtractFloat(stringStruct.Size, "size", c.NamedPropertiesMap)
 	err = cutils.CombineErrors(err, parseErr)
-	c, err = c.parseAlignment(stringStruct, err)
+	c.TextAlignment, c.NamedPropertiesMap, parseErr = cutils.ExtractTextAlignment(stringStruct.TextAlignment, "alignment", c.NamedPropertiesMap)
+	err = cutils.CombineErrors(err, parseErr)
 	c.Colour, c.NamedPropertiesMap, parseErr = cutils.ParseColourStrings(stringStruct.Colour.Red, stringStruct.Colour.Green, stringStruct.Colour.Blue, stringStruct.Colour.Alpha, c.NamedPropertiesMap)
 	err = cutils.CombineErrors(err, parseErr)
 
@@ -35,27 +36,4 @@ func (component Component) parseJSONFormat(stringStruct *textFormat, props rende
 		c = component
 	}
 	return c, props, err
-}
-
-func (component Component) parseAlignment(stringStruct *textFormat, history error) (c Component, err error) {
-	err = history
-	c = component
-	var alignmentString string
-	var parseErr error
-	alignmentString, c.NamedPropertiesMap, parseErr = cutils.ExtractString(stringStruct.Alignment, "alignment", c.NamedPropertiesMap)
-	if parseErr != nil {
-		err = cutils.CombineErrors(err, parseErr)
-		return
-	}
-	switch alignmentString {
-	case "left":
-		c.Alignment = AlignmentLeft
-	case "right":
-		c.Alignment = AlignmentRight
-	case "centre":
-		c.Alignment = AlignmentCentre
-	default:
-		c.Alignment = AlignmentLeft
-	}
-	return
 }

@@ -8,6 +8,7 @@ import (
 	"runtime/debug"
 
 	"github.com/LLKennedy/gosysfonts"
+	"github.com/LLKennedy/imagetemplate/v3/cutils"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/image/font"
@@ -34,8 +35,8 @@ type Component struct {
 	Size float64
 	// MaxWidth is the maximum number of horizontal pixels the dot can move before scaling text.
 	MaxWidth int
-	// Alignment aligns text to the left, right or centre.
-	Alignment Alignment
+	// cutils.TextAlignment aligns text to the left, right or centre.
+	TextAlignment cutils.TextAlignment
 	// Font is the typeface to use.
 	Font *truetype.Font
 	// Colour is the colour of the text.
@@ -47,13 +48,13 @@ type Component struct {
 }
 
 type textFormat struct {
-	Content   string `json:"content"`
-	StartX    string `json:"startX"`
-	StartY    string `json:"startY"`
-	Size      string `json:"size"`
-	MaxWidth  string `json:"maxWidth"`
-	Alignment string `json:"alignment"`
-	Font      struct {
+	Content       string `json:"content"`
+	StartX        string `json:"startX"`
+	StartY        string `json:"startY"`
+	Size          string `json:"size"`
+	MaxWidth      string `json:"maxWidth"`
+	TextAlignment string `json:"alignment"`
+	Font          struct {
 		FontName string `json:"fontName"`
 		FontFile string `json:"fontFile"`
 		FontURL  string `json:"fontURL"`
@@ -65,18 +66,6 @@ type textFormat struct {
 		Alpha string `json:"A"`
 	} `json:"colour"`
 }
-
-// Alignment is a text alignment.
-type Alignment int
-
-const (
-	// AlignmentLeft aligns text left
-	AlignmentLeft Alignment = iota
-	// AlignmentRight aligns text right
-	AlignmentRight
-	// AlignmentCentre aligns text centrally
-	AlignmentCentre
-)
 
 // Write draws text on the canvas.
 func (component Component) Write(canvas render.Canvas) (c render.Canvas, err error) {
@@ -102,12 +91,12 @@ func (component Component) Write(canvas render.Canvas) (c render.Canvas, err err
 			fontSize = ratio * fontSize
 		} else if realWidth < component.MaxWidth {
 			remainingWidth := float64(component.MaxWidth) - float64(realWidth)
-			switch component.Alignment {
-			case AlignmentLeft:
+			switch component.TextAlignment {
+			case cutils.TextAlignmentLeft:
 				alignmentOffset = 0
-			case AlignmentRight:
+			case cutils.TextAlignmentRight:
 				alignmentOffset = int(remainingWidth)
-			case AlignmentCentre:
+			case cutils.TextAlignmentCentre:
 				alignmentOffset = int(remainingWidth / 2)
 			default:
 				alignmentOffset = 0

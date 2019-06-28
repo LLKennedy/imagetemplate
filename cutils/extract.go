@@ -40,3 +40,9 @@ func ExtractFloat(raw, name string, props map[string][]string) (float64, map[str
 	}
 	return foundInt, newProps, nil
 }
+
+// ExtractTextAlignment extracts a TextAlignment from the raw JSON data
+func ExtractTextAlignment(raw, name string, props map[string][]string) (TextAlignment, map[string][]string, error) {
+	str, newProps, err := ExtractString(raw, name, props)
+	return StringToAlignment(str), newProps, err
+}
