@@ -12,6 +12,7 @@ import (
 	"golang.org/x/image/font/gofont/goregular"
 
 	"github.com/LLKennedy/gosysfonts"
+	"github.com/LLKennedy/imagetemplate/v3/cutils"
 	"github.com/LLKennedy/imagetemplate/v3/internal/filesystem"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/golang/freetype/truetype"
@@ -83,25 +84,25 @@ func TestDateTimeWrite(t *testing.T) {
 		canvas.On("Text", "", image.Pt(50, 0), expectedFont, color.NRGBA{}, 100).Return(canvas, nil)
 		timeVal := time.Now()
 		t.Run("left", func(t *testing.T) {
-			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Time: &timeVal, Alignment: AlignmentLeft}
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Time: &timeVal, TextAlignment: cutils.TextAlignmentLeft}
 			modifiedCanvas, err := c.Write(canvas)
 			assert.Equal(t, canvas, modifiedCanvas)
 			assert.NoError(t, err)
 		})
 		t.Run("right", func(t *testing.T) {
-			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Time: &timeVal, Alignment: AlignmentRight}
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Time: &timeVal, TextAlignment: cutils.TextAlignmentRight}
 			modifiedCanvas, err := c.Write(canvas)
 			assert.Equal(t, canvas, modifiedCanvas)
 			assert.NoError(t, err)
 		})
 		t.Run("centre", func(t *testing.T) {
-			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Time: &timeVal, Alignment: AlignmentCentre}
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Time: &timeVal, TextAlignment: cutils.TextAlignmentCentre}
 			modifiedCanvas, err := c.Write(canvas)
 			assert.Equal(t, canvas, modifiedCanvas)
 			assert.NoError(t, err)
 		})
 		t.Run("default", func(t *testing.T) {
-			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Time: &timeVal, Alignment: Alignment(12)}
+			c := Component{Font: goreg, Size: 24, MaxWidth: 100, Time: &timeVal, TextAlignment: cutils.TextAlignment(12)}
 			modifiedCanvas, err := c.Write(canvas)
 			assert.Equal(t, canvas, modifiedCanvas)
 			assert.NoError(t, err)
@@ -352,7 +353,7 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 				fs:                 ttfFS,
 				Font:               func() *truetype.Font { f, _ := truetype.Parse(goregular.TTF); return f }(),
 			},
@@ -373,8 +374,8 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 				NamedPropertiesMap: map[string][]string{
 					"aProp": {"fontFile"},
 				},
-				Alignment: AlignmentLeft,
-				fs:        ttfFS,
+				TextAlignment: cutils.TextAlignmentLeft,
+				fs:            ttfFS,
 			},
 			err: "freetype: invalid TrueType format: TTF data is too short",
 		},
@@ -393,8 +394,8 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 				NamedPropertiesMap: map[string][]string{
 					"aProp": {"fontFile"},
 				},
-				Alignment: AlignmentLeft,
-				fs:        ttfFS,
+				TextAlignment: cutils.TextAlignmentLeft,
+				fs:            ttfFS,
 			},
 			err: "cannot read from nil file",
 		},
@@ -440,11 +441,11 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 				},
 			},
 			input: render.NamedProperties{
-				"aProp": AlignmentLeft,
+				"aProp": cutils.TextAlignmentLeft,
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 			},
 			err: "",
 		},
@@ -460,7 +461,7 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 			},
 			err: "",
 		},
@@ -476,7 +477,7 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Alignment:          AlignmentRight,
+				TextAlignment:      cutils.TextAlignmentRight,
 			},
 			err: "",
 		},
@@ -492,7 +493,7 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Alignment:          AlignmentCentre,
+				TextAlignment:      cutils.TextAlignmentCentre,
 			},
 			err: "",
 		},
@@ -508,7 +509,7 @@ func TestDateTimeSetNamedProperties(t *testing.T) {
 			},
 			res: Component{
 				NamedPropertiesMap: map[string][]string{},
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 			},
 			err: "",
 		},
@@ -803,13 +804,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 					FontFile string `json:"fontFile"`
 					FontURL  string `json:"fontURL"`
 				}{},
-				Time:       "3h",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "67",
-				Size:       "89",
-				Alignment:  "left",
+				Time:          "3h",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -838,13 +839,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontName: "bad",
 				},
-				Time:       "3h",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "67",
-				Size:       "89",
-				Alignment:  "left",
+				Time:          "3h",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -876,13 +877,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontName: "good",
 				},
-				Time:       "$some time$",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "67",
-				Size:       "89",
-				Alignment:  "left",
+				Time:          "$some time$",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -902,7 +903,7 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				Start:              image.Pt(12, 12),
 				MaxWidth:           67,
 				Size:               89,
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 				Colour:             color.NRGBA{R: 6, G: 53, B: 197, A: 244},
 				NamedPropertiesMap: map[string][]string{"some time": {"time"}},
 			},
@@ -921,13 +922,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "nilfont.TTF",
 				},
-				Time:       "3h",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "67",
-				Size:       "89",
-				Alignment:  "left",
+				Time:          "3h",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -959,13 +960,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "badfont.TTF",
 				},
-				Time:       "3h",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "67",
-				Size:       "89",
-				Alignment:  "left",
+				Time:          "3h",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -997,13 +998,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Time:       "$some time$",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "67",
-				Size:       "89",
-				Alignment:  "left",
+				Time:          "$some time$",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1023,7 +1024,7 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				Start:              image.Pt(12, 12),
 				MaxWidth:           67,
 				Size:               89,
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 				Colour:             color.NRGBA{R: 6, G: 53, B: 197, A: 244},
 				NamedPropertiesMap: map[string][]string{"some time": {"time"}},
 			},
@@ -1040,13 +1041,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontURL: "anything",
 				},
-				Time:       "3h",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "67",
-				Size:       "89",
-				Alignment:  "left",
+				Time:          "3h",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1076,12 +1077,12 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontName: "good",
 				},
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "67",
-				Size:       "89",
-				Alignment:  "left",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1113,12 +1114,12 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontName: "good",
 				},
-				Time:      "3h",
-				StartX:    "12",
-				StartY:    "12",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "left",
+				Time:          "3h",
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1150,11 +1151,11 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontName: "good",
 				},
-				StartX:    "12",
-				StartY:    "12",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "left",
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1186,12 +1187,12 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontName: "good",
 				},
-				Time:       "3h",
-				TimeFormat: time.RFC822,
-				StartY:     "12",
-				MaxWidth:   "67",
-				Size:       "89",
-				Alignment:  "left",
+				Time:          "3h",
+				TimeFormat:    time.RFC822,
+				StartY:        "12",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1223,12 +1224,12 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontName: "good",
 				},
-				Time:       "3h",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				MaxWidth:   "67",
-				Size:       "89",
-				Alignment:  "left",
+				Time:          "3h",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1260,11 +1261,11 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontName: "good",
 				},
-				Time:       "3h",
-				TimeFormat: time.RFC822,
-				MaxWidth:   "67",
-				Size:       "89",
-				Alignment:  "left",
+				Time:          "3h",
+				TimeFormat:    time.RFC822,
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1296,12 +1297,12 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Time:       "3h",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				Size:       "12",
-				Alignment:  "left",
+				Time:          "3h",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				Size:          "12",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1333,12 +1334,12 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Time:       "3h",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "12",
-				Alignment:  "left",
+				Time:          "3h",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "12",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1407,13 +1408,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Time:       "$some time$",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "12",
-				Size:       "12",
-				Alignment:  "left",
+				Time:          "$some time$",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "12",
+				Size:          "12",
+				TextAlignment: "left",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1433,7 +1434,7 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				Start:              image.Pt(12, 12),
 				MaxWidth:           12,
 				Size:               12,
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 				Colour:             color.NRGBA{R: 6, G: 53, B: 197, A: 244},
 				NamedPropertiesMap: map[string][]string{"some time": {"time"}},
 			},
@@ -1452,13 +1453,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Time:       "$some time$",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "12",
-				Size:       "12",
-				Alignment:  "right",
+				Time:          "$some time$",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "12",
+				Size:          "12",
+				TextAlignment: "right",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1478,7 +1479,7 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				Start:              image.Pt(12, 12),
 				MaxWidth:           12,
 				Size:               12,
-				Alignment:          AlignmentRight,
+				TextAlignment:      cutils.TextAlignmentRight,
 				Colour:             color.NRGBA{R: 6, G: 53, B: 197, A: 244},
 				NamedPropertiesMap: map[string][]string{"some time": {"time"}},
 			},
@@ -1497,13 +1498,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Time:       "$some time$",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "12",
-				Size:       "12",
-				Alignment:  "centre",
+				Time:          "$some time$",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "12",
+				Size:          "12",
+				TextAlignment: "centre",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1523,7 +1524,7 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				Start:              image.Pt(12, 12),
 				MaxWidth:           12,
 				Size:               12,
-				Alignment:          AlignmentCentre,
+				TextAlignment:      cutils.TextAlignmentCentre,
 				Colour:             color.NRGBA{R: 6, G: 53, B: 197, A: 244},
 				NamedPropertiesMap: map[string][]string{"some time": {"time"}},
 			},
@@ -1542,13 +1543,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Time:       "$some time$",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "12",
-				Size:       "12",
-				Alignment:  "something else",
+				Time:          "$some time$",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "12",
+				Size:          "12",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1568,7 +1569,7 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				Start:              image.Pt(12, 12),
 				MaxWidth:           12,
 				Size:               12,
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 				Colour:             color.NRGBA{R: 6, G: 53, B: 197, A: 244},
 				NamedPropertiesMap: map[string][]string{"some time": {"time"}},
 			},
@@ -1587,13 +1588,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Time:       "3h",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "12",
-				Size:       "12",
-				Alignment:  "something else",
+				Time:          "3h",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "12",
+				Size:          "12",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1624,13 +1625,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Time:       "3h",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "12",
-				Size:       "12",
-				Alignment:  "something else",
+				Time:          "3h",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "12",
+				Size:          "12",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1661,13 +1662,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Time:       "3h",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "12",
-				Size:       "12",
-				Alignment:  "something else",
+				Time:          "3h",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "12",
+				Size:          "12",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1698,13 +1699,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Time:       "3h",
-				TimeFormat: time.RFC822,
-				StartX:     "12",
-				StartY:     "12",
-				MaxWidth:   "12",
-				Size:       "12",
-				Alignment:  "something else",
+				Time:          "3h",
+				TimeFormat:    time.RFC822,
+				StartX:        "12",
+				StartY:        "12",
+				MaxWidth:      "12",
+				Size:          "12",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1735,13 +1736,13 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				}{
 					FontFile: "myFont.ttf",
 				},
-				Time:       "$some time$",
-				TimeFormat: time.RFC822,
-				StartX:     "123",
-				StartY:     "45",
-				MaxWidth:   "67",
-				Size:       "89",
-				Alignment:  "something else",
+				Time:          "$some time$",
+				TimeFormat:    time.RFC822,
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`
@@ -1761,7 +1762,7 @@ func TestDateTimeVerifyAndTestDateTimeJSONData(t *testing.T) {
 				Start:              image.Pt(123, 45),
 				MaxWidth:           67,
 				Size:               89,
-				Alignment:          AlignmentLeft,
+				TextAlignment:      cutils.TextAlignmentLeft,
 				Colour:             color.NRGBA{R: 6, G: 53, B: 197, A: 244},
 				NamedPropertiesMap: map[string][]string{"some time": {"time"}},
 			},

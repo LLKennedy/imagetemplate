@@ -1,4 +1,3 @@
-// Package cutils provides common parsing/conversion code for components to cut down on duplication
 package cutils
 
 import (

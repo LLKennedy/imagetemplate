@@ -82,12 +82,12 @@ func TestTextVerifyAndTestTextJSONDataOS(t *testing.T) {
 				}{
 					FontFile: "gibberish file that doesn't exist",
 				},
-				Content:   "hello",
-				StartX:    "123",
-				StartY:    "45",
-				MaxWidth:  "67",
-				Size:      "89",
-				Alignment: "something else",
+				Content:       "hello",
+				StartX:        "123",
+				StartY:        "45",
+				MaxWidth:      "67",
+				Size:          "89",
+				TextAlignment: "something else",
 				Colour: struct {
 					Red   string `json:"R"`
 					Green string `json:"G"`

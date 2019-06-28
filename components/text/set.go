@@ -3,7 +3,7 @@ package text
 import (
 	"fmt"
 
-	"github.com/LLKennedy/imagetemplate/v3/internal/cutils"
+	"github.com/LLKennedy/imagetemplate/v3/cutils"
 )
 
 func (component *Component) delegatedSetProperties(name string, value interface{}) (err error) {
@@ -19,7 +19,7 @@ func (component *Component) delegatedSetProperties(name string, value interface{
 	case "size":
 		err = component.setSize(value)
 	case "alignment":
-		err = component.setAlignment(value)
+		err = component.setTextAlignment(value)
 	case "R", "G", "B", "A":
 		err = component.setColour(name, value)
 	case "startX", "startY":
@@ -72,26 +72,17 @@ func (component *Component) setSize(value interface{}) error {
 	return nil
 }
 
-func (component *Component) setAlignment(value interface{}) error {
-	alignmentVal, isAlignment := value.(Alignment)
+func (component *Component) setTextAlignment(value interface{}) error {
+	alignmentVal, isTextAlignment := value.(cutils.TextAlignment)
 	stringVal, isString := value.(string)
-	if !isAlignment && !isString {
+	if !isTextAlignment && !isString {
 		return fmt.Errorf("could not convert %v to text alignment or string", value)
 	}
-	if isAlignment {
-		component.Alignment = alignmentVal
+	if isTextAlignment {
+		component.TextAlignment = alignmentVal
 		return nil
 	}
-	switch stringVal {
-	case "left":
-		component.Alignment = AlignmentLeft
-	case "right":
-		component.Alignment = AlignmentRight
-	case "centre":
-		component.Alignment = AlignmentCentre
-	default:
-		component.Alignment = AlignmentLeft
-	}
+	component.TextAlignment = cutils.StringToAlignment(stringVal)
 	return nil
 }
 
