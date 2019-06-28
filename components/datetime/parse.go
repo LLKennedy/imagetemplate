@@ -10,7 +10,7 @@ import (
 func (component Component) parseJSONFormat(stringStruct *datetimeFormat, startTime time.Time, props render.NamedProperties) (c Component, foundProps render.NamedProperties, err error) {
 	c = component
 	// Get named properties and assign each real property
-	c, err = c.parseFont(stringStruct, err)
+	c.Font, c.NamedPropertiesMap, err = cutils.ParseFont(stringStruct.Font.FontName, stringStruct.Font.FontFile, stringStruct.Font.FontURL, cutils.ParseFontOptions{Props: c.NamedPropertiesMap, FileSystem: c.getFileSystem(), FontPool: c.getFontPool()})
 	c, err = c.parseTime(stringStruct, startTime, err)
 	c, err = c.parseStart(stringStruct, err)
 	c, err = c.parseMaxWidth(stringStruct, err)
@@ -30,13 +30,6 @@ func (component Component) parseJSONFormat(stringStruct *datetimeFormat, startTi
 		c = component
 	}
 	return c, props, err
-}
-
-func (component Component) parseFont(stringStruct *datetimeFormat, history error) (c Component, err error) {
-	c = component
-	c.Font, c.NamedPropertiesMap, err = cutils.ParseFont(stringStruct.Font.FontName, stringStruct.Font.FontFile, stringStruct.Font.FontURL, cutils.ParseFontOptions{Props: c.NamedPropertiesMap, FileSystem: c.getFileSystem(), FontPool: c.getFontPool()})
-	err = cutils.CombineErrors(history, err)
-	return
 }
 
 func (component Component) parseTime(stringStruct *datetimeFormat, startTime time.Time, history error) (c Component, err error) {
