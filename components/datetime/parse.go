@@ -19,7 +19,8 @@ func (component Component) parseJSONFormat(stringStruct *datetimeFormat, startTi
 	c, err = c.parseMaxWidth(stringStruct, err)
 	c, err = c.parseSize(stringStruct, err)
 	c, err = c.parseAlignment(stringStruct, err)
-	c, err = c.parseColour(stringStruct, err)
+	c.Colour, c.NamedPropertiesMap, parseErr = cutils.ParseColourStrings(stringStruct.Colour.Red, stringStruct.Colour.Green, stringStruct.Colour.Blue, stringStruct.Colour.Alpha, c.NamedPropertiesMap)
+	err = cutils.CombineErrors(err, parseErr)
 
 	// Fill discovered properties with real data
 	for key := range c.NamedPropertiesMap {
@@ -97,17 +98,6 @@ func (component Component) parseAlignment(stringStruct *datetimeFormat, history 
 		c.Alignment = AlignmentCentre
 	default:
 		c.Alignment = AlignmentLeft
-	}
-	return
-}
-
-func (component Component) parseColour(stringStruct *datetimeFormat, history error) (c Component, err error) {
-	err = history
-	c = component
-	var parseErr error
-	c.Colour, c.NamedPropertiesMap, parseErr = cutils.ParseColourStrings(stringStruct.Colour.Red, stringStruct.Colour.Green, stringStruct.Colour.Blue, stringStruct.Colour.Alpha, c.NamedPropertiesMap)
-	if parseErr != nil {
-		err = cutils.CombineErrors(history, parseErr)
 	}
 	return
 }
