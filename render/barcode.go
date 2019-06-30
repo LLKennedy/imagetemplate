@@ -114,73 +114,42 @@ func (canvas ImageCanvas) Barcode(codeType BarcodeType, content []byte, extra Ba
 	switch codeType {
 	case BarcodeTypeAztec:
 		encodedBarcode, err = aztec.Encode(content, extra.AztecMinECCPercent, extra.AztecUserSpecifiedLayers)
-		if err != nil {
-			return canvas, err
-		}
 	case BarcodeTypeCodabar:
 		encodedBarcode, err = codabar.Encode(string(content))
-		if err != nil {
-			return canvas, err
-		}
 	case BarcodeTypeCode128:
 		encodedBarcode, err = code128.Encode(string(content))
-		if err != nil {
-			return canvas, err
-		}
 	case BarcodeTypeCode39:
 		encodedBarcode, err = code39.Encode(string(content), extra.Code39IncludeChecksum, extra.Code39FullASCIIMode)
-		if err != nil {
-			return canvas, err
-		}
 	case BarcodeTypeCode93:
 		encodedBarcode, err = code93.Encode(string(content), extra.Code93IncludeChecksum, extra.Code93FullASCIIMode)
-		if err != nil {
-			if err.Error() == "invalid data!" {
-				err = errors.New("invalid data") //because golang won't shut up otherwise
-			}
-			return canvas, err
+		if err != nil && err.Error() == "invalid data!" {
+			err = errors.New("invalid data")
 		}
 	case BarcodeTypeDataMatrix:
 		encodedBarcode, err = datamatrix.Encode(string(content))
-		if err != nil {
-			return canvas, err
-		}
 	case BarcodeTypeEAN8:
 		if len(content) != 8 {
-			return canvas, errors.New("EAN8 Barcode requires 8 characters")
-		}
-		encodedBarcode, err = ean.Encode(string(content))
-		if err != nil {
-			return canvas, err
+			err = errors.New("EAN8 Barcode requires 8 characters")
+		} else {
+			encodedBarcode, err = ean.Encode(string(content))
 		}
 	case BarcodeTypeEAN13:
 		if len(content) != 13 {
-			return canvas, errors.New("EAN13 Barcode requires 13 characters")
-		}
-		encodedBarcode, err = ean.Encode(string(content))
-		if err != nil {
-			return canvas, err
+			err = errors.New("EAN13 Barcode requires 13 characters")
+		} else {
+			encodedBarcode, err = ean.Encode(string(content))
 		}
 	case BarcodeTypePDF:
 		encodedBarcode, err = pdf417.Encode(string(content), extra.PDFSecurityLevel)
-		if err != nil {
-			return canvas, err
-		}
 	case BarcodeTypeQR:
 		encodedBarcode, err = qr.Encode(string(content), extra.QRLevel, extra.QRMode)
-		if err != nil {
-			return canvas, err
-		}
 	case BarcodeType2of5:
 		encodedBarcode, err = twooffive.Encode(string(content), false)
-		if err != nil {
-			return canvas, err
-		}
 	case BarcodeType2of5Interleaved:
 		encodedBarcode, err = twooffive.Encode(string(content), true)
-		if err != nil {
-			return canvas, err
-		}
+	}
+	if err != nil {
+		return canvas, err
 	}
 	encodedBarcode, err = barcode.Scale(encodedBarcode, width, height)
 	if err != nil {
