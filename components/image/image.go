@@ -2,14 +2,11 @@
 package image
 
 import (
-	"encoding/base64"
 	"fmt"
 	"image"
 	_ "image/jpeg" // jpeg imported for image decoding
 	_ "image/png"  // png imported for image decoding
-	"strings"
 
-	"github.com/LLKennedy/imagetemplate/v3/cutils"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/disintegration/imaging"
 	_ "golang.org/x/image/bmp"  // bmp imported for image decoding
@@ -92,79 +89,7 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	if !ok {
 		return component, props, fmt.Errorf("failed to convert returned data to component properties")
 	}
-	// Get named properties and assign each real property
-	var err error
-	// Deal with the file/data restrictions
-	propData := []render.PropData{
-		{
-			InputValue: stringStruct.FileName,
-			PropName:   "fileName",
-			Type:       render.StringType,
-		},
-		{
-			InputValue: stringStruct.Data,
-			PropName:   "data",
-			Type:       render.StringType,
-		},
-	}
-	var extractedVal interface{}
-	var validIndex int
-	c.NamedPropertiesMap, extractedVal, validIndex, err = render.ExtractExclusiveProp(propData, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if extractedVal != nil {
-		switch validIndex {
-		case 0:
-			stringVal := extractedVal.(string)
-			if c.fs == nil {
-				c.fs = vfs.OS(".")
-			}
-			bytesVal, err := c.fs.Open(stringVal)
-			if err != nil {
-				return component, props, err
-			}
-			defer bytesVal.Close()
-			img, _, err := image.Decode(bytesVal)
-			if err != nil {
-				return component, props, err
-			}
-			c.Image = img
-		case 1:
-			base64Val := extractedVal.(string)
-			r := base64.NewDecoder(base64.StdEncoding, strings.NewReader(base64Val))
-			img, _, err := image.Decode(r)
-			if err != nil {
-				return component, props, err
-			}
-			c.Image = img
-		}
-	}
-
-	// All other props
-	c.TopLeft.X, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.TopLeftX, "topLeftX", c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	c.TopLeft.Y, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.TopLeftY, "topLeftY", c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	c.Width, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.Width, "width", c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	c.Height, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.Height, "height", c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-
-	for key := range c.NamedPropertiesMap {
-		props[key] = struct {
-			Message string
-		}{Message: "Please replace me with real data"}
-	}
-	return c, props, nil
+	return c.parseJSONFormat(stringStruct, props)
 }
 
 func (component Component) getFileSystem() vfs.FileSystem {
