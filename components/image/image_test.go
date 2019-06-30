@@ -247,23 +247,6 @@ func TestImageSetNamedProperties(t *testing.T) {
 			err: "",
 		},
 		{
-			name: "other invalid type",
-			start: Component{
-				NamedPropertiesMap: map[string][]string{
-					"aProp": {"not a prop"},
-				},
-			},
-			input: render.NamedProperties{
-				"aProp": "not a number",
-			},
-			res: Component{
-				NamedPropertiesMap: map[string][]string{
-					"aProp": {"not a prop"},
-				},
-			},
-			err: "error converting not a number to int",
-		},
-		{
 			name: "other invalid name",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
@@ -423,8 +406,13 @@ func TestImageVerifyAndTestImageJSONData(t *testing.T) {
 			err:   "failed to convert returned data to component properties",
 		},
 		{
-			name:  "invalid image type",
-			input: &imageFormat{},
+			name: "invalid image type",
+			input: &imageFormat{
+				TopLeftX: "12",
+				TopLeftY: "120",
+				Width:    "55",
+				Height:   "16",
+			},
 			props: render.NamedProperties{},
 			err:   "exactly one of (fileName,data) must be set",
 		},
@@ -435,6 +423,10 @@ func TestImageVerifyAndTestImageJSONData(t *testing.T) {
 			},
 			input: &imageFormat{
 				FileName: "nilImage.bmp",
+				TopLeftX: "12",
+				TopLeftY: "120",
+				Width:    "55",
+				Height:   "16",
 			},
 			res: Component{
 				fs: imageFS,
@@ -449,6 +441,10 @@ func TestImageVerifyAndTestImageJSONData(t *testing.T) {
 			},
 			input: &imageFormat{
 				FileName: "badImage.bmp",
+				TopLeftX: "12",
+				TopLeftY: "120",
+				Width:    "55",
+				Height:   "16",
 			},
 			res: Component{
 				fs: imageFS,
@@ -457,12 +453,15 @@ func TestImageVerifyAndTestImageJSONData(t *testing.T) {
 			err:   "image: unknown format",
 		},
 		{
-			name: "valid image file",
+			name: "valid image file, missing topLeftX",
 			start: Component{
 				fs: imageFS,
 			},
 			input: &imageFormat{
 				FileName: "myImage.png",
+				TopLeftY: "120",
+				Width:    "55",
+				Height:   "16",
 			},
 			res: Component{
 				fs: imageFS,
@@ -473,40 +472,39 @@ func TestImageVerifyAndTestImageJSONData(t *testing.T) {
 		{
 			name: "bad image b64",
 			input: &imageFormat{
-				Data: "%^*&%^#@*",
+				Data:     "%^*&%^#@*",
+				TopLeftX: "12",
+				TopLeftY: "120",
+				Width:    "55",
+				Height:   "16",
 			},
 			props: render.NamedProperties{},
 			err:   "image: unknown format",
 		},
 		{
-			name: "valid image b64",
+			name: "missing topLeftY",
 			input: &imageFormat{
-				Data: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY/j//z8ABf4C/qc1gYQAAAAASUVORK5CYII=",
-			},
-			props: render.NamedProperties{},
-			err:   "error parsing data for property topLeftX: could not parse empty property",
-		},
-		{
-			name: "valid topLeftX",
-			input: &imageFormat{
-				TopLeftX: "12",
 				Data:     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY/j//z8ABf4C/qc1gYQAAAAASUVORK5CYII=",
+				TopLeftX: "12",
+				Width:    "55",
+				Height:   "16",
 			},
 			props: render.NamedProperties{},
 			err:   "error parsing data for property topLeftY: could not parse empty property",
 		},
 		{
-			name: "valid topLeftY",
+			name: "missing width",
 			input: &imageFormat{
 				TopLeftX: "12",
 				TopLeftY: "120",
+				Height:   "16",
 				Data:     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY/j//z8ABf4C/qc1gYQAAAAASUVORK5CYII=",
 			},
 			props: render.NamedProperties{},
 			err:   "error parsing data for property width: could not parse empty property",
 		},
 		{
-			name: "valid width",
+			name: "missing height",
 			input: &imageFormat{
 				TopLeftX: "12",
 				TopLeftY: "120",

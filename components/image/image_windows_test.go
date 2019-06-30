@@ -41,6 +41,10 @@ func TestImageVerifyAndTestTextJSONDataOS(t *testing.T) {
 			name: "gibberish font file",
 			input: &imageFormat{
 				FileName: "gibberish file that doesn't exist",
+				TopLeftX: "12",
+				TopLeftY: "120",
+				Width:    "55",
+				Height:   "16",
 			},
 			props: render.NamedProperties{},
 			err:   "open gibberish file that doesn't exist: The system cannot find the file specified.",

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"strings"
 
 	"github.com/LLKennedy/imagetemplate/v3/cutils"
 	"github.com/LLKennedy/imagetemplate/v3/render"
@@ -60,48 +59,8 @@ func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 // SetNamedProperties processes the named properties and sets them into the circle properties.
 func (component Component) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
 	c := component
-	setFunc := func(name string, value interface{}) error {
-		if strings.Contains("RGBA", name) && len(name) == 1 {
-			//Process colours
-			colourVal, ok := value.(uint8)
-			if !ok {
-				return fmt.Errorf("error converting %v to uint8", value)
-			}
-			switch name {
-			case "R":
-				c.Colour.R = colourVal
-				return nil
-			case "G":
-				c.Colour.G = colourVal
-				return nil
-			case "B":
-				c.Colour.B = colourVal
-				return nil
-			case "A":
-				c.Colour.A = colourVal
-				return nil
-			}
-		}
-		numberVal, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("error converting %v to int", value)
-		}
-		switch name {
-		case "centreX":
-			c.Centre.X = numberVal
-			return nil
-		case "centreY":
-			c.Centre.Y = numberVal
-			return nil
-		case "radius":
-			c.Radius = numberVal
-			return nil
-		default:
-			return fmt.Errorf("invalid component property in named property map: %v", name)
-		}
-	}
 	var err error
-	c.NamedPropertiesMap, err = render.StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
+	c.NamedPropertiesMap, err = render.StandardSetNamedProperties(properties, component.NamedPropertiesMap, (&c).delegatedSetProperties)
 	if err != nil {
 		return component, err
 	}
