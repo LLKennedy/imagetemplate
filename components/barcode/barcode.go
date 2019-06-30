@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"strings"
 
 	"github.com/LLKennedy/imagetemplate/v3/render"
-	"github.com/boombuler/barcode/qr"
 	"golang.org/x/tools/godoc/vfs"
 )
 
@@ -83,106 +81,8 @@ func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 // SetNamedProperties processes the named properties and sets them into the barcode properties.
 func (component Component) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
 	c := component
-	setFunc := func(name string, value interface{}) error {
-		switch name {
-		case "content":
-			stringVal, ok := value.(string)
-			if !ok {
-				return fmt.Errorf("error converting %v to string", value)
-			}
-			c.Content = stringVal
-			return nil
-		case "barcodeType":
-			stringVal, ok := value.(render.BarcodeType)
-			if !ok {
-				return fmt.Errorf("error converting %v to barcode type", value)
-			}
-			c.Extra = render.BarcodeExtraData{}
-			switch stringVal {
-			case render.BarcodeType2of5:
-			case render.BarcodeType2of5Interleaved:
-			case render.BarcodeTypeAztec:
-				c.Extra.AztecMinECCPercent = 50      //TODO: get a beter value for this, or set it from the file
-				c.Extra.AztecUserSpecifiedLayers = 4 //TODO: get a better value for this, or set it from the file
-			case render.BarcodeTypeCodabar:
-			case render.BarcodeTypeCode128:
-			case render.BarcodeTypeCode39:
-				c.Extra.Code39IncludeChecksum = true
-				c.Extra.Code39FullASCIIMode = true
-			case render.BarcodeTypeCode93:
-				c.Extra.Code93IncludeChecksum = true
-				c.Extra.Code93FullASCIIMode = true
-			case render.BarcodeTypeDataMatrix:
-			case render.BarcodeTypeEAN13:
-			case render.BarcodeTypeEAN8:
-			case render.BarcodeTypePDF:
-				c.Extra.PDFSecurityLevel = 4 //TODO: get a better value for this, or set it from the file
-			case render.BarcodeTypeQR:
-				c.Extra.QRLevel = qr.Q
-				c.Extra.QRMode = qr.Unicode
-			}
-			c.Type = stringVal
-			return nil
-		}
-		if strings.Contains("dRdGdBdAbRbGbBbA", name) && len(name) == 2 {
-			//Process colours
-			colourVal, ok := value.(uint8)
-			if !ok {
-				return fmt.Errorf("error converting %v to uint8", value)
-			}
-			switch name {
-			case "dR":
-				c.DataColour.R = colourVal
-				return nil
-			case "dG":
-				c.DataColour.G = colourVal
-				return nil
-			case "dB":
-				c.DataColour.B = colourVal
-				return nil
-			case "dA":
-				c.DataColour.A = colourVal
-				return nil
-			case "bR":
-				c.BackgroundColour.R = colourVal
-				return nil
-			case "bG":
-				c.BackgroundColour.G = colourVal
-				return nil
-			case "bB":
-				c.BackgroundColour.B = colourVal
-				return nil
-			case "bA":
-				c.BackgroundColour.A = colourVal
-				return nil
-			default:
-				//What? How did you get here?
-				return fmt.Errorf("name was a string inside RGBA and Value was a valid uint8, but Name wasn't R, G, B, or A. Name was: %v", name)
-			}
-		}
-		numberVal, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("error converting %v to int", value)
-		}
-		switch name {
-		case "topLeftX":
-			c.TopLeft.X = numberVal
-			return nil
-		case "topLeftY":
-			c.TopLeft.Y = numberVal
-			return nil
-		case "width":
-			c.Width = numberVal
-			return nil
-		case "height":
-			c.Height = numberVal
-			return nil
-		default:
-			return fmt.Errorf("invalid component property in named property map: %v", name)
-		}
-	}
 	var err error
-	c.NamedPropertiesMap, err = render.StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
+	c.NamedPropertiesMap, err = render.StandardSetNamedProperties(properties, component.NamedPropertiesMap, (&c).delegatedSetProperties)
 	if err != nil {
 		return component, err
 	}

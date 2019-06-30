@@ -104,7 +104,7 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 					"aProp": {"not a prop"},
 				},
 			},
-			err: "error converting not a number to int",
+			err: "invalid component property in named property map: not a prop",
 		},
 		{
 			name: "non-RGBA invalid name",
@@ -175,23 +175,6 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			err: "error converting 15 to barcode type",
 		},
 		{
-			name: "invalid colour code",
-			start: Component{
-				NamedPropertiesMap: map[string][]string{
-					"aProp": {"Rd"},
-				},
-			},
-			input: render.NamedProperties{
-				"aProp": uint8(12),
-			},
-			res: Component{
-				NamedPropertiesMap: map[string][]string{
-					"aProp": {"Rd"},
-				},
-			},
-			err: "name was a string inside RGBA and Value was a valid uint8, but Name wasn't R, G, B, or A. Name was: Rd",
-		},
-		{
 			name: "topLeftX",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
@@ -206,6 +189,24 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 				TopLeft:            image.Pt(15, 0),
 			},
 			err: "",
+		},
+		{
+			name: "invalid topLeftX type",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"topLeftX"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "15",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"topLeftX"},
+				},
+				TopLeft: image.Pt(0, 0),
+			},
+			err: "error converting 15 to int",
 		},
 		{
 			name: "topLeftY",
@@ -224,6 +225,24 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			err: "",
 		},
 		{
+			name: "invalid topLeftY type",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"topLeftY"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "15",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"topLeftY"},
+				},
+				TopLeft: image.Pt(0, 0),
+			},
+			err: "error converting 15 to int",
+		},
+		{
 			name: "width",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
@@ -238,6 +257,56 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 				Width:              15,
 			},
 			err: "",
+		},
+		{
+			name: "invalid width type",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"width"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "15",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"width"},
+				},
+			},
+			err: "error converting 15 to int",
+		},
+		{
+			name: "height",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"height"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 15,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Height:             15,
+			},
+			err: "",
+		},
+		{
+			name: "invalid height type",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"height"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "15",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"height"},
+				},
+			},
+			err: "error converting 15 to int",
 		},
 		{
 			name: "2of5",
