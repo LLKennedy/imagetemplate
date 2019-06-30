@@ -96,29 +96,19 @@ const (
 
 // ExtractSingleProp parses the loaded property configuration and application inputs and returns the desired property if it exists.
 func ExtractSingleProp(inputVal, propName string, typeName PropType, namedPropsMap map[string][]string) (returnedPropsMap map[string][]string, ExtractedValue interface{}, err error) {
-	npm := namedPropsMap
-	if npm == nil {
-		npm = make(map[string][]string)
-	}
-	hasNamedProps, deconstructed, err := ParseDataValue(inputVal)
-	if err != nil {
-		return namedPropsMap, nil, fmt.Errorf("error parsing data for property %v: %v", propName, err)
-	}
-	if hasNamedProps {
-		if !isSingleProp(deconstructed) {
-			return namedPropsMap, nil, fmt.Errorf("composite properties are not yet supported: %v", inputVal)
-		}
-		customPropName := deconstructed.PropNames[0]
-		npm[customPropName] = append(npm[propName], propName)
-		return npm, nil, nil
+	var foundProps bool
+	if returnedPropsMap, foundProps, err = parseToProps(inputVal, propName, namedPropsMap); err != nil || foundProps {
+		return
 	}
 	switch typeName {
 	case IntType:
-		int64Val, err := strconv.ParseInt(inputVal, 10, 64) //Use ParseInt instead of Atoi for compatibility with go 1.7
+		var int64Val int64
+		int64Val, err = strconv.ParseInt(inputVal, 10, 64) //Use ParseInt instead of Atoi for compatibility with go 1.7
 		if err != nil {
-			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to integer: %v", propName, err)
+			err = fmt.Errorf("failed to convert property %v to integer: %v", propName, err)
+		} else {
+			ExtractedValue = int(int64Val)
 		}
-		ExtractedValue = int(int64Val)
 	case StringType:
 		ExtractedValue = inputVal
 	case BoolType:
@@ -147,9 +137,29 @@ func ExtractSingleProp(inputVal, propName string, typeName PropType, namedPropsM
 		err = fmt.Errorf("cannot convert property %v to unsupported type %v", propName, typeName)
 	}
 	if err != nil {
-		npm = namedPropsMap
+		returnedPropsMap = namedPropsMap
 	}
-	return npm, ExtractedValue, err
+	return returnedPropsMap, ExtractedValue, err
+}
+
+func parseToProps(inputVal, propName string, existingProps map[string][]string) (map[string][]string, bool, error) {
+	npm := existingProps
+	if npm == nil {
+		npm = make(map[string][]string)
+	}
+	hasNamedProps, deconstructed, err := ParseDataValue(inputVal)
+	if err != nil {
+		return existingProps, false, fmt.Errorf("error parsing data for property %v: %v", propName, err)
+	}
+	if hasNamedProps {
+		if !isSingleProp(deconstructed) {
+			return existingProps, false, fmt.Errorf("composite properties are not yet supported: %v", inputVal)
+		}
+		customPropName := deconstructed.PropNames[0]
+		npm[customPropName] = append(npm[propName], propName)
+		return npm, true, nil
+	}
+	return npm, false, nil
 }
 
 // PropData is a matched triplet of input property data for use with extraction of exclusive properties.
