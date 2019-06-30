@@ -247,23 +247,6 @@ func TestImageSetNamedProperties(t *testing.T) {
 			err: "",
 		},
 		{
-			name: "other invalid type",
-			start: Component{
-				NamedPropertiesMap: map[string][]string{
-					"aProp": {"not a prop"},
-				},
-			},
-			input: render.NamedProperties{
-				"aProp": "not a number",
-			},
-			res: Component{
-				NamedPropertiesMap: map[string][]string{
-					"aProp": {"not a prop"},
-				},
-			},
-			err: "error converting not a number to int",
-		},
-		{
 			name: "other invalid name",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{

@@ -2,13 +2,11 @@
 package image
 
 import (
-	"bytes"
 	"encoding/base64"
 	"fmt"
 	"image"
 	_ "image/jpeg" // jpeg imported for image decoding
 	_ "image/png"  // png imported for image decoding
-	"io"
 	"strings"
 
 	"github.com/LLKennedy/imagetemplate/v3/cutils"
@@ -73,70 +71,8 @@ func (component Component) Write(canvas render.Canvas) (render.Canvas, error) {
 // SetNamedProperties processes the named properties and sets them into the image properties.
 func (component Component) SetNamedProperties(properties render.NamedProperties) (render.Component, error) {
 	c := component
-	setFunc := func(name string, value interface{}) error {
-		switch name {
-		case "data":
-			bytesVal, isBytes := value.([]byte)
-			stringVal, isString := value.(string)
-			readerVal, isReader := value.(io.Reader)
-			if !isBytes && !isString && !isReader {
-				return fmt.Errorf("error converting %v to []byte, string or io.Reader", value)
-			}
-			var reader io.Reader
-			if isBytes {
-				reader = bytes.NewBuffer(bytesVal)
-			} else if isString {
-				stringReader := strings.NewReader(stringVal)
-				reader = base64.NewDecoder(base64.StdEncoding, stringReader)
-			} else if isReader {
-				reader = readerVal
-			}
-			img, _, err := image.Decode(reader)
-			if err != nil {
-				return err
-			}
-			c.Image = img
-			return nil
-		case "fileName":
-			stringVal, ok := value.(string)
-			if !ok {
-				return fmt.Errorf("error converting %v to string", value)
-			}
-			bytesVal, err := component.getFileSystem().Open(stringVal)
-			if err != nil {
-				return err
-			}
-			defer bytesVal.Close()
-			img, _, err := image.Decode(bytesVal)
-			if err != nil {
-				return err
-			}
-			c.Image = img
-			return nil
-		}
-		numberVal, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("error converting %v to int", value)
-		}
-		switch name {
-		case "topLeftX":
-			c.TopLeft.X = numberVal
-			return nil
-		case "topLeftY":
-			c.TopLeft.Y = numberVal
-			return nil
-		case "width":
-			c.Width = numberVal
-			return nil
-		case "height":
-			c.Height = numberVal
-			return nil
-		default:
-			return fmt.Errorf("invalid component property in named property map: %v", name)
-		}
-	}
 	var err error
-	c.NamedPropertiesMap, err = render.StandardSetNamedProperties(properties, component.NamedPropertiesMap, setFunc)
+	c.NamedPropertiesMap, err = render.StandardSetNamedProperties(properties, component.NamedPropertiesMap, (&c).delegatedSetProperties)
 	if err != nil {
 		return component, err
 	}
