@@ -73,10 +73,9 @@ type conditionalGroup struct {
 }
 
 // SetValue sets the value of a specific named property through this conditional chain, evaluating any conditions along the way.
-func (c ComponentConditional) SetValue(name string, value interface{}) (ComponentConditional, error) {
-	conditional := c
+func (c ComponentConditional) SetValue(name string, value interface{}) (conditional ComponentConditional, err error) {
+	conditional = c
 	for conIndex, con := range conditional.Group.Conditionals {
-		var err error
 		conditional.Group.Conditionals[conIndex], err = con.SetValue(name, value)
 		if err != nil {
 			return c, err
@@ -88,81 +87,102 @@ func (c ComponentConditional) SetValue(name string, value interface{}) (Componen
 		return conditional, nil
 	}
 	if conditional.Name == name {
-		switch conditional.Operator {
-		case equals, contains, startswith, endswith, ciEquals, ciContains, ciStartswith, ciEndswith:
-			// Handle string operators
-			stringVal, ok := value.(string)
-			if !ok {
-				return c, fmt.Errorf("invalid value for string operator: %v", value)
-			}
-			conVal := conditional.Value
-			switch conditional.Operator {
-			case ciEquals:
-				conVal = strings.ToLower(conVal)
-				stringVal = strings.ToLower(stringVal)
-				fallthrough
-			case equals:
-				conditional.validated = conVal == stringVal
-			case ciContains:
-				conVal = strings.ToLower(conVal)
-				stringVal = strings.ToLower(stringVal)
-				fallthrough
-			case contains:
-				conditional.validated = strings.Contains(stringVal, conVal)
-			case ciStartswith:
-				conVal = strings.ToLower(conVal)
-				stringVal = strings.ToLower(stringVal)
-				fallthrough
-			case startswith:
-				if len(conVal) > len(stringVal) {
-					conditional.validated = false
-					break
-				}
-				conditional.validated = stringVal[:len(conVal)] == conVal
-			case ciEndswith:
-				conVal = strings.ToLower(conVal)
-				stringVal = strings.ToLower(stringVal)
-				fallthrough
-			case endswith:
-				if len(conVal) > len(stringVal) {
-					conditional.validated = false
-					break
-				}
-				conditional.validated = stringVal[len(stringVal)-len(conVal):] == conVal
-			}
-		case numequals, lessthan, greaterthan, lessorequal, greaterorequal:
-			// Handle float operators
-			floatVal, ok := value.(float64)
-			if !ok {
-				intVal, ok := value.(int)
-				if !ok {
-					return c, fmt.Errorf("invalid value for float operator: %v", value)
-				}
-				floatVal = float64(intVal)
-			}
-			conVal, err := strconv.ParseFloat(conditional.Value, 64)
-			if err != nil {
-				return c, fmt.Errorf("failed to convert conditional value to float: %v", conditional.Value)
-			}
-			switch conditional.Operator {
-			case numequals:
-				conditional.validated = floatVal == conVal
-			case lessthan:
-				conditional.validated = floatVal < conVal
-			case greaterthan:
-				conditional.validated = floatVal > conVal
-			case lessorequal:
-				conditional.validated = floatVal <= conVal
-			case greaterorequal:
-				conditional.validated = floatVal >= conVal
-			}
-		default:
-			return c, fmt.Errorf("invalid conditional operator %v", conditional.Operator)
+		conditional, err = conditional.setConditionalValue(value)
+	}
+	return conditional, err
+}
+
+func (c ComponentConditional) setConditionalValue(value interface{}) (conditional ComponentConditional, err error) {
+	conditional = c
+	switch conditional.Operator {
+	case equals, contains, startswith, endswith, ciEquals, ciContains, ciStartswith, ciEndswith:
+		conditional, err = conditional.setString(value)
+	case numequals, lessthan, greaterthan, lessorequal, greaterorequal:
+		conditional, err = conditional.setNum(value)
+	default:
+		err = fmt.Errorf("invalid conditional operator %v", conditional.Operator)
+	}
+	if err != nil {
+		return c, err
+	}
+	if conditional.Not {
+		conditional.validated = !conditional.validated
+	}
+	conditional.valueSet = true
+	return conditional, nil
+}
+
+func (c ComponentConditional) setString(value interface{}) (conditional ComponentConditional, err error) {
+	conditional = c
+	// Handle string operators
+	stringVal, ok := value.(string)
+	if !ok {
+		return c, fmt.Errorf("invalid value for string operator: %v", value)
+	}
+	conVal := conditional.Value
+	switch conditional.Operator {
+	case ciEquals:
+		conVal = strings.ToLower(conVal)
+		stringVal = strings.ToLower(stringVal)
+		fallthrough
+	case equals:
+		conditional.validated = conVal == stringVal
+	case ciContains:
+		conVal = strings.ToLower(conVal)
+		stringVal = strings.ToLower(stringVal)
+		fallthrough
+	case contains:
+		conditional.validated = strings.Contains(stringVal, conVal)
+	case ciStartswith:
+		conVal = strings.ToLower(conVal)
+		stringVal = strings.ToLower(stringVal)
+		fallthrough
+	case startswith:
+		if len(conVal) > len(stringVal) {
+			conditional.validated = false
+			break
 		}
-		if conditional.Not {
-			conditional.validated = !conditional.validated
+		conditional.validated = stringVal[:len(conVal)] == conVal
+	case ciEndswith:
+		conVal = strings.ToLower(conVal)
+		stringVal = strings.ToLower(stringVal)
+		fallthrough
+	case endswith:
+		if len(conVal) > len(stringVal) {
+			conditional.validated = false
+			break
 		}
-		conditional.valueSet = true
+		conditional.validated = stringVal[len(stringVal)-len(conVal):] == conVal
+	}
+	return conditional, nil
+}
+
+func (c ComponentConditional) setNum(value interface{}) (conditional ComponentConditional, err error) {
+	conditional = c
+	// Handle float operators
+	floatVal, ok := value.(float64)
+	if !ok {
+		intVal, ok := value.(int)
+		if !ok {
+			return c, fmt.Errorf("invalid value for float operator: %v", value)
+		}
+		floatVal = float64(intVal)
+	}
+	conVal, err := strconv.ParseFloat(conditional.Value, 64)
+	if err != nil {
+		return c, fmt.Errorf("failed to convert conditional value to float: %v", conditional.Value)
+	}
+	switch conditional.Operator {
+	case numequals:
+		conditional.validated = floatVal == conVal
+	case lessthan:
+		conditional.validated = floatVal < conVal
+	case greaterthan:
+		conditional.validated = floatVal > conVal
+	case lessorequal:
+		conditional.validated = floatVal <= conVal
+	case greaterorequal:
+		conditional.validated = floatVal >= conVal
 	}
 	return conditional, nil
 }
