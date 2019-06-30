@@ -3,6 +3,7 @@ package barcode
 import (
 	"fmt"
 
+	"github.com/LLKennedy/imagetemplate/v3/cutils"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/boombuler/barcode/qr"
 )
@@ -10,7 +11,7 @@ import (
 func (component *Component) delegatedSetProperties(name string, value interface{}) (err error) {
 	switch name {
 	case "content":
-		err = component.setContent(value)
+		component.Content, err = cutils.SetString(value)
 	case "barcodeType":
 		stringVal, ok := value.(render.BarcodeType)
 		if !ok {
@@ -47,22 +48,13 @@ func (component *Component) delegatedSetProperties(name string, value interface{
 	case "topLeftX", "topLeftY":
 		err = component.setTopLeft(name, value)
 	case "width":
-		err = component.setWidth(value)
+		component.Width, err = cutils.SetInt(value)
 	case "height":
-		err = component.setHeight(value)
+		component.Height, err = cutils.SetInt(value)
 	default:
 		return fmt.Errorf("invalid component property in named property map: %v", name)
 	}
 	return
-}
-
-func (component *Component) setContent(value interface{}) error {
-	stringVal, ok := value.(string)
-	if !ok {
-		return fmt.Errorf("error converting %v to string", value)
-	}
-	component.Content = stringVal
-	return nil
 }
 
 func (component *Component) setColour(name string, value interface{}) error {
@@ -92,37 +84,11 @@ func (component *Component) setColour(name string, value interface{}) error {
 	return nil
 }
 
-func (component *Component) setTopLeft(name string, value interface{}) error {
+func (component *Component) setTopLeft(name string, value interface{}) (err error) {
 	if name == "topLeftX" {
-		numberVal, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("error converting %v to int", value)
-		}
-		component.TopLeft.X = numberVal
-		return nil
+		component.TopLeft.X, err = cutils.SetInt(value)
+		return err
 	}
-	numberVal, ok := value.(int)
-	if !ok {
-		return fmt.Errorf("error converting %v to int", value)
-	}
-	component.TopLeft.Y = numberVal
-	return nil
-}
-
-func (component *Component) setWidth(value interface{}) error {
-	numberVal, ok := value.(int)
-	if !ok {
-		return fmt.Errorf("error converting %v to int", value)
-	}
-	component.Width = numberVal
-	return nil
-}
-
-func (component *Component) setHeight(value interface{}) error {
-	numberVal, ok := value.(int)
-	if !ok {
-		return fmt.Errorf("error converting %v to int", value)
-	}
-	component.Height = numberVal
-	return nil
+	component.TopLeft.Y, err = cutils.SetInt(value)
+	return err
 }

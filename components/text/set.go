@@ -17,7 +17,7 @@ func (component *Component) delegatedSetProperties(name string, value interface{
 	case "fontURL":
 		err = component.setFontURL(value)
 	case "size":
-		err = component.setSize(value)
+		component.Size, err = cutils.SetFloat64(value)
 	case "alignment":
 		err = component.setTextAlignment(value)
 	case "R", "G", "B", "A":
@@ -25,7 +25,7 @@ func (component *Component) delegatedSetProperties(name string, value interface{
 	case "startX", "startY":
 		err = component.setStart(name, value)
 	case "maxWidth":
-		err = component.setMaxWidth(value)
+		component.MaxWidth, err = cutils.SetInt(value)
 	default:
 		err = fmt.Errorf("invalid component property in named property map: %v", name)
 	}
@@ -63,15 +63,6 @@ func (component *Component) setFontURL(value interface{}) error {
 	return fmt.Errorf("fontURL not implemented")
 }
 
-func (component *Component) setSize(value interface{}) error {
-	float64Val, ok := value.(float64)
-	if !ok {
-		return fmt.Errorf("error converting %v to float64", value)
-	}
-	component.Size = float64Val
-	return nil
-}
-
 func (component *Component) setTextAlignment(value interface{}) error {
 	alignmentVal, isTextAlignment := value.(cutils.TextAlignment)
 	stringVal, isString := value.(string)
@@ -105,28 +96,11 @@ func (component *Component) setColour(name string, value interface{}) error {
 	return nil
 }
 
-func (component *Component) setStart(name string, value interface{}) error {
+func (component *Component) setStart(name string, value interface{}) (err error) {
 	if name == "startX" {
-		numberVal, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("error converting %v to int", value)
-		}
-		component.Start.X = numberVal
-		return nil
+		component.Start.X, err = cutils.SetInt(value)
+		return err
 	}
-	numberVal, ok := value.(int)
-	if !ok {
-		return fmt.Errorf("error converting %v to int", value)
-	}
-	component.Start.Y = numberVal
-	return nil
-}
-
-func (component *Component) setMaxWidth(value interface{}) error {
-	numberVal, ok := value.(int)
-	if !ok {
-		return fmt.Errorf("error converting %v to int", value)
-	}
-	component.MaxWidth = numberVal
-	return nil
+	component.Start.Y, err = cutils.SetInt(value)
+	return err
 }
