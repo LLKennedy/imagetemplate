@@ -118,37 +118,38 @@ func ExtractSingleProp(inputVal, propName string, typeName PropType, namedPropsM
 		if err != nil {
 			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to integer: %v", propName, err)
 		}
-		intVal := int(int64Val)
-		return npm, intVal, nil
+		ExtractedValue = int(int64Val)
 	case StringType:
-		return npm, inputVal, nil
+		ExtractedValue = inputVal
 	case BoolType:
-		boolVal, err := strconv.ParseBool(inputVal)
+		ExtractedValue, err = strconv.ParseBool(inputVal)
 		if err != nil {
-			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to bool: %v", propName, err)
+			err = fmt.Errorf("failed to convert property %v to bool: %v", propName, err)
 		}
-		return npm, boolVal, nil
 	case Uint8Type:
-		uintVal, err := strconv.ParseUint(inputVal, 0, 8)
+		var rawU uint64
+		rawU, err = strconv.ParseUint(inputVal, 0, 8)
 		if err != nil {
-			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to uint8: %v", propName, err)
+			err = fmt.Errorf("failed to convert property %v to uint8: %v", propName, err)
 		}
-		uint8Val := uint8(uintVal)
-		return npm, uint8Val, nil
+		ExtractedValue = uint8(rawU)
 	case Float64Type:
-		float64Val, err := strconv.ParseFloat(inputVal, 64)
+		ExtractedValue, err = strconv.ParseFloat(inputVal, 64)
 		if err != nil {
-			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to float64: %v", propName, err)
+			err = fmt.Errorf("failed to convert property %v to float64: %v", propName, err)
 		}
-		return npm, float64Val, nil
 	case TimeType:
-		durationVal, err := time.ParseDuration(inputVal)
+		ExtractedValue, err = time.ParseDuration(inputVal)
 		if err != nil {
-			return namedPropsMap, nil, fmt.Errorf("failed to convert property %v to time.Duration: %v", propName, err)
+			err = fmt.Errorf("failed to convert property %v to time.Duration: %v", propName, err)
 		}
-		return npm, durationVal, nil
+	default:
+		err = fmt.Errorf("cannot convert property %v to unsupported type %v", propName, typeName)
 	}
-	return namedPropsMap, nil, fmt.Errorf("cannot convert property %v to unsupported type %v", propName, typeName)
+	if err != nil {
+		npm = namedPropsMap
+	}
+	return npm, ExtractedValue, err
 }
 
 // PropData is a matched triplet of input property data for use with extraction of exclusive properties.
