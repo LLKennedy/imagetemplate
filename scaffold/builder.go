@@ -22,6 +22,7 @@ import (
 	_ "github.com/LLKennedy/imagetemplate/v3/components/image"     // add image component to registry by default
 	_ "github.com/LLKennedy/imagetemplate/v3/components/rectangle" // add rectangle component to registry by default
 	_ "github.com/LLKennedy/imagetemplate/v3/components/text"      // add text component to registry by default
+	"github.com/LLKennedy/imagetemplate/v3/cutils"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 
 	"github.com/disintegration/imaging"
@@ -174,11 +175,12 @@ func (builder ImageBuilder) setBackgroundImage(template Template) (ImageBuilder,
 	dataSet := template.BaseImage.Data != ""
 	fileSet := template.BaseImage.FileName != ""
 	baseColourSet := template.BaseImage.BaseWidth != "" && template.BaseImage.BaseHeight != "" && (template.BaseImage.BaseColour.Red != "" || template.BaseImage.BaseColour.Green != "" || template.BaseImage.BaseColour.Blue != "" || template.BaseImage.BaseColour.Alpha != "")
-	if (dataSet && fileSet) || (dataSet && baseColourSet) || (fileSet && baseColourSet) {
-		return builder, fmt.Errorf("cannot load base image from file and load from data string and generate from base colour, specify only data or fileName or base colour")
-	}
-	if !dataSet && !fileSet && !baseColourSet {
+	oneSet := dataSet || fileSet || baseColourSet
+	if !oneSet {
 		return builder.SetCanvas(builder.GetCanvas()).(ImageBuilder), nil
+	}
+	if cutils.ExclusiveNor(dataSet, fileSet, baseColourSet) {
+		return builder, fmt.Errorf("cannot load base image from file and load from data string and generate from base colour, specify only data or fileName or base colour")
 	}
 	// Get image data from string or file
 	var imageData io.Reader
