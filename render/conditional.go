@@ -188,56 +188,66 @@ func (c ComponentConditional) setNum(value interface{}) (conditional ComponentCo
 }
 
 // Validate validates this conditional chain, erroring if a value down the line has not been set and evaluated.
-func (c ComponentConditional) Validate() (bool, error) {
+func (c ComponentConditional) Validate() (result bool, err error) {
 	if !c.valueSet && c.Name != "" {
 		return false, fmt.Errorf("attempted to validate conditional %v %v %v without setting %v", c.Name, c.Operator, c.Value, c.Name)
 	}
+	var negate bool
 	group := c.Group.Conditionals
 	if len(group) == 0 {
 		return c.validated, nil
 	}
 	op := c.Group.Operator
-	if op == xor {
-		//Evaluate XOR on a group as meaning only one of all results in the list can be true, and one must be true.
-		trueCount := 0
-		if c.validated {
+	switch op {
+	case xor:
+		result, err = c.validateXor()
+	case nand, nor:
+		negate = true
+		fallthrough
+	case and, or:
+		result, err = c.validateAndOr(negate)
+	default:
+		result = false
+		err = fmt.Errorf("invalid group operator %v", op)
+	}
+	return
+}
+
+func (c ComponentConditional) validateXor() (bool, error) {
+	//Evaluate XOR on a group as meaning only one of all results in the list can be true, and one must be true.
+	trueCount := 0
+	if c.validated {
+		trueCount++
+	}
+	for _, subConditional := range c.Group.Conditionals {
+		result, err := subConditional.Validate()
+		if err != nil {
+			return false, err
+		}
+		if result {
 			trueCount++
 		}
-		for _, subConditional := range group {
-			result, err := subConditional.Validate()
-			if err != nil {
-				return false, err
-			}
-			if result {
-				trueCount++
-			}
-		}
-		return trueCount == 1, nil
 	}
-	var result bool
-	var negate bool
-	if op == nand || op == nor {
-		negate = true
-	}
-	result = c.validated
-	if op == and || op == nand || op == or || op == nor {
-		for _, subConditional := range group {
-			subResult, err := subConditional.Validate()
-			if err != nil {
-				return false, err
-			}
-			if op == and || op == nand {
-				result = result && subResult
-			} else {
-				result = result || subResult
-			}
+	return trueCount == 1, nil
+}
+
+func (c ComponentConditional) validateAndOr(negate bool) (bool, error) {
+	result := c.validated
+	for _, subConditional := range c.Group.Conditionals {
+		subResult, err := subConditional.Validate()
+		if err != nil {
+			return false, err
 		}
-		if negate {
-			result = !result
+		if c.Group.Operator == and || c.Group.Operator == nand {
+			result = result && subResult
+		} else {
+			result = result || subResult
 		}
-		return result, nil
 	}
-	return false, fmt.Errorf("invalid group operator %v", op)
+	if negate {
+		result = !result
+	}
+	return result, nil
 }
 
 // GetNamedPropertiesList returns a list of all named props found in the conditional.
