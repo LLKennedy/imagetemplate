@@ -105,46 +105,38 @@ func setType(value interface{}, typeName setTypes) (converted interface{}, err e
 	var ok bool
 	switch typeName {
 	case setStringType:
-		converted, ok = value.(string)
-		if !ok {
+		if converted, ok = value.(string); !ok {
 			converted = ""
 		}
 	case setIntType:
-		converted, ok = value.(int)
-		if !ok {
+		if converted, ok = value.(int); !ok {
 			converted = 0
 		}
 	case setUint8Type:
-		converted, ok = value.(uint8)
-		if !ok {
+		if converted, ok = value.(uint8); !ok {
 			converted = uint8(0)
 		}
 	case setFloat64Type:
-		converted, ok = value.(float64)
-		if !ok {
+		if converted, ok = value.(float64); !ok {
 			converted = float64(0)
 		}
 	case setBoolType:
-		converted, ok = value.(bool)
-		if !ok {
+		if converted, ok = value.(bool); !ok {
 			converted = false
 		}
 	case setTimeType:
-		converted, ok = value.(time.Time)
-		if !ok {
+		if converted, ok = value.(time.Time); !ok {
 			converted = time.Time{}
 		}
 	case setTimePointType:
 		converted, ok = value.(*time.Time)
 	case setImageType:
-		converted, ok = value.(image.Image)
-		if !ok {
+		if converted, ok = value.(image.Image); !ok {
 			var img image.Image
 			converted = img
 		}
 	case setColourType:
-		converted, ok = value.(color.Color)
-		if !ok {
+		if converted, ok = value.(color.Color); !ok {
 			var clr color.Color
 			converted = clr
 		}
