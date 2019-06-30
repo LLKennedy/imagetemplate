@@ -7,7 +7,6 @@ import (
 	"image/color"
 	"strings"
 
-	"github.com/LLKennedy/imagetemplate/v3/cutils"
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/boombuler/barcode/qr"
 	"golang.org/x/tools/godoc/vfs"
@@ -203,100 +202,7 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	if !ok {
 		return component, props, fmt.Errorf("failed to convert returned data to component properties")
 	}
-	// Get named properties and assign each real property
-	var newVal interface{}
-	var err error
-	var typeString string
-	typeString, c.NamedPropertiesMap, err = cutils.ExtractString(stringStruct.Type, "barcodeType", c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if typeString != "" {
-		c.Type, err = render.ToBarcodeType(typeString)
-		if err != nil {
-			return component, props, fmt.Errorf("for barcode type %s: %v", typeString, err)
-		}
-	}
-	c.Content, c.NamedPropertiesMap, err = cutils.ExtractString(stringStruct.Content, "content", c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	c.TopLeft.X, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.TopLeftX, "topLeftX", c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	c.TopLeft.Y, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.TopLeftY, "topLeftY", c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	c.Width, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.Width, "width", c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	c.Height, c.NamedPropertiesMap, err = cutils.ExtractInt(stringStruct.Height, "height", c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.DataColour.Red, "dR", render.Uint8Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.DataColour.R = newVal.(uint8)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.DataColour.Green, "dG", render.Uint8Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.DataColour.G = newVal.(uint8)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.DataColour.Blue, "dB", render.Uint8Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.DataColour.B = newVal.(uint8)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.DataColour.Alpha, "dA", render.Uint8Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.DataColour.A = newVal.(uint8)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.BackgroundColour.Red, "bR", render.Uint8Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.BackgroundColour.R = newVal.(uint8)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.BackgroundColour.Green, "bG", render.Uint8Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.BackgroundColour.G = newVal.(uint8)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.BackgroundColour.Blue, "bB", render.Uint8Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.BackgroundColour.B = newVal.(uint8)
-	}
-	c.NamedPropertiesMap, newVal, err = render.ExtractSingleProp(stringStruct.BackgroundColour.Alpha, "bA", render.Uint8Type, c.NamedPropertiesMap)
-	if err != nil {
-		return component, props, err
-	}
-	if newVal != nil {
-		c.BackgroundColour.A = newVal.(uint8)
-	}
-	for key := range c.NamedPropertiesMap {
-		props[key] = struct{ Message string }{Message: "Please replace me with real data"}
-	}
-	return c, props, nil
+	return c.parseJSONFormat(stringStruct, props)
 }
 
 func init() {

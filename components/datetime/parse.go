@@ -22,7 +22,7 @@ func (component Component) parseJSONFormat(stringStruct *datetimeFormat, startTi
 	err = cutils.CombineErrors(err, parseErr)
 	c.TextAlignment, c.NamedPropertiesMap, parseErr = cutils.ExtractTextAlignment(stringStruct.TextAlignment, "alignment", c.NamedPropertiesMap)
 	err = cutils.CombineErrors(err, parseErr)
-	c.Colour, c.NamedPropertiesMap, parseErr = cutils.ParseColourStrings(stringStruct.Colour.Red, stringStruct.Colour.Green, stringStruct.Colour.Blue, stringStruct.Colour.Alpha, c.NamedPropertiesMap)
+	c.Colour, c.NamedPropertiesMap, parseErr = cutils.ParseColourStrings(cutils.ColourStrings{R: stringStruct.Colour.Red, G: stringStruct.Colour.Green, B: stringStruct.Colour.Blue, A: stringStruct.Colour.Alpha}, "", c.NamedPropertiesMap)
 	err = cutils.CombineErrors(err, parseErr)
 
 	// Fill discovered properties with real data
