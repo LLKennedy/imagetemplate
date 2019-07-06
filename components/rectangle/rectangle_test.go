@@ -89,23 +89,6 @@ func TestRectangleSetNamedProperties(t *testing.T) {
 			err: "",
 		},
 		{
-			name: "non-RGBA invalid type",
-			start: Component{
-				NamedPropertiesMap: map[string][]string{
-					"aProp": {"not a prop"},
-				},
-			},
-			input: render.NamedProperties{
-				"aProp": "not a number",
-			},
-			res: Component{
-				NamedPropertiesMap: map[string][]string{
-					"aProp": {"not a prop"},
-				},
-			},
-			err: "error converting not a number to int",
-		},
-		{
 			name: "non-RGBA invalid name",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{

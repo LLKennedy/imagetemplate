@@ -16,6 +16,22 @@ func CombineErrors(history, latest error) error {
 	return fmt.Errorf("%v\n%v", history, latest)
 }
 
+// ExclusiveOr returns true if one and only one of the passed in booleans is true
+func ExclusiveOr(args ...bool) bool {
+	trueCount := 0
+	for _, arg := range args {
+		if arg {
+			trueCount++
+		}
+	}
+	return trueCount == 1
+}
+
+// ExclusiveNor returns false if one and only one of the passed in booleans is true
+func ExclusiveNor(args ...bool) bool {
+	return !ExclusiveOr(args...)
+}
+
 // TextAlignment is a text alignment.
 type TextAlignment int
 

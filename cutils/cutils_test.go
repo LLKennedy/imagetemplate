@@ -30,6 +30,54 @@ func TestCombineErrors(t *testing.T) {
 	})
 }
 
+func TestExclusiveOr(t *testing.T) {
+	t.Run("no parameters", func(t *testing.T) {
+		assert.False(t, ExclusiveOr())
+	})
+	t.Run("one true", func(t *testing.T) {
+		assert.True(t, ExclusiveOr(true))
+	})
+	t.Run("one false", func(t *testing.T) {
+		assert.False(t, ExclusiveOr(false))
+	})
+	t.Run("one true, one false", func(t *testing.T) {
+		assert.True(t, ExclusiveOr(true, false))
+	})
+	t.Run("one true, many false", func(t *testing.T) {
+		assert.True(t, ExclusiveOr(true, false, false, false, false, false, false, false, false))
+	})
+	t.Run("two true, one false", func(t *testing.T) {
+		assert.False(t, ExclusiveOr(true, true, false))
+	})
+	t.Run("two true, many false", func(t *testing.T) {
+		assert.False(t, ExclusiveOr(true, true, false, false, false, false, false, false, false))
+	})
+}
+
+func TestExclusiveNor(t *testing.T) {
+	t.Run("no parameters", func(t *testing.T) {
+		assert.True(t, ExclusiveNor())
+	})
+	t.Run("one true", func(t *testing.T) {
+		assert.False(t, ExclusiveNor(true))
+	})
+	t.Run("one false", func(t *testing.T) {
+		assert.True(t, ExclusiveNor(false))
+	})
+	t.Run("one true, one false", func(t *testing.T) {
+		assert.False(t, ExclusiveNor(true, false))
+	})
+	t.Run("one true, many false", func(t *testing.T) {
+		assert.False(t, ExclusiveNor(true, false, false, false, false, false, false, false, false))
+	})
+	t.Run("two true, one false", func(t *testing.T) {
+		assert.True(t, ExclusiveNor(true, true, false))
+	})
+	t.Run("two true, many false", func(t *testing.T) {
+		assert.True(t, ExclusiveNor(true, true, false, false, false, false, false, false, false))
+	})
+}
+
 func TestStringToAlignment(t *testing.T) {
 	assert.Equal(t, TextAlignmentLeft, StringToAlignment("left"))
 	assert.Equal(t, TextAlignmentCentre, StringToAlignment("centre"))

@@ -104,7 +104,7 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 					"aProp": {"not a prop"},
 				},
 			},
-			err: "error converting not a number to int",
+			err: "invalid component property in named property map: not a prop",
 		},
 		{
 			name: "non-RGBA invalid name",
@@ -175,23 +175,6 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			err: "error converting 15 to barcode type",
 		},
 		{
-			name: "invalid colour code",
-			start: Component{
-				NamedPropertiesMap: map[string][]string{
-					"aProp": {"Rd"},
-				},
-			},
-			input: render.NamedProperties{
-				"aProp": uint8(12),
-			},
-			res: Component{
-				NamedPropertiesMap: map[string][]string{
-					"aProp": {"Rd"},
-				},
-			},
-			err: "name was a string inside RGBA and Value was a valid uint8, but Name wasn't R, G, B, or A. Name was: Rd",
-		},
-		{
 			name: "topLeftX",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
@@ -206,6 +189,24 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 				TopLeft:            image.Pt(15, 0),
 			},
 			err: "",
+		},
+		{
+			name: "invalid topLeftX type",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"topLeftX"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "15",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"topLeftX"},
+				},
+				TopLeft: image.Pt(0, 0),
+			},
+			err: "error converting 15 to int",
 		},
 		{
 			name: "topLeftY",
@@ -224,6 +225,24 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 			err: "",
 		},
 		{
+			name: "invalid topLeftY type",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"topLeftY"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "15",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"topLeftY"},
+				},
+				TopLeft: image.Pt(0, 0),
+			},
+			err: "error converting 15 to int",
+		},
+		{
 			name: "width",
 			start: Component{
 				NamedPropertiesMap: map[string][]string{
@@ -238,6 +257,56 @@ func TestBarcodeSetNamedProperties(t *testing.T) {
 				Width:              15,
 			},
 			err: "",
+		},
+		{
+			name: "invalid width type",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"width"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "15",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"width"},
+				},
+			},
+			err: "error converting 15 to int",
+		},
+		{
+			name: "height",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"height"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": 15,
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{},
+				Height:             15,
+			},
+			err: "",
+		},
+		{
+			name: "invalid height type",
+			start: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"height"},
+				},
+			},
+			input: render.NamedProperties{
+				"aProp": "15",
+			},
+			res: Component{
+				NamedPropertiesMap: map[string][]string{
+					"aProp": {"height"},
+				},
+			},
+			err: "error converting 15 to int",
 		},
 		{
 			name: "2of5",
@@ -497,7 +566,34 @@ func TestBarcodeVerifyAndTestBarcodeJSONData(t *testing.T) {
 		{
 			name: "more than one prop",
 			input: &barcodeFormat{
-				Type: "$a$ and $b$",
+				Type:     "$a$ and $b$",
+				Content:  "hello",
+				TopLeftX: "12",
+				TopLeftY: "12",
+				Width:    "6",
+				Height:   "6",
+				DataColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
+				BackgroundColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
 			},
 			props: render.NamedProperties{},
 			err:   "composite properties are not yet supported: $a$ and $b$",
@@ -505,76 +601,210 @@ func TestBarcodeVerifyAndTestBarcodeJSONData(t *testing.T) {
 		{
 			name: "invalid barcode type",
 			input: &barcodeFormat{
-				Type: "a",
-			},
-			props: render.NamedProperties{},
-			err:   "for barcode type a: barcode type does not match defined constants",
-		},
-		{
-			name: "valid barcode type",
-			input: &barcodeFormat{
-				Type: "Aztec",
-			},
-			props: render.NamedProperties{},
-			err:   "error parsing data for property content: could not parse empty property",
-		},
-		{
-			name: "valid content",
-			input: &barcodeFormat{
-				Type:    "Aztec",
-				Content: "hello",
-			},
-			props: render.NamedProperties{},
-			err:   "error parsing data for property topLeftX: could not parse empty property",
-		},
-		{
-			name: "valid topLeftX",
-			input: &barcodeFormat{
-				Type:     "Aztec",
-				Content:  "hello",
-				TopLeftX: "12",
-			},
-			props: render.NamedProperties{},
-			err:   "error parsing data for property topLeftY: could not parse empty property",
-		},
-		{
-			name: "valid topLeftY",
-			input: &barcodeFormat{
-				Type:     "Aztec",
-				Content:  "hello",
-				TopLeftX: "12",
-				TopLeftY: "12",
-			},
-			props: render.NamedProperties{},
-			err:   "error parsing data for property width: could not parse empty property",
-		},
-		{
-			name: "valid width",
-			input: &barcodeFormat{
-				Type:     "Aztec",
-				Content:  "hello",
-				TopLeftX: "12",
-				TopLeftY: "12",
-				Width:    "6",
-			},
-			props: render.NamedProperties{},
-			err:   "error parsing data for property height: could not parse empty property",
-		},
-		{
-			name: "valid height",
-			input: &barcodeFormat{
-				Type:     "Aztec",
+				Type:     "a",
 				Content:  "hello",
 				TopLeftX: "12",
 				TopLeftY: "12",
 				Width:    "6",
 				Height:   "6",
+				DataColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
+				BackgroundColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
 			},
 			props: render.NamedProperties{},
-			err:   "error parsing data for property dR: could not parse empty property",
+			err:   "for barcode type a: barcode type does not match defined constants",
 		},
 		{
-			name: "valid dR",
+			name: "missing content",
+			input: &barcodeFormat{
+				Type:     "Aztec",
+				TopLeftX: "12",
+				TopLeftY: "12",
+				Width:    "6",
+				Height:   "6",
+				DataColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
+				BackgroundColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
+			},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property content: could not parse empty property",
+		},
+		{
+			name: "missing topleft x",
+			input: &barcodeFormat{
+				Type:     "Aztec",
+				Content:  "hello",
+				TopLeftY: "12",
+				Width:    "6",
+				Height:   "6",
+				DataColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
+				BackgroundColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
+			},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property topLeftX: could not parse empty property",
+		},
+		{
+			name: "missing topleft y",
+			input: &barcodeFormat{
+				Type:     "Aztec",
+				Content:  "hello",
+				TopLeftX: "12",
+				Width:    "6",
+				Height:   "6",
+				DataColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
+				BackgroundColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
+			},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property topLeftY: could not parse empty property",
+		},
+		{
+			name: "missing width",
+			input: &barcodeFormat{
+				Type:     "Aztec",
+				Content:  "hello",
+				TopLeftX: "12",
+				TopLeftY: "12",
+				Height:   "6",
+				DataColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
+				BackgroundColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
+			},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property width: could not parse empty property",
+		},
+		{
+			name: "missing height",
+			input: &barcodeFormat{
+				Type:     "Aztec",
+				Content:  "hello",
+				TopLeftX: "12",
+				TopLeftY: "12",
+				Width:    "6",
+				DataColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
+				BackgroundColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
+			},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property height: could not parse empty property",
+		},
+		{
+			name: "valid missing data colour red",
 			input: &barcodeFormat{
 				Type:     "Aztec",
 				Content:  "hello",
@@ -588,14 +818,61 @@ func TestBarcodeVerifyAndTestBarcodeJSONData(t *testing.T) {
 					Blue  string `json:"B"`
 					Alpha string `json:"A"`
 				}{
-					Red: "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
+				BackgroundColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
+			},
+			props: render.NamedProperties{},
+			err:   "error parsing data for property dR: could not parse empty property",
+		},
+		{
+			name: "missing data colour green",
+			input: &barcodeFormat{
+				Type:     "Aztec",
+				Content:  "hello",
+				TopLeftX: "12",
+				TopLeftY: "12",
+				Width:    "6",
+				Height:   "6",
+				DataColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Blue:  "154",
+					Alpha: "91",
+				},
+				BackgroundColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
 				},
 			},
 			props: render.NamedProperties{},
 			err:   "error parsing data for property dG: could not parse empty property",
 		},
 		{
-			name: "valid dG",
+			name: "valid data colour blue",
 			input: &barcodeFormat{
 				Type:     "Aztec",
 				Content:  "hello",
@@ -611,13 +888,25 @@ func TestBarcodeVerifyAndTestBarcodeJSONData(t *testing.T) {
 				}{
 					Red:   "18",
 					Green: "3",
+					Alpha: "91",
+				},
+				BackgroundColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
 				},
 			},
 			props: render.NamedProperties{},
 			err:   "error parsing data for property dB: could not parse empty property",
 		},
 		{
-			name: "valid dB",
+			name: "missing data colour alpha",
 			input: &barcodeFormat{
 				Type:     "Aztec",
 				Content:  "hello",
@@ -635,12 +924,23 @@ func TestBarcodeVerifyAndTestBarcodeJSONData(t *testing.T) {
 					Green: "3",
 					Blue:  "154",
 				},
+				BackgroundColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
+					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
 			},
 			props: render.NamedProperties{},
 			err:   "error parsing data for property dA: could not parse empty property",
 		},
 		{
-			name: "valid dA",
+			name: "missing background colour red",
 			input: &barcodeFormat{
 				Type:     "Aztec",
 				Content:  "hello",
@@ -655,6 +955,16 @@ func TestBarcodeVerifyAndTestBarcodeJSONData(t *testing.T) {
 					Alpha string `json:"A"`
 				}{
 					Red:   "18",
+					Green: "3",
+					Blue:  "154",
+					Alpha: "91",
+				},
+				BackgroundColour: struct {
+					Red   string `json:"R"`
+					Green string `json:"G"`
+					Blue  string `json:"B"`
+					Alpha string `json:"A"`
+				}{
 					Green: "3",
 					Blue:  "154",
 					Alpha: "91",
@@ -664,7 +974,7 @@ func TestBarcodeVerifyAndTestBarcodeJSONData(t *testing.T) {
 			err:   "error parsing data for property bR: could not parse empty property",
 		},
 		{
-			name: "valid bR",
+			name: "missing background colour green",
 			input: &barcodeFormat{
 				Type:     "Aztec",
 				Content:  "hello",
@@ -689,14 +999,16 @@ func TestBarcodeVerifyAndTestBarcodeJSONData(t *testing.T) {
 					Blue  string `json:"B"`
 					Alpha string `json:"A"`
 				}{
-					Red: "18",
+					Red:   "18",
+					Blue:  "154",
+					Alpha: "91",
 				},
 			},
 			props: render.NamedProperties{},
 			err:   "error parsing data for property bG: could not parse empty property",
 		},
 		{
-			name: "valid bG",
+			name: "missing background colour blue",
 			input: &barcodeFormat{
 				Type:     "Aztec",
 				Content:  "hello",
@@ -723,13 +1035,14 @@ func TestBarcodeVerifyAndTestBarcodeJSONData(t *testing.T) {
 				}{
 					Red:   "18",
 					Green: "3",
+					Alpha: "91",
 				},
 			},
 			props: render.NamedProperties{},
 			err:   "error parsing data for property bB: could not parse empty property",
 		},
 		{
-			name: "valid bB",
+			name: "missing background colour alpha",
 			input: &barcodeFormat{
 				Type:     "Aztec",
 				Content:  "hello",
