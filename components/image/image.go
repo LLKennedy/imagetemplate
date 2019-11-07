@@ -6,6 +6,8 @@ import (
 	"image"
 	_ "image/jpeg" // jpeg imported for image decoding
 	_ "image/png"  // png imported for image decoding
+	"io/ioutil"
+	"os"
 
 	"github.com/LLKennedy/imagetemplate/v3/render"
 	"github.com/disintegration/imaging"
@@ -92,11 +94,35 @@ func (component Component) VerifyAndSetJSONData(data interface{}) (render.Compon
 	return c.parseJSONFormat(stringStruct, props)
 }
 
+type osFileSystem struct {
+}
+
+func (ofs *osFileSystem) Open(path string) (vfs.ReadSeekCloser, error) {
+	return os.Open(path)
+}
+
+func (ofs *osFileSystem) Lstat(path string) (os.FileInfo, error) {
+	return os.Lstat(path)
+}
+
+func (ofs *osFileSystem) Stat(path string) (os.FileInfo, error) {
+	return os.Stat(path)
+}
+
+func (ofs *osFileSystem) ReadDir(path string) ([]os.FileInfo, error) {
+	return ioutil.ReadDir(path)
+}
+
+func (ofs *osFileSystem) RootType(path string) vfs.RootType {
+	return vfs.OS(".").RootType(path)
+}
+
+func (ofs *osFileSystem) String() string {
+	return vfs.OS(".").String()
+}
+
 func (component Component) getFileSystem() vfs.FileSystem {
-	if component.fs == nil {
-		return vfs.OS(".")
-	}
-	return component.fs
+	return &osFileSystem{}
 }
 
 func init() {
