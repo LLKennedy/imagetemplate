@@ -1,28 +1,30 @@
 {
   "name": "@llkennedy/imagetemplate-canvas",
   "version": "0.1.0",
-  "description": "Canvas wrapping for the ImageTemplate library",
+  "description": "Canvas logic for the Typescript implementation if ImageTemplate",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/llkennedy/imagetemplate.git"
+    "url": "git+https://github.com/LLKennedy/imagetemplate.git"
   },
   "keywords": [
-    "imagetemplate",
+    "image",
+    "template",
     "json",
-    "gui",
-    "typescript"
+    "typescript",
+    "canvas",
+    "html"
   ],
   "author": "Luke Kennedy",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/llkennedy/imagetemplate/issues"
+    "url": "https://github.com/LLKennedy/imagetemplate/issues"
   },
-  "homepage": "https://github.com/llkennedy/imagetemplate#readme",
-  "devDependencies": {
+  "homepage": "https://github.com/LLKennedy/imagetemplate#readme",
+  "dependencies": {
     "typescript": "^4.2.4"
   }
 }
