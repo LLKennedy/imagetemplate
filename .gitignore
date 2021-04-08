@@ -8,6 +8,7 @@
 !*.json
 !*.ps1
 !*.sh
+!*.ts
 
 # garnish
 .vscode/
@@ -20,3 +21,4 @@
 
 # special cases
 !internal/vendor/examples/**
+**/node_modules/**
