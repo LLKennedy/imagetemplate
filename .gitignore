@@ -20,3 +20,5 @@
 
 # special cases
 !internal/vendor/examples/**
+
+**/node_modules/**
