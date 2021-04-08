@@ -24,7 +24,7 @@
     "url": "https://github.com/LLKennedy/imagetemplate/issues"
   },
   "homepage": "https://github.com/LLKennedy/imagetemplate#readme",
-  "dependencies": {
+  "devDependencies": {
     "typescript": "^4.2.4"
   }
 }
