@@ -33,7 +33,6 @@
     "publish",
     "./src/lib"
   ],
-  "homepage": "https://github.com/LLKennedy/imagetemplate#readme",
   "devDependencies": {
     "@testing-library/jest-dom": "^5.11.10",
     "@testing-library/react": "^11.2.6",
