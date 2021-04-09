@@ -4,6 +4,12 @@ export interface Point {
 }
 
 export class RGBA implements Colour {
+	constructor(r: number = 0, g: number = 0, b: number = 0, a: number = 0) {
+		this.R = r;
+		this.G = g;
+		this.B = b;
+		this.A = a;
+	}
 	public R: number = 0;
 	public G: number = 0;
 	public B: number = 0;
@@ -90,11 +96,11 @@ export class CanvasWrapper {
 		return this.ref.canvas?.height ?? 0;
 	}
 	public async Rectangle(topLeft: Point, width: number, height: number, colour: Colour): Promise<void> {
-		this.ref.fillStyle = colourToHex(colour);
+		this.ref.fillStyle = colourToHex(this.ref, colour);
 		this.ref.fillRect(topLeft.x, topLeft.y, width, height);
 	}
 	public async Circle(centre: Point, radius: number, colour: Colour): Promise<void> {
-		this.ref.fillStyle = colourToHex(colour);
+		this.ref.fillStyle = colourToHex(this.ref, colour);
 		throw new Error("unimplemented");
 	}
 	public async Text(text: string, start: Point, typeFace: string, colour: Colour, maxWidth: number): Promise<void> {
@@ -116,10 +122,11 @@ export class CanvasWrapper {
 
 export interface ICanvas extends CanvasWrapper { }
 
-function colourToHex(colour: Colour): string {
+function colourToHex(ref: CanvasRenderingContext2D, colour: Colour): string {
 	let [r, g, b, a] = colour.RGBA();
 	if (r < 0 || g < 0 || b < 0 || a < 0 || r > 255 || g > 255 || b > 255 || a > 255) {
 		throw new Error("R, G, B and A values must be between 0 and 255");
 	}
+	ref.globalAlpha = a / 255;
 	return `rgba(${r}, ${g}, ${b}, ${a})`;
 }

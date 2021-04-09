@@ -37,10 +37,8 @@ class App extends React.Component<Props, State> {
       throw new Error("canvas context was null");
     }
     const wrapper = new CanvasWrapper(ctx);
-    const red = new RGBA();
-    red.R = 255;
-    red.A = 127;
-    await wrapper.Rectangle({ x: 0, y: 0 }, 100, 100, red);
+    await wrapper.Rectangle({ x: 0, y: 0 }, 100, 50, new RGBA(255, 0, 0, 127));
+    await wrapper.Rectangle({ x: 0, y: 0 }, 50, 100, new RGBA(255, 255, 0, 127));
   }
 }
 
