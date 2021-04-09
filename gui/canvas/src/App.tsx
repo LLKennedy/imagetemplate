@@ -1,5 +1,5 @@
 import React from 'react';
-import { CanvasWrapper } from './lib/canvas';
+import { CanvasWrapper, RGBA } from './lib/canvas';
 
 interface Props { }
 
@@ -23,7 +23,7 @@ class App extends React.Component<Props, State> {
   componentDidMount() {
     window.requestAnimationFrame(this.draw.bind(this));
   }
-  draw() {
+  async draw() {
     if (this.state.ref.current === undefined || this.state.ref.current === null) {
       window.requestAnimationFrame(this.draw.bind(this));
       return;
@@ -37,6 +37,10 @@ class App extends React.Component<Props, State> {
       throw new Error("canvas context was null");
     }
     const wrapper = new CanvasWrapper(ctx);
+    const red = new RGBA();
+    red.R = 255;
+    red.A = 127;
+    await wrapper.Rectangle({ x: 0, y: 0 }, 100, 100, red);
   }
 }
 

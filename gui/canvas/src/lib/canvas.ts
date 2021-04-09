@@ -3,6 +3,16 @@ export interface Point {
 	y: number;
 }
 
+export class RGBA implements Colour {
+	public R: number = 0;
+	public G: number = 0;
+	public B: number = 0;
+	public A: number = 0;
+	RGBA(): [number, number, number, number] {
+		return [this.R, this.G, this.B, this.A];
+	}
+}
+
 export interface Colour {
 	RGBA(): [number, number, number, number];
 }
