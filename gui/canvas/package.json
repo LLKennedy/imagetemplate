@@ -4,7 +4,8 @@
   "description": "Canvas logic for the Typescript implementation if ImageTemplate",
   "main": "lib/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rimraf ./lib && tsc",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -26,5 +27,8 @@
   "homepage": "https://github.com/LLKennedy/imagetemplate#readme",
   "dependencies": {
     "typescript": "^4.2.4"
+  },
+  "devDependencies": {
+    "rimraf": "^3.0.2"
   }
 }
