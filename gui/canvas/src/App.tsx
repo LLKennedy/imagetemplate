@@ -1,10 +1,10 @@
 import React from 'react';
-import { CanvasWrapper } from './lib/canvas';
+// import { CanvasWrapper } from './library/canvas';
 
 interface Props { }
 
 class State {
-  ref: React.RefObject<HTMLCanvasElement> = React.createRef<HTMLCanvasElement>();
+  public ref: React.RefObject<HTMLCanvasElement> = React.createRef<HTMLCanvasElement>();
 }
 
 class App extends React.Component<Props, State> {
@@ -36,7 +36,7 @@ class App extends React.Component<Props, State> {
       window.alert("canvas context was null");
       throw new Error("canvas context was null");
     }
-    const wrapper = new CanvasWrapper(ctx);
+    // const wrapper = new CanvasWrapper(ctx);
   }
 }
 

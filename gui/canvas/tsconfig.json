@@ -1,6 +1,13 @@
 {
   "compilerOptions": {
-    "target": "ES2015",
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext",
+      "es5",
+      "es6"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -14,14 +21,11 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext",
-      "ES2015"
-    ]
+    "rootDir": "./src",
+    "downlevelIteration": true
   },
   "include": [
-    "src"
+    "src/**/*.ts",
+    "src/**/*.tsx"
   ]
 }

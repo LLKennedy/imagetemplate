@@ -4,7 +4,7 @@ export interface Point {
 }
 
 export interface Colour {
-	RGBA(): [number, number, number, number]
+	RGBA(): [number, number, number, number];
 }
 
 export enum BarcodeType {
@@ -39,7 +39,7 @@ export enum QREncodingMode {
 
 export class BarcodeExtraData {
 	/** AztecMinECCPercent is required for aztec barcodes*/
-	public AztecMinECCPercent: number = 0;
+	AztecMinECCPercent: number = 0;
 	/** AztecUserSpecifiedLayers is required for aztec barcodes*/
 	public AztecUserSpecifiedLayers: number = 0;
 	/** Code39IncludeChecksum is required for code39 barcodes*/
