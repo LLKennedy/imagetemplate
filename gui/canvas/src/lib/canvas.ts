@@ -1,3 +1,6 @@
+import { BarcodeType } from "./barcode/barcode";
+import { EncodingMode, ErrorCorrectionLevel } from "./barcode/qr";
+
 export interface Point {
 	x: number;
 	y: number;
@@ -23,36 +26,6 @@ export interface Colour {
 	RGBA(): [number, number, number, number];
 }
 
-export enum BarcodeType {
-	Aztec = "Aztec",
-	Codabar = "Codabar",
-	Code128 = "Code 128",
-	Code39 = "Code 39",
-	Code93 = "Code 93",
-	DataMatrix = "DataMatrix",
-	EAN8 = "EAN 8",
-	EAN13 = "EAN 13",
-	PDF = "PDF417",
-	QR = "QR Code",
-	TwoOfFive = "2 of 5",
-	TwoOfFiveInterleaved = "2 of 5 (interleaved)"
-}
-
-export enum QRErrorCorrectionLevel {
-	L = 0,
-	M = 1,
-	Q = 2,
-	H = 3
-}
-
-export enum QREncodingMode {
-	Invalid = 0,
-	NumericMode = 1,
-	AlphaNumericMode = 2,
-	ByteMode = 4,
-	KanjiMode = 8,
-}
-
 export class BarcodeExtraData {
 	/** AztecMinECCPercent is required for aztec barcodes*/
 	public AztecMinECCPercent: number = 0;
@@ -69,9 +42,9 @@ export class BarcodeExtraData {
 	/** PDFSecurityLevel is required for pdf417 barcodes*/
 	public PDFSecurityLevel: number = 0;
 	/** QRLevel is required for qr barcodes*/
-	public QRLevel: QRErrorCorrectionLevel = QRErrorCorrectionLevel.L;
+	public QRLevel: ErrorCorrectionLevel = ErrorCorrectionLevel.L;
 	/** QRMode is required for qr barcodes*/
-	public QRMode: QREncodingMode = QREncodingMode.Invalid;
+	public QRMode: EncodingMode = EncodingMode.Invalid;
 }
 
 export class CanvasWrapper {

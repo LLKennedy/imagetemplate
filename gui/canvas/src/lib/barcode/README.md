@@ -1,0 +1,1 @@
+This barcode implementation is written using github.com/boombuler/barcode as a reference, rather than any actual standard. This is so that we get 100% identical barcode rendering as we use in Go, for consistent output.
