@@ -31,3 +31,4 @@
 !internal/vendor/examples/**
 
 **/node_modules/**
+gui/canvas/publish/

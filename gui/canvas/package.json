@@ -4,7 +4,7 @@
   "description": "Canvas logic for the Typescript implementation of ImageTemplate",
   "main": "lib/index.js",
   "scripts": {
-    "build": "rimraf ./publish && tsc -c publishcfg/tsconfig.json",
+    "build": "rimraf ./publish && tsc -p publishcfg/tsconfig.json",
     "prepublishOnly": "npm run build",
     "start": "react-scripts start",
     "react-build": "react-scripts build",
@@ -30,7 +30,7 @@
   },
   "files": [
     "publish",
-    "src/lib"
+    "./src/lib"
   ],
   "homepage": "https://github.com/LLKennedy/imagetemplate#readme",
   "devDependencies": {
