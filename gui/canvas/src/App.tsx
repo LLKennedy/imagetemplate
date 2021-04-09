@@ -1,5 +1,5 @@
 import React from 'react';
-// import { CanvasWrapper } from './library/canvas';
+import { CanvasWrapper } from './library/canvas';
 
 interface Props { }
 
@@ -36,7 +36,7 @@ class App extends React.Component<Props, State> {
       window.alert("canvas context was null");
       throw new Error("canvas context was null");
     }
-    // const wrapper = new CanvasWrapper(ctx);
+    const wrapper = new CanvasWrapper(ctx);
   }
 }
 

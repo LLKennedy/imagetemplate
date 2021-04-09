@@ -39,7 +39,7 @@ export enum QREncodingMode {
 
 export class BarcodeExtraData {
 	/** AztecMinECCPercent is required for aztec barcodes*/
-	AztecMinECCPercent: number = 0;
+	public AztecMinECCPercent: number = 0;
 	/** AztecUserSpecifiedLayers is required for aztec barcodes*/
 	public AztecUserSpecifiedLayers: number = 0;
 	/** Code39IncludeChecksum is required for code39 barcodes*/
