@@ -9,6 +9,14 @@
 !*.ps1
 !*.sh
 !*.ts
+!*.tsx
+!*.js
+!*.html
+!*.css
+!*.svg
+!*.png
+!*.ico
+!*.txt
 
 # garnish
 .vscode/
