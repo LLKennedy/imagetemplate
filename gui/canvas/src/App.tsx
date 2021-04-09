@@ -1,5 +1,5 @@
 import React from 'react';
-import { CanvasWrapper } from './library/canvas';
+import { CanvasWrapper } from './lib/canvas';
 
 interface Props { }
 
