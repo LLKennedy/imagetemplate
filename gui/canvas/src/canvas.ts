@@ -51,7 +51,7 @@ export class BarcodeExtraData {
 	/** Code93FullASCIIMode is required for code93 barcodes*/
 	public Code93FullASCIIMode: boolean = false;
 	/** PDFSecurityLevel is required for pdf417 barcodes*/
-	public PDFSecurityLevel: number;
+	public PDFSecurityLevel: number = 0;
 	/** QRLevel is required for qr barcodes*/
 	public QRLevel: QRErrorCorrectionLevel = QRErrorCorrectionLevel.L;
 	/** QRMode is required for qr barcodes*/
@@ -60,7 +60,7 @@ export class BarcodeExtraData {
 
 export class CanvasWrapper {
 	private ref: CanvasRenderingContext2D;
-	public PPI: number;
+	public PPI: number = 0;
 	constructor(ref: CanvasRenderingContext2D) {
 		if (ref === undefined || ref === null) {
 			throw new Error("canvas reference must not be null or undefined");
