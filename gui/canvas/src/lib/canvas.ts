@@ -30,11 +30,11 @@ export enum QRErrorCorrectionLevel {
 }
 
 export enum QREncodingMode {
-	invalid = 0,
+	Invalid = 0,
 	NumericMode = 1,
 	AlphaNumericMode = 2,
 	ByteMode = 4,
-	KanjiMode = 8
+	KanjiMode = 8,
 }
 
 export class BarcodeExtraData {
@@ -55,7 +55,7 @@ export class BarcodeExtraData {
 	/** QRLevel is required for qr barcodes*/
 	public QRLevel: QRErrorCorrectionLevel = QRErrorCorrectionLevel.L;
 	/** QRMode is required for qr barcodes*/
-	public QRMode: QREncodingMode = QREncodingMode.invalid;
+	public QRMode: QREncodingMode = QREncodingMode.Invalid;
 }
 
 export class CanvasWrapper {
