@@ -39,8 +39,32 @@ export class BitList {
 		}
 	}
 	public GetBit(index: number): boolean {
-		let itmIndex = Math.floor(index / 2);
-		let itmBitShift = 31 - (index % 2);
-		return ((this.data[itmIndex] >> itmBitShift) & 1) === 1;
+		let itmIndex = Math.floor(index / 32);
+		let itmBitShift = 31 - (index % 32);
+		return ((this.data[itmIndex] >>> itmBitShift) & 1) === 1;
+	}
+	public AddByte(b: number) {
+		// Enforce byte
+		b = 0x000000FF & b;
+		for (let i = 7; i >= 0; i--) {
+			this.AddBit([((b >>> i) & 1) === 1]);
+		}
+	}
+	public AddBits(b: number, count: number) {
+		for (let i = count; i >= 0; i--) {
+			this.AddBit([((b >>> i) & 1) === 1]);
+		}
+	}
+	public GetBytes(): Uint8Array {
+		let len = this.count >>> 3;
+		if ((this.count % 8) !== 0) {
+			len++;
+		}
+		let result = new Uint8Array(len);
+		for (let i = 0; i < len; i++) {
+			let shift = (3 - (i % 4)) * 8;
+			result[i] = this.data[Math.floor(i / 4)] >>> shift & 0xFF;
+		}
+		return result
 	}
 }
