@@ -1,5 +1,8 @@
-import { Barcode } from "./barcode";
+import { GaloisField, GFPoly } from "../util/galoisfield";
+import { make } from "../util/make";
+import { Barcode, BarcodeType, Metadata } from "./barcode";
 import { BitList } from "./utils";
+import { IMutex, Mutex } from "@llkennedy/mutex.js";
 
 export enum ErrorCorrectionLevel {
 	L = 0,
@@ -375,18 +378,109 @@ export function Encode(content: string, level: ErrorCorrectionLevel, mode: Encod
 	}
 	let [bits, vi] = encoder(content, level);
 	let blocks = splitToBlocks(bits.GetBytes(), vi);
-	let data = blocks.interleave(vi);
+	let data = interleave(blocks, vi);
 	let result = render(data, vi);
 	result.content = content;
 	return result;
 }
 
-class qrCode {
+class reedSolomonEncoder {
+	gf: GaloisField;
+	polynomes: GFPoly[];
+	private m: IMutex;
+	constructor(gf: GaloisField) {
+		this.gf = gf;
+		this.polynomes = [new GFPoly(gf, [1])];
+		this.m = new Mutex();
+	}
+	private async getPolynomial(degree: number): Promise<GFPoly> {
+		return this.m.Run(() => {
+			if (degree >= this.polynomes.length) {
+				let last = this.polynomes[this.polynomes.length - 1];
+				for (let d = this.polynomes.length; d < degree; d++) {
+					let next = last.Multiply(new GFPoly(this.gf, [1, this.gf.ALogTbl[d - 1 + this.gf.Base]]));
+					this.polynomes.push(next);
+					last = next;
+				}
+			}
+			return this.polynomes[degree];
+		})
+	}
+	public async Encode(data: number[], eccCount: number): Promise<number[]> {
+		let generator = await this.getPolynomial(eccCount);
+		let info = new GFPoly(this.gf, data);
+		info = info.MultByMonominal(eccCount, 1);
+		let [_, remainder] = info.Divide(generator);
+		let result = make(() => 0, eccCount);
+		let numZero = eccCount - remainder.Coefficients.length;
+		for (let i = 0; i < remainder.Coefficients.length; i++) {
+			result[numZero + i] = remainder.Coefficients[i];
+		}
+		return result;
+	}
+}
+
+class errorCorrection {
+	rs: reedSolomonEncoder;
+	constructor() {
+		let fld = new GaloisField(285, 256, 0);
+		this.rs = new reedSolomonEncoder(fld);
+	}
+	public async calcECC(data: Uint8Array, eccCount: number): Promise<Uint8Array> {
+		let dataInts = make(() => 0, data.length);
+		for (let i = 0; i < data.length; i++) {
+			dataInts[i] = data[i];
+		}
+		let res = await this.rs.Encode(dataInts, eccCount);
+		let result = new Uint8Array(res.length);
+		for (let i = 0; i < res.length; i++) {
+			result[i] = res[i];
+		}
+		return result;
+	}
+}
+
+function interleave(bl: block[], vi: versionInfo): Uint8Array {
+
+}
+
+class block {
+	data?: Uint8Array;
+	ecc?: Uint8Array;
+}
+
+function splitToBlocks(data: Uint8Array, vi: versionInfo): block[] {
+	let result = make(() => new block(), vi.NumberOfBlocksInGroup1 + vi.NumberOfBlocksInGroup2);
+	for (let b = 0; b < vi.NumberOfBlocksInGroup1; b++) {
+		let blk = new block();
+		blk.data = new Uint8Array(vi.DataCodeWordsPerBlockInGroup1);
+		for (let cw = 0; cw < vi.DataCodeWordsPerBlockInGroup1; cw++) {
+			blk.data[cw] = data[cw];
+		}
+		blk.ecc = 
+	}
+	return result;
+}
+
+class qrCode implements Barcode {
 	dimension: number = 0;
 	data?: BitList;
 	content: string = "";
+	public Metadata(): Metadata {
+		return {
+			CodeKind: BarcodeType.QR,
+			Dimensions: 2
+		}
+	}
+	public Content(): string {
+		return this.content;
+	}
+	public async Draw(ref: CanvasRenderingContext2D): Promise<void> {
+		throw new Error("unimplemented")
+	}
 }
 
 function render(data: Uint8Array, vi: versionInfo): qrCode {
-	let dim = vi.modulWidth
+	let dim = vi.modulWidth();
+	let results = make()
 }
