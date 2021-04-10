@@ -1,6 +1,14 @@
 export class BitList {
 	private count: number = 0;
 	private data: Uint32Array = new Uint32Array();
+	constructor(capacity: number) {
+		this.count = capacity;
+		let x = 0;
+		if (capacity % 32 !== 0) {
+			x = 1;
+		}
+		this.data = new Uint32Array(Math.floor(capacity / 32) + x);
+	}
 	public Len(): number {
 		return this.count;
 	}

@@ -1,7 +1,7 @@
 import { GaloisField, GFPoly } from "../util/galoisfield";
 import { make } from "../util/make";
 import { Barcode, BarcodeType, Metadata } from "./barcode";
-import { BitList } from "./utils";
+import { BitList } from "../util/bitlist";
 import { IMutex, Mutex } from "@llkennedy/mutex.js";
 
 export enum ErrorCorrectionLevel {
@@ -363,7 +363,7 @@ interface encoder {
 	(content: string, level: ErrorCorrectionLevel): [BitList, versionInfo]
 }
 
-export function Encode(content: string, level: ErrorCorrectionLevel, mode: EncodingMode): Barcode {
+export async function Encode(content: string, level: ErrorCorrectionLevel, mode: EncodingMode): Promise<Barcode> {
 	let encoder: encoder;
 	switch (mode) {
 		case EncodingMode.AlphaNumericMode:
@@ -377,7 +377,7 @@ export function Encode(content: string, level: ErrorCorrectionLevel, mode: Encod
 			throw new Error("not implemented");
 	}
 	let [bits, vi] = encoder(content, level);
-	let blocks = splitToBlocks(bits.GetBytes(), vi);
+	let blocks = await splitToBlocks(bits.GetBytes(), vi);
 	let data = interleave(blocks, vi);
 	let result = render(data, vi);
 	result.content = content;
@@ -440,8 +440,26 @@ class errorCorrection {
 	}
 }
 
-function interleave(bl: block[], vi: versionInfo): Uint8Array {
+const ec: Readonly<errorCorrection> = new errorCorrection();
 
+function interleave(bl: block[], vi: versionInfo): Uint8Array {
+	let maxCodewordCount: number;
+	if (vi.DataCodeWordsPerBlockInGroup1 > vi.DataCodeWordsPerBlockInGroup2) {
+		maxCodewordCount = vi.DataCodeWordsPerBlockInGroup1;
+	} else {
+		maxCodewordCount = vi.DataCodeWordsPerBlockInGroup2;
+	}
+	const resultLen = (vi.DataCodeWordsPerBlockInGroup1 + vi.ErrorCorrectionCodewordsPerBlock) * vi.NumberOfBlocksInGroup1
+		+ (vi.DataCodeWordsPerBlockInGroup2 + vi.ErrorCorrectionCodewordsPerBlock) * vi.NumberOfBlocksInGroup2;
+	let result: number[] = [];
+	for (let i = 0; i < maxCodewordCount; i++) {
+		for (let b = 0; b < bl.length; b++) {
+			if ((bl[b].data?.length ?? 0) > i) {
+				result.push(bl[b].data?.[i] ?? 0);
+			}
+		}
+	}
+	return new Uint8Array(result);
 }
 
 class block {
@@ -449,15 +467,26 @@ class block {
 	ecc?: Uint8Array;
 }
 
-function splitToBlocks(data: Uint8Array, vi: versionInfo): block[] {
+async function splitToBlocks(data: Uint8Array, vi: versionInfo): Promise<block[]> {
+	const dataArr = Array.from(data);
 	let result = make(() => new block(), vi.NumberOfBlocksInGroup1 + vi.NumberOfBlocksInGroup2);
 	for (let b = 0; b < vi.NumberOfBlocksInGroup1; b++) {
 		let blk = new block();
 		blk.data = new Uint8Array(vi.DataCodeWordsPerBlockInGroup1);
 		for (let cw = 0; cw < vi.DataCodeWordsPerBlockInGroup1; cw++) {
-			blk.data[cw] = data[cw];
+			blk.data[cw] = dataArr.shift() ?? 0;
 		}
-		blk.ecc = 
+		blk.ecc = await ec.calcECC(blk.data ?? new Uint8Array(), vi.ErrorCorrectionCodewordsPerBlock);
+		result[b] = blk;
+	}
+	for (let b = 0; b < vi.NumberOfBlocksInGroup2; b++) {
+		let blk = new block();
+		blk.data = new Uint8Array(vi.NumberOfBlocksInGroup2);
+		for (let cw = 0; cw < vi.DataCodeWordsPerBlockInGroup2; cw++) {
+			blk.data[cw] = dataArr.shift() ?? 0;
+		}
+		blk.ecc = await ec.calcECC(blk.data ?? new Uint8Array(), vi.ErrorCorrectionCodewordsPerBlock);
+		result[vi.NumberOfBlocksInGroup1 + b] = blk;
 	}
 	return result;
 }
@@ -466,6 +495,10 @@ class qrCode implements Barcode {
 	dimension: number = 0;
 	data?: BitList;
 	content: string = "";
+	constructor(dim: number) {
+		this.dimension = dim;
+		this.data = new BitList(dim);
+	}
 	public Metadata(): Metadata {
 		return {
 			CodeKind: BarcodeType.QR,
@@ -478,9 +511,43 @@ class qrCode implements Barcode {
 	public async Draw(ref: CanvasRenderingContext2D): Promise<void> {
 		throw new Error("unimplemented")
 	}
+	public Get(x: number, y: number): boolean {
+		return this.data?.GetBit(x * this.dimension + y) ?? false;
+	}
+	public Set(x: number, y: number, val: boolean) {
+		this.data?.SetBit(x * this.dimension + y, val);
+	}
+	public calcPenalty(): number {
+		return this.calcPenaltyRule1() + this.calcPenaltyRule2() + this.calcPenaltyRule3() + this.calcPenaltyRule4();
+	}
+	public calcPenaltyRule1(): number {
+		let result = 0;
+		for (let x = 0; x < this.dimension; x++) {
+			let checkForX = false;
+			let cntX = 0;
+			let checkForY = false;
+			let cntY = 0;
+			for (let y = 0; y < this.dimension; y++) {
+
+			}
+		}
+	}
+	public calcPenaltyRule2(): number {
+	}
+	public calcPenaltyRule3(): number {
+	}
+	public calcPenaltyRule4(): number {
+	}
 }
 
 function render(data: Uint8Array, vi: versionInfo): qrCode {
 	let dim = vi.modulWidth();
-	let results = make()
+	let results: Barcode[] = [];
+	for (let i = 0; i < 8; i++) {
+		results.push(new qrCode(dim))
+	}
+	let occupied = new qrCode(dim);
+	let setAll = function (x: number, y: number, val: boolean) {
+
+	}
 }
