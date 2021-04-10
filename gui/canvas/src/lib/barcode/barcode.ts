@@ -12,3 +12,14 @@ export enum BarcodeType {
 	TwoOfFive = "2 of 5",
 	TwoOfFiveInterleaved = "2 of 5 (interleaved)"
 }
+
+export interface Metadata {
+	CodeKind: string;
+	Dimensions: number;
+}
+
+export interface Barcode {
+	Metadata(): Metadata;
+	Content(): string;
+	Draw(ref: CanvasRenderingContext2D): Promise<void>;
+}

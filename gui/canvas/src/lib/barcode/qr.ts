@@ -1,3 +1,6 @@
+import { Barcode } from "./barcode";
+import { BitList } from "./utils";
+
 export enum ErrorCorrectionLevel {
 	L = 0,
 	M = 1,
@@ -73,6 +76,45 @@ export class versionInfo {
 			default:
 				return 0;
 		}
+	}
+	public modulWidth(): number {
+		return ((this.Version - 1) * 4) + 21;
+	}
+	public alignmentPatternPlacements(): number[] {
+		if (this.Version === 1) {
+			return [];
+		}
+		const first = 6;
+		const last = this.modulWidth() - 7;
+		const space = last - first;
+		const count = Math.ceil(space / 28) + 1;
+		let result: number[] = [];
+		for (let i = 0; i < count; i++) {
+			result.push(0);
+		}
+		result[0] = first;
+		result[result.length - 1] = last;
+		if (count > 2) {
+			let step = Math.ceil((last - first) / (count - 1));
+			if (step % 2 === 1) {
+				let frac = (last - first) / (count - 1);
+				let x = frac % 1;
+				if (x >= 0.5) {
+					frac = Math.ceil(frac);
+				} else {
+					frac = Math.floor(frac);
+				}
+				if (Math.floor(frac) % 2 === 0) {
+					step--;
+				} else {
+					step++;
+				}
+			}
+			for (let i = 1; i <= count - 2; i++) {
+				result[i] = last - (step * (count - 1 - i));
+			}
+		}
+		return result;
 	}
 }
 
@@ -237,18 +279,72 @@ const versionInfos: readonly Readonly<versionInfo>[] = [
 	new versionInfo(40, ErrorCorrectionLevel.M, 28, 18, 47, 31, 48),
 	new versionInfo(40, ErrorCorrectionLevel.Q, 30, 34, 24, 34, 25),
 	new versionInfo(40, ErrorCorrectionLevel.H, 30, 20, 15, 61, 16),
-]
+];
 
-function encodeAlphaNumeric(content: string, ecl: ErrorCorrectionLevel) {
+const charSet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
+
+function stringToAlphaIdx(content: string): number[] {
+	let result: number[] = [];
+	for (let r of content) {
+		let idx = charSet.indexOf(r);
+		result.push(idx);
+		if (idx < 0) {
+			break;
+		}
+	}
+	return result;
+}
+
+function addPaddingAndTerminator(bl: BitList, vi: versionInfo) {
+	for (let i = 0; i < 4 && bl.Len() < vi.totalDataBytes() * 8; i++) {
+		bl.AddBit([false]);
+	}
+	while (bl.Len() % 8 !== 0) {
+		bl.AddBit([false]);
+	}
+	for (let i = 0; bl.Len() < vi.totalDataBytes() * 8; i++) {
+		if (i % 2 === 0) {
+			bl.AddByte(236);
+		} else {
+			bl.AddByte(17);
+		}
+	}
+}
+
+function encodeAlphaNumeric(content: string, ecl: ErrorCorrectionLevel): [BitList, versionInfo] {
 	const contentLenIsOdd = content.length % 2 == 1;
 	let contentBitCount = Math.floor(content.length / 2) * 11;
 	if (contentLenIsOdd) {
 		contentBitCount += 6;
 	}
 	let vi = findSmallestVersionInfo(ecl, EncodingMode.AlphaNumericMode, contentBitCount);
+	if (vi === undefined) {
+		throw new Error("too much data to encode");
+	}
+	let res = new BitList();
+	res.AddBits(EncodingMode.AlphaNumericMode, 4);
+	res.AddBits(content.length, vi.charCountBits(EncodingMode.AlphaNumericMode));
+	let encoder = stringToAlphaIdx(content);
+	for (let idx = 0; idx < Math.floor(content.length / 2); idx++) {
+		let c1 = encoder.shift() ?? -1;
+		let c2 = encoder.shift() ?? -1;
+		if (c1 < 0 || c2 < 0) {
+			throw new Error(`${content} cannot be encoded as AlphaNumeric`);
+		}
+		res.AddBits(c1 * 45 + c2, 11);
+	}
+	if (contentLenIsOdd) {
+		let c = encoder.shift() ?? -1;
+		if (c < 0) {
+			throw new Error(`${content} cannot be encoded as AlphaNumeric`)
+		}
+		res.AddBits(c, 6);
+	}
+	addPaddingAndTerminator(res, vi);
+	return [res, vi];
 }
 
-function findSmallestVersionInfo(ecl: ErrorCorrectionLevel, mode: EncodingMode, dataBits: number): Readonly<versionInfo> | undefined {
+export function findSmallestVersionInfo(ecl: ErrorCorrectionLevel, mode: EncodingMode, dataBits: number): Readonly<versionInfo> | undefined {
 	dataBits += 4;
 	for (let vi of versionInfos) {
 		if (vi.Level === ecl) {
@@ -258,4 +354,39 @@ function findSmallestVersionInfo(ecl: ErrorCorrectionLevel, mode: EncodingMode, 
 		}
 	}
 	return undefined;
+}
+
+interface encoder {
+	(content: string, level: ErrorCorrectionLevel): [BitList, versionInfo]
+}
+
+export function Encode(content: string, level: ErrorCorrectionLevel, mode: EncodingMode): Barcode {
+	let encoder: encoder;
+	switch (mode) {
+		case EncodingMode.AlphaNumericMode:
+			encoder = encodeAlphaNumeric;
+			break;
+		case EncodingMode.ByteMode:
+		case EncodingMode.Invalid:
+		case EncodingMode.KanjiMode:
+		case EncodingMode.NumericMode:
+		default:
+			throw new Error("not implemented");
+	}
+	let [bits, vi] = encoder(content, level);
+	let blocks = splitToBlocks(bits.GetBytes(), vi);
+	let data = blocks.interleave(vi);
+	let result = render(data, vi);
+	result.content = content;
+	return result;
+}
+
+class qrCode {
+	dimension: number = 0;
+	data?: BitList;
+	content: string = "";
+}
+
+function render(data: Uint8Array, vi: versionInfo): qrCode {
+	let dim = vi.modulWidth
 }
