@@ -51,7 +51,7 @@ export class BitList {
 		}
 	}
 	public AddBits(b: number, count: number) {
-		for (let i = count; i >= 0; i--) {
+		for (let i = count - 1; i >= 0; i--) {
 			this.AddBit([((b >>> i) & 1) === 1]);
 		}
 	}
