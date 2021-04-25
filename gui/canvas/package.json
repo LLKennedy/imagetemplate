@@ -67,6 +67,6 @@
     ]
   },
   "dependencies": {
-    "@llkennedy/mutex.js": "^1.0.2"
+    "@llkennedy/mutex.js": "^1.0.3"
   }
 }

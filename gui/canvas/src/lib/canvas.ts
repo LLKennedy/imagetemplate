@@ -1,5 +1,6 @@
 import { BarcodeType } from "./barcode/barcode";
 import { EncodingMode, ErrorCorrectionLevel } from "./barcode/qr";
+import { Mutex, IMutex } from "@llkennedy/mutex.js";
 
 export interface Point {
 	x: number;
@@ -48,58 +49,84 @@ export class BarcodeExtraData {
 }
 
 export class CanvasWrapper {
-	private ref: CanvasRenderingContext2D;
+	private ctx: CanvasRenderingContext2D;
 	public PPI: number = 0;
-	constructor(ref: CanvasRenderingContext2D) {
-		if (ref === undefined || ref === null) {
-			throw new Error("canvas reference must not be null or undefined");
+	private mx: IMutex = new Mutex();
+	constructor(ctx: CanvasRenderingContext2D) {
+		if (ctx === undefined || ctx === null) {
+			throw new Error("canvas ctxerence must not be null or undefined");
 		}
-		this.ref = ref;
+		this.ctx = ctx;
 	}
 	public async SetUnderlyingImage(newImage: CanvasImageSource): Promise<void> {
-		this.ref.drawImage(newImage, 0, 0, this.ref.canvas?.width ?? 0, this.ref.canvas?.height ?? 0);
+		await this.mx.Run(() => {
+			this.ctx.drawImage(newImage, 0, 0, this.ctx.canvas?.width ?? 0, this.ctx.canvas?.height ?? 0);
+		})
 	}
 	public async GetUnderlyingImage(): Promise<ImageData> {
-		return this.ref.getImageData(0, 0, this.ref.canvas?.width ?? 0, this.ref.canvas?.height ?? 0);
+		return await this.mx.Run(() => {
+			return this.ctx.getImageData(0, 0, this.ctx.canvas?.width ?? 0, this.ctx.canvas?.height ?? 0);
+		})
 	}
 	public async GetWidth(): Promise<number> {
-		return this.ref.canvas?.width ?? 0;
+		return await this.mx.Run(() => {
+			return this.ctx.canvas?.width ?? 0;
+		})
 	}
 	public async GetHeight(): Promise<number> {
-		return this.ref.canvas?.height ?? 0;
+		return await this.mx.Run(() => {
+			return this.ctx.canvas?.height ?? 0;
+		})
 	}
 	public async Rectangle(topLeft: Point, width: number, height: number, colour: Colour): Promise<void> {
-		this.ref.fillStyle = colourToHex(this.ref, colour);
-		this.ref.fillRect(topLeft.x, topLeft.y, width, height);
+		await this.mx.Run(() => {
+			this.ctx.fillStyle = colourToHex(this.ctx, colour);
+			this.ctx.fillRect(topLeft.x, topLeft.y, width, height);
+		})
 	}
 	public async Circle(centre: Point, radius: number, colour: Colour): Promise<void> {
-		this.ref.fillStyle = colourToHex(this.ref, colour);
-		throw new Error("unimplemented");
+		await this.mx.Run(() => {
+			this.ctx.fillStyle = colourToHex(this.ctx, colour);
+			this.ctx.beginPath();
+			this.ctx.arc(centre.x, centre.y, radius, 0, 2 * Math.PI);
+			this.ctx.fill();
+		})
 	}
 	public async Text(text: string, start: Point, typeFace: string, colour: Colour, maxWidth: number): Promise<void> {
-		this.ref.font = typeFace;
-		this.ref.fillText(text, start.x, start.y, maxWidth);
+		await this.mx.Run(() => {
+			this.ctx.font = typeFace;
+			this.ctx.fillStyle = colourToHex(this.ctx, colour);
+			this.ctx.fillText(text, start.x, start.y, maxWidth);
+		})
 	}
-	public async TryText(text: string, start: Point, typeFace: string, colour: Colour, maxWidth: number): Promise<boolean> {
-		this.ref.font = typeFace;
-		let measured = this.ref.measureText(text);
-		return measured.width <= maxWidth;
+	/** TryText measures  */
+	public async MeasureText(text: string, typeFace: string, maxWidth: number): Promise<number> {
+		return await this.mx.Run(() => {
+			this.ctx.font = typeFace;
+			return this.ctx.measureText(text).width;
+		})
 	}
+	/** Draw another image on top of this one */
 	public async DrawImage(start: Point, subImage: CanvasImageSource): Promise<void> {
-		this.ref.drawImage(subImage, start.x, start.y);
+		await this.mx.Run(() => {
+			this.ctx.drawImage(subImage, start.x, start.y);
+		})
 	}
+	/** UNIMPLMENTED, DO NOT USE */
 	public async Barcode(codeType: BarcodeType, content: Uint8Array, extra: BarcodeExtraData, start: Point, width: number, height: number, dataColour: Colour, bgColour: Colour): Promise<void> {
-		throw new Error("unimplemented");
+		await this.mx.Run(() => {
+			throw new Error("barcodes are not implemented");
+		})
 	}
 }
 
 export interface ICanvas extends CanvasWrapper { }
 
-function colourToHex(ref: CanvasRenderingContext2D, colour: Colour): string {
+function colourToHex(ctx: CanvasRenderingContext2D, colour: Colour): string {
 	let [r, g, b, a] = colour.RGBA();
 	if (r < 0 || g < 0 || b < 0 || a < 0 || r > 255 || g > 255 || b > 255 || a > 255) {
 		throw new Error("R, G, B and A values must be between 0 and 255");
 	}
-	ref.globalAlpha = a / 255;
+	ctx.globalAlpha = a / 255;
 	return `rgba(${r}, ${g}, ${b}, ${a})`;
 }

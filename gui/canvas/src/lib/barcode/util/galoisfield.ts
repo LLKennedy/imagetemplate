@@ -1,4 +1,4 @@
-import { make } from "./make";
+import { make } from "../../util/make";
 
 export class GaloisField {
 	Size: number = 0;
