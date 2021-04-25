@@ -17,7 +17,7 @@ class App extends React.Component<Props, State> {
       <header>
         Canvas Test
         </header>
-      <canvas ref={this.state.ref} />
+      <canvas ref={this.state.ref} width={1000} height={1000} />
     </div>;
   }
   componentDidMount() {
@@ -39,6 +39,7 @@ class App extends React.Component<Props, State> {
     const wrapper = new CanvasWrapper(ctx);
     await wrapper.Rectangle({ x: 0, y: 0 }, 100, 50, new RGBA(255, 0, 0, 127));
     await wrapper.Rectangle({ x: 0, y: 0 }, 50, 100, new RGBA(255, 255, 0, 127));
+    await wrapper.Circle({ x: 25, y: 25 }, 10, new RGBA(0, 0, 255, 127));
   }
 }
 

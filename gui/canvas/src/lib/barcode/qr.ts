@@ -1,7 +1,7 @@
-import { GaloisField, GFPoly } from "../util/galoisfield";
+import { GaloisField, GFPoly } from "./util/galoisfield";
 import { make } from "../util/make";
 import { Barcode, BarcodeType, Metadata } from "./barcode";
-import { BitList } from "../util/bitlist";
+import { BitList } from "./util/bitlist";
 import { IMutex, Mutex } from "@llkennedy/mutex.js";
 
 export enum ErrorCorrectionLevel {
@@ -324,7 +324,7 @@ function encodeAlphaNumeric(content: string, ecl: ErrorCorrectionLevel): [BitLis
 	if (vi === undefined) {
 		throw new Error("too much data to encode");
 	}
-	let res = new BitList();
+	let res = new BitList(0);
 	res.AddBits(EncodingMode.AlphaNumericMode, 4);
 	res.AddBits(content.length, vi.charCountBits(EncodingMode.AlphaNumericMode));
 	let encoder = stringToAlphaIdx(content);
@@ -363,26 +363,26 @@ interface encoder {
 	(content: string, level: ErrorCorrectionLevel): [BitList, versionInfo]
 }
 
-export async function Encode(content: string, level: ErrorCorrectionLevel, mode: EncodingMode): Promise<Barcode> {
-	let encoder: encoder;
-	switch (mode) {
-		case EncodingMode.AlphaNumericMode:
-			encoder = encodeAlphaNumeric;
-			break;
-		case EncodingMode.ByteMode:
-		case EncodingMode.Invalid:
-		case EncodingMode.KanjiMode:
-		case EncodingMode.NumericMode:
-		default:
-			throw new Error("not implemented");
-	}
-	let [bits, vi] = encoder(content, level);
-	let blocks = await splitToBlocks(bits.GetBytes(), vi);
-	let data = interleave(blocks, vi);
-	let result = render(data, vi);
-	result.content = content;
-	return result;
-}
+// export async function Encode(content: string, level: ErrorCorrectionLevel, mode: EncodingMode): Promise<Barcode> {
+// 	let encoder: encoder;
+// 	switch (mode) {
+// 		case EncodingMode.AlphaNumericMode:
+// 			encoder = encodeAlphaNumeric;
+// 			break;
+// 		case EncodingMode.ByteMode:
+// 		case EncodingMode.Invalid:
+// 		case EncodingMode.KanjiMode:
+// 		case EncodingMode.NumericMode:
+// 		default:
+// 			throw new Error("not implemented");
+// 	}
+// 	let [bits, vi] = encoder(content, level);
+// 	let blocks = await splitToBlocks(bits.GetBytes(), vi);
+// 	let data = interleave(blocks, vi);
+// 	let result = render(data, vi);
+// 	result.content = content;
+// 	return result;
+// }
 
 class reedSolomonEncoder {
 	gf: GaloisField;
@@ -517,37 +517,37 @@ class qrCode implements Barcode {
 	public Set(x: number, y: number, val: boolean) {
 		this.data?.SetBit(x * this.dimension + y, val);
 	}
-	public calcPenalty(): number {
-		return this.calcPenaltyRule1() + this.calcPenaltyRule2() + this.calcPenaltyRule3() + this.calcPenaltyRule4();
-	}
-	public calcPenaltyRule1(): number {
-		let result = 0;
-		for (let x = 0; x < this.dimension; x++) {
-			let checkForX = false;
-			let cntX = 0;
-			let checkForY = false;
-			let cntY = 0;
-			for (let y = 0; y < this.dimension; y++) {
+	// public calcPenalty(): number {
+	// 	return this.calcPenaltyRule1() + this.calcPenaltyRule2() + this.calcPenaltyRule3() + this.calcPenaltyRule4();
+	// }
+	// public calcPenaltyRule1(): number {
+	// 	let result = 0;
+	// 	for (let x = 0; x < this.dimension; x++) {
+	// 		let checkForX = false;
+	// 		let cntX = 0;
+	// 		let checkForY = false;
+	// 		let cntY = 0;
+	// 		for (let y = 0; y < this.dimension; y++) {
 
-			}
-		}
-	}
-	public calcPenaltyRule2(): number {
-	}
-	public calcPenaltyRule3(): number {
-	}
-	public calcPenaltyRule4(): number {
-	}
+	// 		}
+	// 	}
+	// }
+	// public calcPenaltyRule2(): number {
+	// }
+	// public calcPenaltyRule3(): number {
+	// }
+	// public calcPenaltyRule4(): number {
+	// }
 }
 
-function render(data: Uint8Array, vi: versionInfo): qrCode {
-	let dim = vi.modulWidth();
-	let results: Barcode[] = [];
-	for (let i = 0; i < 8; i++) {
-		results.push(new qrCode(dim))
-	}
-	let occupied = new qrCode(dim);
-	let setAll = function (x: number, y: number, val: boolean) {
+// function render(data: Uint8Array, vi: versionInfo): qrCode {
+// 	let dim = vi.modulWidth();
+// 	let results: Barcode[] = [];
+// 	for (let i = 0; i < 8; i++) {
+// 		results.push(new qrCode(dim))
+// 	}
+// 	let occupied = new qrCode(dim);
+// 	let setAll = function (x: number, y: number, val: boolean) {
 
-	}
-}
+// 	}
+// }
